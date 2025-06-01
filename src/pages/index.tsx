@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -7,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>NutriFind - Găsește nutriționistul perfect pentru tine</title>
+        <title>NutriConnect - Găsește nutriționistul perfect pentru tine</title>
         <meta name="description" content="Conectează-te cu nutriționiști verificați din România. Consultații personalizate, prețuri transparente, rezultate garantate." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -19,7 +20,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <span className="text-2xl font-bold text-green-600">NutriFind</span>
+                <span className="text-2xl font-bold text-green-600">NutriConnect</span>
               </div>
               
               {/* Desktop Navigation */}
@@ -82,9 +83,11 @@ export default function Home() {
                     Consultații personalizate, prețuri transparente, rezultate garantate.
                   </p>
                   <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                    <button className="bg-green-600 text-white px-8 py-4 rounded-full text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
-                      Găsește un nutriționist
-                    </button>
+                    <Link href="/find-nutritionist">
+                      <button className="bg-green-600 text-white px-8 py-4 rounded-full text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
+                        Găsește un nutriționist
+                      </button>
+                    </Link>
                     <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
                       Sunt nutriționist
                     </button>
@@ -116,7 +119,7 @@ export default function Home() {
         </section>
 
         {/* How it works */}
-        <section id="how-it-works" className="py-20 bg-gray-50 text-black">
+        <section id="how-it-works" className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Cum funcționează?</h2>
@@ -140,7 +143,7 @@ export default function Home() {
                 <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                   <span className="text-2xl font-bold text-green-600">2</span>
                 </div>
-                <h3 className="text-xl text-black font-semibold mb-4">Alege nutriționistul</h3>
+                <h3 className="text-xl font-semibold mb-4">Alege nutriționistul</h3>
                 <p className="text-gray-600">
                   Explorează profilurile detaliate, citește recenzii și compară prețuri transparent
                 </p>
@@ -160,10 +163,10 @@ export default function Home() {
         </section>
 
         {/* Benefits Section */}
-        <section id="benefits" className="py-20 bg-white text-black">
+        <section id="benefits" className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">De ce NutriFind?</h2>
+              <h2 className="text-4xl font-bold text-gray-800 mb-4">De ce NutriConnect?</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Platforma noastră îți oferă tot ce ai nevoie pentru a-ți atinge obiectivele de sănătate
               </p>
@@ -254,11 +257,11 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Ce spun clienții noștri</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Mii de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriFind
+                Mii de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriConnect
               </p>
             </div>
 
-            <div className="text-black grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-white p-8 rounded-xl shadow-lg">
                 <div className="flex mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -273,7 +276,7 @@ export default function Home() {
                 <p className="font-semibold">Maria P., București</p>
               </div>
 
-              <div className="bg-whit p-8 rounded-xl shadow-lg">
+              <div className="bg-white p-8 rounded-xl shadow-lg">
                 <div className="flex mb-4">
                   {[...Array(5)].map((_, i) => (
                     <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -311,11 +314,13 @@ export default function Home() {
               Gata să îți transformi viața?
             </h2>
             <p className="text-xl text-green-100 mb-8">
-              Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriFind
+              Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriConnect
             </p>
-            <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
-              Începe gratuit acum
-            </button>
+            <Link href="/find-nutritionist">
+              <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
+                Începe gratuit acum
+              </button>
+            </Link>
           </div>
         </section>
 
@@ -324,7 +329,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <h3 className="text-2xl font-bold mb-4 text-green-400">NutriFind</h3>
+                <h3 className="text-2xl font-bold mb-4 text-green-400">NutriConnect</h3>
                 <p className="text-gray-400">
                   Platforma #1 din România pentru conectarea cu nutriționiști verificați
                 </p>
