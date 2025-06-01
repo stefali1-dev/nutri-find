@@ -22,15 +22,22 @@ export default function Home() {
               <div className="flex items-center">
                 <span className="text-2xl font-bold text-green-600">NutriConnect</span>
               </div>
-              
+
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8">
                 <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors">Cum funcționează</a>
                 <a href="#benefits" className="text-gray-700 hover:text-green-600 transition-colors">Beneficii</a>
                 <a href="#testimonials" className="text-gray-700 hover:text-green-600 transition-colors">Testimoniale</a>
-                <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
-                  Începe acum
-                </button>
+                <Link href="/nutritionists/find">
+                  <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
+                    Începe acum
+                  </button>
+                </Link>
+                <Link href="nutritionists/login">
+                  <button className="bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">
+                    Login
+                  </button>
+                </Link>
               </div>
 
               {/* Mobile menu button */}
@@ -58,9 +65,11 @@ export default function Home() {
                 <a href="#how-it-works" className="block px-3 py-2 text-gray-700 hover:text-green-600">Cum funcționează</a>
                 <a href="#benefits" className="block px-3 py-2 text-gray-700 hover:text-green-600">Beneficii</a>
                 <a href="#testimonials" className="block px-3 py-2 text-gray-700 hover:text-green-600">Testimoniale</a>
-                <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
-                  Începe acum
-                </button>
+                <Link href="/nutritionists/find">
+                  <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
+                    Începe acum
+                  </button>
+                </Link>
               </div>
             </div>
           )}
@@ -69,17 +78,17 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative pt-16 pb-32 flex content-center items-center justify-center min-h-[80vh]">
           <div className="absolute top-0 w-full h-full bg-gradient-to-br from-green-50 to-emerald-50"></div>
-          
+
           <div className="container relative mx-auto px-4">
             <div className="items-center flex flex-wrap">
               <div className="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
                 <div className="animate-fade-in">
                   <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
-                    Găsește nutriționistul 
+                    Găsește nutriționistul
                     <span className="text-green-600"> perfect</span> pentru tine
                   </h1>
                   <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                    Conectează-te cu nutriționiști verificați din România. 
+                    Conectează-te cu nutriționiști verificați din România.
                     Consultații personalizate, prețuri transparente, rezultate garantate.
                   </p>
                   <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -88,9 +97,11 @@ export default function Home() {
                         Găsește un nutriționist
                       </button>
                     </Link>
-                    <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
-                      Sunt nutriționist
-                    </button>
+                    <Link href="/nutritionists/onboarding">
+                      <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
+                        Sunt nutriționist
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -334,7 +345,7 @@ export default function Home() {
                   Platforma #1 din România pentru conectarea cu nutriționiști verificați
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="text-lg font-semibold mb-4">Platformă</h4>
                 <ul className="space-y-2">
@@ -344,7 +355,7 @@ export default function Home() {
                   <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Pentru nutriționiști</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="text-lg font-semibold mb-4">Companie</h4>
                 <ul className="space-y-2">
@@ -354,7 +365,7 @@ export default function Home() {
                   <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Blog</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="text-lg font-semibold mb-4">Legal</h4>
                 <ul className="space-y-2">
@@ -364,7 +375,7 @@ export default function Home() {
                 </ul>
               </div>
             </div>
-            
+
             <div className="mt-12 pt-8 border-t border-gray-800 text-center">
               <p className="text-gray-400">
                 © 2024 NutriFind. Toate drepturile rezervate. Făcut cu ❤️ în România.
