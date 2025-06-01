@@ -83,7 +83,7 @@ export default function Home() {
                     Consultații personalizate, prețuri transparente, rezultate garantate.
                   </p>
                   <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/find-nutritionist">
+                    <Link href="/nutritionists/find">
                       <button className="bg-green-600 text-white px-8 py-4 rounded-full text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
                         Găsește un nutriționist
                       </button>
@@ -316,7 +316,7 @@ export default function Home() {
             <p className="text-xl text-green-100 mb-8">
               Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriConnect
             </p>
-            <Link href="/find-nutritionist">
+            <Link href="/nutritionists/find">
               <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
                 Începe gratuit acum
               </button>
