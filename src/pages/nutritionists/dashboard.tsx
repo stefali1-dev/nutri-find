@@ -1,357 +1,524 @@
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useState, useEffect } from 'react'
 
-// Iconițe (poți folosi o bibliotecă de iconițe precum Heroicons sau React Icons)
-const UsersIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-  </svg>
-)
-const ChartBarIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-  </svg>
-)
-const StarIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.31h5.408c.498 0 .706.656.34.957l-4.37 3.185a.563.563 0 00-.182.635l2.125 5.111a.563.563 0 01-.812.622l-4.37-3.185a.563.563 0 00-.652 0l-4.37 3.185a.563.563 0 01-.812-.622l2.125-5.111a.563.563 0 00-.182-.635l-4.37-3.185a.563.563 0 01.34-.957h5.408a.563.563 0 00.475-.31l2.125-5.111z" />
-  </svg>
-)
-const CurrencyEuroIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 7.756a4.5 4.5 0 100 8.488M7.5 10.5h5.25m-5.25 3h5.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
-const CalendarDaysIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z" />
-  </svg>
-)
-const Cog6ToothIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.096.573.394 1.086.785 1.475l.93.89a.75.75 0 010 1.06l-.93.89c-.39.39-.69.902-.784 1.475l-.214 1.282c-.09.542-.56.94-1.11.94h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.096-.573-.393-1.086-.785-1.475l-.93-.89a.75.75 0 010-1.06l.93-.89c.39-.39.69-.902.785-1.475l.213-1.282zM12 15a3 3 0 100-6 3 3 0 000 6z" />
-    </svg>
-)
-const ArrowTrendingUpIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.329 4.329 7.006-7.006M21 7.5V12M21 7.5H16.5" />
-    </svg>
-)
-const ArrowTrendingDownIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6L9 12.75l4.329-4.329 7.006 7.006M21 16.5V12M21 16.5H16.5" />
-    </svg>
-)
-
-
-interface MetricCardProps {
-  title: string;
-  value: string;
-  period?: string;
-  icon: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-  trendValue?: string;
-  actionLink?: string;
-  actionText?: string;
-  colorClass?: string;
+interface Appointment {
+  id: string
+  clientName: string
+  clientPhoto: string
+  date: string
+  time: string
+  type: 'online' | 'in-person'
+  status: 'confirmed' | 'pending' | 'completed'
+  service: string
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, period, icon, trend, trendValue, actionLink, actionText, colorClass = 'bg-green-600' }) => {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-      <div className="flex items-center justify-between mb-3">
-        <div className={`p-3 rounded-full ${colorClass} text-white`}>
-          {icon}
-        </div>
-        {actionLink && actionText && (
-            <Link href={actionLink}>
-                <span className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors">
-                    {actionText}
-                </span>
-            </Link>
-        )}
-      </div>
-      <h3 className="text-lg font-semibold text-gray-500 mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-gray-800 mb-1">{value}</p>
-      <div className="flex items-center text-sm">
-        {trend && trendValue && (
-          <span className={`flex items-center mr-2 ${
-            trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-gray-500'
-          }`}>
-            {trend === 'up' && <ArrowTrendingUpIcon />}
-            {trend === 'down' && <ArrowTrendingDownIcon />}
-            <span className="ml-1 font-medium">{trendValue}</span>
-          </span>
-        )}
-        {period && <span className="text-gray-500">{period}</span>}
-      </div>
-    </div>
-  )
+interface MetricCard {
+  title: string
+  value: string | number
+  change: number
+  changeType: 'increase' | 'decrease' | 'neutral'
+  icon: string
+  color: string
 }
 
-interface UpcomingAppointment {
-    id: string;
-    clientName: string;
-    time: string;
-    date: string;
-    type: 'Online' | 'În persoană';
-    avatarUrl?: string;
+interface Activity {
+  id: string
+  type: 'booking' | 'review' | 'message' | 'payment'
+  description: string
+  time: string
+  isNew: boolean
 }
-
-const mockAppointments: UpcomingAppointment[] = [
-    { id: '1', clientName: 'Ana Popescu', time: '10:00', date: 'Azi', type: 'Online', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana&backgroundColor=b6e3f4' },
-    { id: '2', clientName: 'Mihai Ionescu', time: '14:30', date: 'Azi', type: 'În persoană', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mihai&backgroundColor=c0aede' },
-    { id: '3', clientName: 'Elena Vasilescu', time: '09:00', date: 'Mâine', type: 'Online', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena&backgroundColor=ffd5dc' },
-]
-
-// Mock data - ar trebui să vină din API
-const nutritionistData = {
-  name: 'Dr. Exemplu Nutriționist', // Înlocuiește cu numele real
-  profilePhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=NutritionistDas&backgroundColor=d1d4f9', // Placeholder, înlocuiește
-  metrics: {
-    profileViews: { value: '1,230', period: 'ultima lună', trend: 'up', trendValue: '+15%' },
-    conversionRate: { value: '12.5%', period: 'ultima lună', trend: 'up', trendValue: '+2.1%' },
-    avgRating: { value: '4.92', period: '(125 recenzii)', trend: 'neutral', trendValue: '' },
-    totalRevenue: { value: '5,850 RON', period: 'luna curentă', trend: 'up', trendValue: '+850 RON' },
-  }
-}
-
 
 export default function NutritionistDashboard() {
   const router = useRouter()
-  const [activeLink, setActiveLink] = useState('dashboard')
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('week')
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [currentDate] = useState(new Date())
 
-  // Simulează încărcarea datelor (poți adăuga un loader real dacă e nevoie)
-  // useEffect(() => {
-  //   // Fetch data from Supabase here
-  // }, [])
+  // Mock data
+  const nutritionistData = {
+    name: 'Dr. Maria Popescu',
+    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=b6e3f4',
+    memberSince: 'Ianuarie 2024',
+    plan: 'Professional',
+    nextPayment: '15 Iunie 2024'
+  }
 
-  const sidebarLinks = [
-    { name: 'Dashboard', href: '/nutritionists/dashboard', icon: ChartBarIcon, id: 'dashboard' },
-    { name: 'Programări', href: '/nutritionists/appointments', icon: CalendarDaysIcon, id: 'appointments' },
-    { name: 'Profilul Meu', href: '/nutritionists/profile', icon: UsersIcon, id: 'profile' },
-    { name: 'Servicii & Prețuri', href: '/nutritionists/services', icon: CurrencyEuroIcon, id: 'services_pricing' },
-    { name: 'Setări Cont', href: '/nutritionists/settings', icon: Cog6ToothIcon, id: 'settings' },
+  const todayAppointments: Appointment[] = [
+    {
+      id: '1',
+      clientName: 'Ana Ionescu',
+      clientPhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana&backgroundColor=ffd5dc',
+      date: 'Azi',
+      time: '10:00',
+      type: 'online',
+      status: 'confirmed',
+      service: 'Consultație inițială'
+    },
+    {
+      id: '2',
+      clientName: 'Mihai Popa',
+      clientPhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mihai&backgroundColor=c9f7f5',
+      date: 'Azi',
+      time: '11:30',
+      type: 'in-person',
+      status: 'confirmed',
+      service: 'Monitorizare'
+    },
+    {
+      id: '3',
+      clientName: 'Elena Radu',
+      clientPhoto: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena&backgroundColor=ffd9a6',
+      date: 'Azi',
+      time: '14:00',
+      type: 'online',
+      status: 'pending',
+      service: 'Consultație nutriție sportivă'
+    }
   ]
 
-  const handleLinkClick = (id: string) => {
-    setActiveLink(id)
-    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-    // router.push(href) // Navighează dacă nu ești pe pagina respectivă
+  const metrics: MetricCard[] = [
+    {
+      title: 'Vizualizări profil',
+      value: '1,234',
+      change: 12.5,
+      changeType: 'increase',
+      icon: '👁️',
+      color: 'blue'
+    },
+    {
+      title: 'Consultații această lună',
+      value: '48',
+      change: 8,
+      changeType: 'increase',
+      icon: '📅',
+      color: 'green'
+    },
+    {
+      title: 'Venit lunar',
+      value: '12,400 RON',
+      change: 15.3,
+      changeType: 'increase',
+      icon: '💰',
+      color: 'emerald'
+    },
+    {
+      title: 'Rating mediu',
+      value: '4.9',
+      change: 0.1,
+      changeType: 'increase',
+      icon: '⭐',
+      color: 'yellow'
+    }
+  ]
+
+  const recentActivities: Activity[] = [
+    {
+      id: '1',
+      type: 'booking',
+      description: 'Programare nouă de la Alexandru Popescu pentru mâine',
+      time: 'Acum 10 minute',
+      isNew: true
+    },
+    {
+      id: '2',
+      type: 'review',
+      description: 'Recenzie nouă 5★ de la Maria Georgescu',
+      time: 'Acum 2 ore',
+      isNew: true
+    },
+    {
+      id: '3',
+      type: 'message',
+      description: 'Mesaj nou de la Elena Radu',
+      time: 'Acum 3 ore',
+      isNew: false
+    },
+    {
+      id: '4',
+      type: 'payment',
+      description: 'Plată primită: 250 RON de la Ana Ionescu',
+      time: 'Ieri',
+      isNew: false
+    }
+  ]
+
+  const chartData = {
+    labels: ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum'],
+    consultations: [8, 12, 10, 14, 16, 9, 6],
+    revenue: [2000, 3000, 2500, 3500, 4000, 2250, 1500]
+  }
+
+  const upcomingClients = [
+    { name: 'Ana Ionescu', sessions: 12, nextSession: 'Azi, 10:00' },
+    { name: 'Mihai Popa', sessions: 8, nextSession: 'Azi, 11:30' },
+    { name: 'Elena Radu', sessions: 5, nextSession: 'Azi, 14:00' },
+    { name: 'George Dumitrescu', sessions: 3, nextSession: 'Mâine, 09:00' }
+  ]
+
+  const getGreeting = () => {
+    const hour = currentDate.getHours()
+    if (hour < 12) return 'Bună dimineața'
+    if (hour < 18) return 'Bună ziua'
+    return 'Bună seara'
+  }
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'booking': return '📅'
+      case 'review': return '⭐'
+      case 'message': return '💬'
+      case 'payment': return '💰'
+      default: return '📌'
+    }
   }
 
   return (
     <>
       <Head>
-        <title>Dashboard Nutriționist - NutriConnect</title>
-        <meta name="description" content="Panoul de control pentru nutriționiști NutriConnect." />
+        <title>Dashboard - NutriConnect Pro</title>
+        <meta name="description" content="Gestionează-ți practica de nutriție cu ușurință" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex">
-        {/* Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col`}>
-            <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
                 <Link href="/">
-                    <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                  <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
                 </Link>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-gray-500 hover:text-gray-700">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">PRO</span>
+              </div>
+
+              <nav className="hidden md:flex items-center space-x-8">
+                <Link href="/nutritionists/dashboard">
+                  <span className="text-gray-900 font-medium cursor-pointer">Dashboard</span>
+                </Link>
+                <Link href="/nutritionist/appointments">
+                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Programări</span>
+                </Link>
+                <Link href="/nutritionist/clients">
+                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Clienți</span>
+                </Link>
+                <Link href="/nutritionist/profile">
+                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Profil</span>
+                </Link>
+              </nav>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={nutritionistData.photo}
+                    alt={nutritionistData.name}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div className="hidden md:block">
+                    <p className="text-sm font-medium text-gray-900">{nutritionistData.name}</p>
+                    <p className="text-xs text-gray-500">Plan {nutritionistData.plan}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
+              </div>
             </div>
-            <nav className="flex-grow px-4 py-6 space-y-2">
-                {sidebarLinks.map((link) => (
-                <a
-                    key={link.id}
-                    href={link.href} // Pentru demo, folosim href direct; pentru Next.js routing, folosește componenta Link și onClick
-                    onClick={(e) => {
-                        e.preventDefault(); // Previne navigarea standard dacă gestionezi prin router.push
-                        handleLinkClick(link.id);
-                        router.push(link.href); // Asigură-te că pagina există
-                    }}
-                    className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 group ${
-                    activeLink === link.id
-                        ? 'bg-green-600 text-white shadow-md scale-105'
-                        : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {getGreeting()}, {nutritionistData.name.split(' ')[1]}! 👋
+            </h1>
+            <p className="text-gray-600">
+              Ai {todayAppointments.length} consultații programate azi. Să facem o zi productivă!
+            </p>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <button className="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition-all transform hover:scale-105 flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span className="font-medium">Adaugă programare</span>
+            </button>
+            <button className="bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-xl hover:border-green-500 hover:text-green-600 transition-all flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span className="font-medium">Client nou</span>
+            </button>
+            <button className="bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-xl hover:border-green-500 hover:text-green-600 transition-all flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              <span className="font-medium">Plan alimentar</span>
+            </button>
+            <button className="bg-white border-2 border-gray-200 text-gray-700 p-4 rounded-xl hover:border-green-500 hover:text-green-600 transition-all flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium">Trimite mesaj</span>
+            </button>
+          </div>
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {metrics.map((metric, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-sm p-6 hover:shadow-lg transition-all duration-300 border border-gray-100"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">{metric.title}</p>
+                    <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                  </div>
+                  <span className="text-3xl">{metric.icon}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`flex items-center gap-1 text-sm font-medium ${metric.changeType === 'increase' ? 'text-green-600' :
+                      metric.changeType === 'decrease' ? 'text-red-600' : 'text-gray-600'
+                    }`}>
+                    {metric.changeType === 'increase' && '↑'}
+                    {metric.changeType === 'decrease' && '↓'}
+                    {Math.abs(metric.change)}%
+                  </span>
+                  <span className="text-sm text-gray-500">față de luna trecută</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Today's Schedule */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Programul de azi</h2>
+                  <Link href="/nutritionist/appointments">
+                    <span className="text-green-600 hover:text-green-700 text-sm font-medium cursor-pointer">
+                      Vezi toate →
+                    </span>
+                  </Link>
+                </div>
+
+                <div className="space-y-4">
+                  {todayAppointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={appointment.clientPhoto}
+                          alt={appointment.clientName}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <div>
+                          <p className="font-medium text-gray-900">{appointment.clientName}</p>
+                          <p className="text-sm text-gray-600">{appointment.service}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{appointment.time}</p>
+                          <p className="text-sm text-gray-600">
+                            {appointment.type === 'online' ? 'Online' : 'La cabinet'}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 text-xs rounded-full ${appointment.status === 'confirmed'
+                            ? 'bg-green-100 text-green-800'
+                            : appointment.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                          {appointment.status === 'confirmed' ? 'Confirmat' :
+                            appointment.status === 'pending' ? 'În așteptare' : 'Completat'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Performance Chart */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Performanță săptămânală</h2>
+                  <select
+                    value={selectedPeriod}
+                    onChange={(e) => setSelectedPeriod(e.target.value)}
+                    className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                  >
+                    <option value="week">Ultima săptămână</option>
+                    <option value="month">Ultima lună</option>
+                    <option value="year">Ultimul an</option>
+                  </select>
+                </div>
+
+                {/* Simple Chart Representation */}
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-600">Consultații</span>
+                      <span className="text-sm font-medium text-gray-900">85 total</span>
+                    </div>
+                    <div className="flex items-end gap-2 h-32">
+                      {chartData.consultations.map((value, index) => (
+                        <div
+                          key={index}
+                          className="flex-1 bg-green-500 rounded-t hover:bg-green-600 transition-colors relative group"
+                          style={{ height: `${(value / Math.max(...chartData.consultations)) * 100}%` }}
+                        >
+                          <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between mt-2">
+                      {chartData.labels.map((label, index) => (
+                        <span key={index} className="text-xs text-gray-500 flex-1 text-center">
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-600">Venituri</span>
+                      <span className="text-sm font-medium text-gray-900">18,750 RON</span>
+                    </div>
+                    <div className="flex items-end gap-2 h-32">
+                      {chartData.revenue.map((value, index) => (
+                        <div
+                          key={index}
+                          className="flex-1 bg-emerald-500 rounded-t hover:bg-emerald-600 transition-colors relative group"
+                          style={{ height: `${(value / Math.max(...chartData.revenue)) * 100}%` }}
+                        >
+                          <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {value} RON
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Recent Activity */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Activitate recentă</h2>
+                <div className="space-y-4">
+                  {recentActivities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3">
+                      <span className="text-2xl mt-1">{getActivityIcon(activity.type)}</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900">
+                          {activity.description}
+                          {activity.isNew && (
+                            <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                              Nou
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Clients */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Clienți fideli</h2>
+                <div className="space-y-4">
+                  {upcomingClients.map((client, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">{client.name}</p>
+                        <p className="text-sm text-gray-600">{client.sessions} sesiuni</p>
+                      </div>
+                      <p className="text-sm text-gray-500">{client.nextSession}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-6 text-white">
+                <h3 className="text-lg font-semibold mb-4">Poziția ta în top</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-100">În categoria ta</span>
+                    <span className="font-bold">#3 din 45</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-100">În orașul tău</span>
+                    <span className="font-bold">#12 din 234</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-100">Rating general</span>
+                    <span className="font-bold">Top 5%</span>
+                  </div>
+                </div>
+                <button className="mt-4 w-full bg-white/20 hover:bg-white/30 backdrop-blur py-2 rounded-lg transition-colors text-sm font-medium">
+                  Vezi clasament complet →
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Notifications Dropdown */}
+        {showNotifications && (
+          <div className="absolute top-16 right-4 w-96 bg-white rounded-xl shadow-xl border border-gray-100 z-50">
+            <div className="p-4 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-900">Notificări</h3>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className={`p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${activity.isNew ? 'bg-green-50' : ''
                     }`}
                 >
-                    <link.icon />
-                    <span className="ml-3 font-medium">{link.name}</span>
-                </a>
-                ))}
-            </nav>
-            <div className="px-6 py-4 border-t border-gray-200">
-                <button 
-                    onClick={() => { /* Logica de logout */ router.push('/nutritionists/login'); }}
-                    className="w-full flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
-                    <span className="ml-3 font-medium">Deconectare</span>
-                </button>
-            </div>
-        </aside>
-
-        {/* Main content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top bar */}
-          <header className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between h-16">
-                <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-gray-600 hover:text-gray-800">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
-                <h1 className="text-2xl font-semibold text-gray-800 hidden md:block">Dashboard Profesional</h1>
-                <div className="flex items-center">
-                  <div className="mr-4 hidden sm:block">
-                    <p className="text-sm text-gray-500">Bine ai venit,</p>
-                    <p className="font-medium text-gray-800">{nutritionistData.name}</p>
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl">{getActivityIcon(activity.type)}</span>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">{activity.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    </div>
                   </div>
-                  <img
-                    className="h-10 w-10 rounded-full object-cover"
-                    src={nutritionistData.profilePhoto}
-                    alt="Fotografie profil"
-                  />
                 </div>
-              </div>
+              ))}
             </div>
-          </header>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-green-50 to-emerald-50 p-6 md:p-8">
-            {/* Welcome Banner / Quick Tip */}
-            <div className="bg-green-600 text-white rounded-xl shadow-lg p-6 mb-8 flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-semibold mb-1">Salut, {nutritionistData.name.split(' ')[1]}!</h2>
-                    <p className="text-green-100">Iată o privire de ansamblu asupra activității tale.</p>
-                </div>
-                <Link href="/nutritionists/profile/edit">
-                    <button className="bg-white text-green-700 px-5 py-2.5 rounded-lg font-semibold hover:bg-green-50 transition-colors text-sm">
-                        Actualizează Profilul
-                    </button>
-                </Link>
+            <div className="p-4 border-t border-gray-100">
+              <button className="text-sm text-green-600 hover:text-green-700 font-medium">
+                Vezi toate notificările
+              </button>
             </div>
-            
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <MetricCard
-                title="Vizualizări Profil"
-                value={nutritionistData.metrics.profileViews.value}
-                period={nutritionistData.metrics.profileViews.period}
-                icon={<UsersIcon />}
-                trend={nutritionistData.metrics.profileViews.trend as any}
-                trendValue={nutritionistData.metrics.profileViews.trendValue}
-                colorClass="bg-sky-500"
-              />
-              <MetricCard
-                title="Rată Conversie"
-                value={nutritionistData.metrics.conversionRate.value}
-                period={nutritionistData.metrics.conversionRate.period}
-                icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.329 4.329 7.006-7.006M21 7.5V12M21 7.5H16.5" /></svg>}
-                trend={nutritionistData.metrics.conversionRate.trend as any}
-                trendValue={nutritionistData.metrics.conversionRate.trendValue}
-                colorClass="bg-purple-500"
-              />
-              <MetricCard
-                title="Rating Mediu"
-                value={nutritionistData.metrics.avgRating.value}
-                period={nutritionistData.metrics.avgRating.period}
-                icon={<StarIcon />}
-                trend={nutritionistData.metrics.avgRating.trend as any}
-                trendValue={nutritionistData.metrics.avgRating.trendValue}
-                colorClass="bg-amber-500"
-                actionLink="/nutritionists/reviews"
-                actionText="Vezi Recenzii"
-              />
-              <MetricCard
-                title="Venituri Lunare"
-                value={nutritionistData.metrics.totalRevenue.value}
-                period={nutritionistData.metrics.totalRevenue.period}
-                icon={<CurrencyEuroIcon />}
-                trend={nutritionistData.metrics.totalRevenue.trend as any}
-                trendValue={nutritionistData.metrics.totalRevenue.trendValue}
-                colorClass="bg-green-500"
-                actionLink="/nutritionists/earnings"
-                actionText="Detalii Venituri"
-              />
-            </div>
-
-            {/* Sections: Appointments & Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              {/* Upcoming Appointments */}
-              <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold text-gray-800">Programări Viitoare</h3>
-                    <Link href="/nutritionists/appointments">
-                        <span className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors">
-                            Vezi toate programările
-                        </span>
-                    </Link>
-                </div>
-                {mockAppointments.length > 0 ? (
-                    <div className="space-y-4">
-                    {mockAppointments.slice(0,3).map(app => (
-                        <div key={app.id} className="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors">
-                            <img src={app.avatarUrl || `https://ui-avatars.com/api/?name=${app.clientName.replace(' ', '+')}&background=random`} alt={app.clientName} className="w-10 h-10 rounded-full mr-4 object-cover"/>
-                            <div className="flex-1">
-                                <p className="font-semibold text-gray-800">{app.clientName}</p>
-                                <p className="text-sm text-gray-500">{app.date}, {app.time} - {app.type}</p>
-                            </div>
-                            <button className="text-green-600 hover:text-green-700 text-sm font-medium p-2 rounded-md hover:bg-green-100 transition-colors">
-                                Detalii
-                            </button>
-                        </div>
-                    ))}
-                    </div>
-                ) : (
-                    <p className="text-gray-500 text-center py-4">Nu ai programări viitoare.</p>
-                )}
-              </div>
-
-              {/* Quick Actions / Tips */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                <h3 className="text-xl font-semibold text-gray-800 mb-6">Acțiuni Rapide</h3>
-                <div className="space-y-3">
-                    <Link href="/nutritionists/availability/edit">
-                        <button className="w-full flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700 transition-all transform hover:scale-102">
-                            <CalendarDaysIcon/> Actualizează Disponibilitatea
-                        </button>
-                    </Link>
-                     <Link href="/nutritionists/services/new">
-                        <button className="w-full flex items-center justify-center gap-2 bg-sky-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-sky-700 transition-all transform hover:scale-102">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                            Adaugă Serviciu Nou
-                        </button>
-                    </Link>
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                        <h4 className="font-semibold text-gray-700 mb-2">💡 Sfat Pro:</h4>
-                        <p className="text-sm text-gray-600">
-                            Un profil complet și actualizat, cu o fotografie profesională, atrage mai mulți clienți. Verifică-ți periodic descrierea și specializările!
-                        </p>
-                    </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Placeholder for Charts/Graphs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Trend Venituri (Ultimele 6 luni)</h3>
-                    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <p className="text-gray-400">Aici va fi un grafic cu veniturile</p>
-                    </div>
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Comparație cu Media Specializării</h3>
-                    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <p className="text-gray-400">Aici va fi un grafic comparativ</p>
-                    </div>
-                </div>
-            </div>
-
-          </main>
-        </div>
+          </div>
+        )}
       </div>
     </>
   )

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { supabase } from '../../../lib/supabaseClient'
+
 
 interface FormData {
   goal: string
@@ -87,12 +89,70 @@ export default function FindNutritionist() {
   }
 
   const handleSubmit = async () => {
-    // Clear saved data
-    localStorage.removeItem('nutriForm')
-    // Here you would send data to your backend
-    console.log('Form submitted:', formData)
-    // Redirect to results page
-    router.push('/nutritionists/results')
+    try {
+      // Show loading state
+      setIsAnimating(true)
+      
+      // Prepare data for Supabase
+      const dataToSave = {
+        email: formData.email,
+        name: formData.name,
+        goal: formData.goal,
+        specific_goals: formData.specificGoals,
+        health_conditions: formData.healthConditions,
+        diet_type: formData.dietType || null,
+        budget: formData.budget,
+        consultation_type: formData.consultationType,
+        availability: formData.availability,
+        experience_preference: formData.experience || null,
+        location: formData.location || null,
+        age_range: formData.age || null,
+        gender: formData.gender || null
+      }
+
+      // Check if email already exists and update or insert
+      const { data: existingUser } = await supabase
+        .from('client_preferences')
+        .select('id')
+        .eq('email', formData.email)
+        .single()
+
+      let error
+      if (existingUser) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('client_preferences')
+          .update(dataToSave)
+          .eq('email', formData.email)
+        error = updateError
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('client_preferences')
+          .insert([dataToSave])
+        error = insertError
+      }
+
+      if (error) {
+        console.error('Error saving preferences:', error)
+        alert('A apărut o eroare la salvarea preferințelor. Te rugăm să încerci din nou.')
+        setIsAnimating(false)
+        return
+      }
+
+      // Clear saved data from localStorage
+      localStorage.removeItem('nutriForm')
+      
+      // Save email in session storage for results page
+      sessionStorage.setItem('clientEmail', formData.email)
+      
+      // Redirect to results page
+      router.push('/nutritionists/results')
+    } catch (error) {
+      console.error('Unexpected error:', error)
+      alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
+      setIsAnimating(false)
+    }
   }
 
   const updateFormData = (field: keyof FormData, value: any) => {
