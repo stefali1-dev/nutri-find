@@ -1,576 +1,791 @@
 import { useState, useEffect } from 'react'
-import Head from 'next/head'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { supabase } from '../../../lib/supabaseClient'
 
-interface Nutritionist {
-    id: string
-    name: string
-    photo: string
-    specializations: string[]
-    experience: string
-    rating: number
-    reviewCount: number
-    price: string
-    consultationType: string[]
-    availability: string
-    description: string
-    badges: string[]
-    responseTime: string
-    successStories: number
+interface FormData {
+  goal: string
+  healthConditions: string[]
+  dietType: string
+  budget: string
+  consultationType: string
+  availability: string[]
+  experience: string
+  location: string
+  age: string
+  gender: string
+  email: string
+  name: string
 }
 
-// Mock data - în producție ar veni din API
-const mockNutritionists: Nutritionist[] = [
+interface OnboardingData {
+  id?: string
+  email: string
+  fullName: string
+  phone: string
+  birthDate: string
+  gender: string
+  licenseNumber: string
+  yearsExperience: string
+  workType: string[]
+  specializations: string[]
+  education: {
+    degree: string
+    university: string
+    graduationYear: string
+  }[]
+  certifications: {
+    name: string
+    issuer: string
+    year: string
+  }[]
+  consultationTypes: string[]
+  services: {
+    name: string
+    duration: string
+    price: string
+    description: string
+  }[]
+  workDays: string[]
+  workHours: {
+    start: string
+    end: string
+  }
+  consultationDuration: string
+  bio: string
+  profilePhoto: string
+  languages: string[]
+  location: string
+  documents: {
+    diploma: File | null
+    license: File | null
+    insurance: File | null
+  }
+  termsAccepted: boolean
+  rating?: number
+  totalReviews?: number
+  nextAvailable?: string
+  isOnline?: boolean
+}
+
+export default function ResultsVertical() {
+  const router = useRouter()
+  const [userPreferences, setUserPreferences] = useState<FormData | null>(null)
+  const [nutritionists, setNutritionists] = useState<OnboardingData[]>([])
+  const [filteredNutritionists, setFilteredNutritionists] = useState<OnboardingData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState('relevance')
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState({
+    price: 'all',
+    experience: 'all',
+    consultationType: 'all',
+    availability: 'all'
+  })
+
+  // Mock data extins cu informații pentru UX optimizat
+  const mockNutritionists: OnboardingData[] = [
     {
-        id: '1',
-        name: 'Dr. Maria Popescu',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=b6e3f4',
-        specializations: ['Slăbire sănătoasă', 'Nutriție sportivă', 'Diabet'],
-        experience: '8 ani experiență',
-        rating: 4.9,
-        reviewCount: 127,
-        price: '250 RON',
-        consultationType: ['online', 'in-person'],
-        availability: 'Disponibil în 2 zile',
-        description: 'Specialist în nutriție clinică cu experiență vastă în managementul greutății și nutriție sportivă.',
-        badges: ['Top Rated', 'Verificat'],
-        responseTime: 'Răspunde în ~2 ore',
-        successStories: 89
+      id: '1',
+      email: 'ana.popescu@email.com',
+      fullName: 'Dr. Ana Popescu',
+      phone: '0721234567',
+      birthDate: '1985-05-15',
+      gender: 'Feminin',
+      licenseNumber: 'CDR12345',
+      yearsExperience: '8',
+      workType: ['online', 'in-person'],
+      specializations: ['weight-loss', 'sports-nutrition'],
+      education: [{
+        degree: 'Licență în Nutriție și Dietetică',
+        university: 'Universitatea de Medicină București',
+        graduationYear: '2015'
+      }],
+      certifications: [{
+        name: 'Certificat Nutriție Sportivă',
+        issuer: 'ACSM',
+        year: '2020'
+      }],
+      consultationTypes: ['online', 'in-person'],
+      services: [
+        {
+          name: 'Consultație inițială',
+          duration: '60 min',
+          price: '250',
+          description: 'Evaluare completă și plan personalizat'
+        },
+        {
+          name: 'Follow-up',
+          duration: '30 min',
+          price: '150',
+          description: 'Monitorizare și ajustări'
+        }
+      ],
+      workDays: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
+      workHours: { start: '09:00', end: '17:00' },
+      consultationDuration: '60',
+      bio: 'Sunt nutriționist cu 8 ani de experiență, specializată în pierderea în greutate și nutriția sportivă. Îmi place să ajut oamenii să își atingă obiectivele de sănătate prin planuri personalizate și suport continuu.',
+      profilePhoto: '/api/placeholder/80/80',
+      languages: ['Română', 'Engleză'],
+      location: 'București',
+      documents: { diploma: null, license: null, insurance: null },
+      termsAccepted: true,
+      rating: 4.9,
+      totalReviews: 156,
+      nextAvailable: 'Mâine, 14:00',
+      isOnline: true
     },
     {
-        id: '2',
-        name: 'Andreea Ionescu',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Andreea&backgroundColor=ffd5dc',
-        specializations: ['Vegetarian/Vegan', 'Alergii alimentare', 'Sănătate digestivă'],
-        experience: '5 ani experiență',
-        rating: 4.8,
-        reviewCount: 94,
-        price: '200 RON',
-        consultationType: ['online'],
-        availability: 'Disponibil azi',
-        description: 'Pasionată de nutriție plant-based și sănătate holistică. Abordare personalizată pentru fiecare client.',
-        badges: ['Răspuns rapid', 'Eco-friendly'],
-        responseTime: 'Răspunde în ~30 min',
-        successStories: 67
+      id: '2',
+      email: 'maria.ionescu@email.com',
+      fullName: 'Maria Ionescu',
+      phone: '0722345678',
+      birthDate: '1990-08-22',
+      gender: 'Feminin',
+      licenseNumber: 'CDR23456',
+      yearsExperience: '5',
+      workType: ['online'],
+      specializations: ['general-health', 'health-condition'],
+      education: [{
+        degree: 'Master în Nutriție Clinică',
+        university: 'UMF Cluj',
+        graduationYear: '2018'
+      }],
+      certifications: [],
+      consultationTypes: ['online'],
+      services: [
+        {
+          name: 'Consultație online',
+          duration: '45 min',
+          price: '180',
+          description: 'Consultație video cu plan personalizat'
+        },
+        {
+          name: 'Plan nutrițional',
+          duration: '30 min',
+          price: '120',
+          description: 'Plan detaliat pe 4 săptămâni'
+        }
+      ],
+      workDays: ['Luni', 'Miercuri', 'Vineri', 'Sâmbătă'],
+      workHours: { start: '10:00', end: '18:00' },
+      consultationDuration: '45',
+      bio: 'Nutriționist specializat în nutriția clinică și gestionarea condițiilor medicale prin alimentație. Abordez fiecare caz cu atenție și empatie.',
+      profilePhoto: '/api/placeholder/80/80',
+      languages: ['Română'],
+      location: 'Cluj-Napoca',
+      documents: { diploma: null, license: null, insurance: null },
+      termsAccepted: true,
+      rating: 4.7,
+      totalReviews: 89,
+      nextAvailable: 'Vineri, 16:30',
+      isOnline: true
     },
     {
-        id: '3',
-        name: 'Mihai Dumitrescu',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mihai&backgroundColor=c9f7f5',
-        specializations: ['Creștere masă musculară', 'Nutriție sportivă', 'Recuperare'],
-        experience: '3 ani experiență',
-        rating: 4.7,
-        reviewCount: 56,
-        price: '150 RON',
-        consultationType: ['online', 'in-person'],
-        availability: 'Disponibil mâine',
-        description: 'Fost sportiv de performanță, acum ajut alți sportivi să își atingă potențialul maxim.',
-        badges: ['Rising Star', 'Sportiv'],
-        responseTime: 'Răspunde în ~1 oră',
-        successStories: 45
+      id: '3',
+      email: 'alex.tudor@email.com',
+      fullName: 'Alexandru Tudor',
+      phone: '0723456789',
+      birthDate: '1988-12-10',
+      gender: 'Masculin',
+      licenseNumber: 'CDR34567',
+      yearsExperience: '6',
+      workType: ['in-person', 'hybrid'],
+      specializations: ['muscle-gain', 'sports-nutrition'],
+      education: [{
+        degree: 'Licență Nutriție și Dietă',
+        university: 'Universitatea de Vest Timișoara',
+        graduationYear: '2016'
+      }],
+      certifications: [{
+        name: 'ISSA Nutrition Specialist',
+        issuer: 'ISSA',
+        year: '2019'
+      }],
+      consultationTypes: ['in-person', 'hybrid'],
+      services: [
+        {
+          name: 'Consultație cabinet',
+          duration: '60 min',
+          price: '300',
+          description: 'Consultație completă cu măsurători corporale'
+        },
+        {
+          name: 'Plan nutriție sportivă',
+          duration: '90 min',
+          price: '450',
+          description: 'Plan specializat pentru performanță sportivă'
+        }
+      ],
+      workDays: ['Marți', 'Joi', 'Vineri', 'Sâmbătă'],
+      workHours: { start: '08:00', end: '16:00' },
+      consultationDuration: '60',
+      bio: 'Specialist în nutriția sportivă cu focus pe creșterea masei musculare și optimizarea performanței. Lucrez cu atleți profesioniști și amatori.',
+      profilePhoto: '/api/placeholder/80/80',
+      languages: ['Română', 'Engleză', 'Germană'],
+      location: 'Timișoara',
+      documents: { diploma: null, license: null, insurance: null },
+      termsAccepted: true,
+      rating: 4.8,
+      totalReviews: 124,
+      nextAvailable: 'Marți, 10:00',
+      isOnline: false
     },
     {
-        id: '4',
-        name: 'Elena Radu',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena&backgroundColor=ffd9a6',
-        specializations: ['Nutriție pediatrică', 'Sarcină și alăptare', 'Familie'],
-        experience: '10 ani experiență',
-        rating: 5.0,
-        reviewCount: 203,
-        price: '300 RON',
-        consultationType: ['in-person'],
-        availability: 'Disponibil în 3 zile',
-        description: 'Specialist în nutriție pentru copii și mame. Creez planuri nutritive pentru întreaga familie.',
-        badges: ['Expert', 'Family-friendly'],
-        responseTime: 'Răspunde în ~4 ore',
-        successStories: 156
-    },
-    {
-        id: '5',
-        name: 'Alexandru Popa',
-        photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alexandru&backgroundColor=a6d9f7',
-        specializations: ['Keto', 'Intermittent fasting', 'Biohacking'],
-        experience: '2 ani experiență',
-        rating: 4.6,
-        reviewCount: 34,
-        price: 'GRATUIT - primele 3 consultații',
-        consultationType: ['online'],
-        availability: 'Disponibil azi',
-        description: 'Nutriționist începător, pasionat de abordări moderne. Ofer consultații gratuite pentru experiență!',
-        badges: ['Ofertă specială', 'Începător motivat'],
-        responseTime: 'Răspunde instant',
-        successStories: 28
+      id: '4',
+      email: 'cristina.popescu@email.com',
+      fullName: 'Cristina Popescu',
+      phone: '0724567890',
+      birthDate: '1992-03-18',
+      gender: 'Feminin',
+      licenseNumber: 'CDR45678',
+      yearsExperience: '3',
+      workType: ['online'],
+      specializations: ['weight-loss', 'general-health'],
+      education: [{
+        degree: 'Licență în Nutriție',
+        university: 'Universitatea București',
+        graduationYear: '2021'
+      }],
+      certifications: [],
+      consultationTypes: ['online'],
+      services: [
+        {
+          name: 'Consultație începători',
+          duration: '45 min',
+          price: '120',
+          description: 'Perfect pentru primul pas către o viață sănătoasă'
+        }
+      ],
+      workDays: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
+      workHours: { start: '14:00', end: '20:00' },
+      consultationDuration: '45',
+      bio: 'Nutriționist tânăr și entuziast, specializat în îndrumarea persoanelor care fac primii pași către o alimentație sănătoasă.',
+      profilePhoto: '/api/placeholder/80/80',
+      languages: ['Română', 'Engleză'],
+      location: 'București',
+      documents: { diploma: null, license: null, insurance: null },
+      termsAccepted: true,
+      rating: 4.6,
+      totalReviews: 42,
+      nextAvailable: 'Astăzi, 18:00',
+      isOnline: true
     }
-]
+  ]
 
-export default function Results() {
-    const router = useRouter()
-    const [nutritionists, setNutritionists] = useState<Nutritionist[]>(mockNutritionists)
-    const [filteredNutritionists, setFilteredNutritionists] = useState<Nutritionist[]>(mockNutritionists)
-    const [isLoading, setIsLoading] = useState(true)
-    const [savedFormData, setSavedFormData] = useState<any>(null)
-
-    // Filters
-    const [priceFilter, setPriceFilter] = useState('all')
-    const [consultationFilter, setConsultationFilter] = useState('all')
-    const [specializationFilter, setSpecializationFilter] = useState('all')
-    const [sortBy, setSortBy] = useState('recommended')
-    const [showFilters, setShowFilters] = useState(false)
-
-    useEffect(() => {
-        // Simulate loading
-        setTimeout(() => setIsLoading(false), 1500)
-
-        // Get saved form data
-        const formData = localStorage.getItem('nutriForm')
-        if (formData) {
-            setSavedFormData(JSON.parse(formData))
-        }
-    }, [])
-
-    useEffect(() => {
-        // Apply filters
-        let filtered = [...nutritionists]
-
-        // Price filter
-        if (priceFilter !== 'all') {
-            filtered = filtered.filter(n => {
-                if (priceFilter === 'free') return n.price.includes('GRATUIT')
-                if (priceFilter === '0-200') return parseInt(n.price) <= 200
-                if (priceFilter === '200-500') return parseInt(n.price) > 200 && parseInt(n.price) <= 500
-                return true
-            })
-        }
-
-        // Consultation type filter
-        if (consultationFilter !== 'all') {
-            filtered = filtered.filter(n => n.consultationType.includes(consultationFilter))
-        }
-
-        // Specialization filter
-        if (specializationFilter !== 'all') {
-            filtered = filtered.filter(n =>
-                n.specializations.some(s => s.toLowerCase().includes(specializationFilter.toLowerCase()))
-            )
-        }
-
-        // Sort
-        if (sortBy === 'price-low') {
-            filtered.sort((a, b) => {
-                const priceA = a.price.includes('GRATUIT') ? 0 : parseInt(a.price)
-                const priceB = b.price.includes('GRATUIT') ? 0 : parseInt(b.price)
-                return priceA - priceB
-            })
-        } else if (sortBy === 'price-high') {
-            filtered.sort((a, b) => {
-                const priceA = a.price.includes('GRATUIT') ? 0 : parseInt(a.price)
-                const priceB = b.price.includes('GRATUIT') ? 0 : parseInt(b.price)
-                return priceB - priceA
-            })
-        } else if (sortBy === 'rating') {
-            filtered.sort((a, b) => b.rating - a.rating)
-        } else if (sortBy === 'experience') {
-            filtered.sort((a, b) => {
-                const expA = parseInt(a.experience)
-                const expB = parseInt(b.experience)
-                return expB - expA
-            })
-        }
-
-        setFilteredNutritionists(filtered)
-    }, [priceFilter, consultationFilter, specializationFilter, sortBy, nutritionists])
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">Căutăm nutriționiștii perfecți pentru tine...</h2>
-                    <p className="text-gray-600">Analizăm preferințele tale și potrivim cei mai buni specialiști</p>
-                </div>
-            </div>
-        )
+  useEffect(() => {
+    const preferences = sessionStorage.getItem('nutriPreferences')
+    if (preferences) {
+      setUserPreferences(JSON.parse(preferences))
     }
 
+    setTimeout(() => {
+      setNutritionists(mockNutritionists)
+      setFilteredNutritionists(mockNutritionists)
+      setLoading(false)
+    }, 1200)
+  }, [])
+
+  const handleBookConsultation = (nutritionist: OnboardingData) => {
+    // Salvăm ID-ul nutriționistului pentru pagina de booking
+    sessionStorage.setItem('selectedNutritionist', nutritionist.id!)
+    router.push(`/nutritionists/${nutritionist.id}/booking`)
+  }
+
+  const handleViewProfile = (nutritionist: OnboardingData) => {
+    router.push(`/nutritionists/${nutritionist.id}`)
+  }
+
+  const getSpecializationEmoji = (spec: string) => {
+    const emojiMap: { [key: string]: string } = {
+      'weight-loss': '⚖️',
+      'muscle-gain': '💪',
+      'health-condition': '🏥',
+      'sports-nutrition': '🏃‍♂️',
+      'general-health': '🥗'
+    }
+    return emojiMap[spec] || '✨'
+  }
+
+  const getSpecializationLabel = (spec: string) => {
+    const labelMap: { [key: string]: string } = {
+      'weight-loss': 'Slăbire',
+      'muscle-gain': 'Masa musculară',
+      'health-condition': 'Condiții medicale',
+      'sports-nutrition': 'Nutriție sportivă',
+      'general-health': 'Sănătate generală'
+    }
+    return labelMap[spec] || spec
+  }
+
+  const getLowestPrice = (services: any[]) => {
+    return Math.min(...services.map(s => parseInt(s.price)))
+  }
+
+  const renderStars = (rating: number) => {
     return (
-        <>
-            <Head>
-                <title>Rezultate - Nutriționiști Recomandați | NutriConnect</title>
-                <meta name="description" content="Nutriționiști verificați care se potrivesc perfect cu nevoile tale" />
-            </Head>
-
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-                {/* Header */}
-                <div className="bg-white shadow-sm sticky top-0 z-40">
-                    <div className="max-w-7xl mx-auto px-4 py-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Link href="/">
-                                    <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
-                                </Link>
-                                <span className="text-gray-400">/</span>
-                                <span className="text-gray-600">Rezultate căutare</span>
-                            </div>
-                            <button
-                                onClick={() => router.push('/find-nutritionist')}
-                                className="text-green-600 hover:text-green-700 flex items-center gap-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                                </svg>
-                                Modifică preferințele
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Results Summary */}
-                <div className="bg-white border-b">
-                    <div className="max-w-7xl mx-auto px-4 py-6">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                    Am găsit {filteredNutritionists.length} nutriționiști pentru tine! 🎉
-                                </h1>
-                                <p className="text-gray-600">
-                                    Bazat pe preferințele tale: {savedFormData?.goal === 'weight-loss' && 'Slăbire sănătoasă'}
-                                    {savedFormData?.goal === 'muscle-gain' && 'Creștere masă musculară'}
-                                    {savedFormData?.goal === 'health-condition' && 'Gestionare condiție medicală'}
-                                    {savedFormData?.goal === 'sports-nutrition' && 'Nutriție sportivă'}
-                                    {savedFormData?.goal === 'general-health' && 'Alimentație sănătoasă'}
-                                    {savedFormData?.budget === 'free' && ' • Consultații gratuite'}
-                                    {savedFormData?.consultationType && ` • ${savedFormData.consultationType === 'online' ? 'Online' : savedFormData.consultationType === 'in-person' ? 'În persoană' : 'Hibrid'}`}
-                                </p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setShowFilters(!showFilters)}
-                                    className="md:hidden bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                    </svg>
-                                    Filtre
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="max-w-7xl mx-auto px-4 py-8">
-                    <div className="flex gap-8">
-                        {/* Filters Sidebar */}
-                        <div className={`${showFilters ? 'fixed inset-0 z-50 bg-white md:relative md:inset-auto' : 'hidden md:block'} md:w-64 flex-shrink-0`}>
-                            <div className="bg-white rounded-xl shadow-lg p-6 md:sticky md:top-24">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-lg font-semibold text-gray-800">Filtrează rezultatele</h3>
-                                    <button
-                                        onClick={() => setShowFilters(false)}
-                                        className="md:hidden text-gray-500 hover:text-gray-700"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                {/* Sort */}
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Sortează după</label>
-                                    <select
-                                        value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
-                                        className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                                    >
-                                        <option value="recommended">Recomandat pentru tine</option>
-                                        <option value="rating">Rating</option>
-                                        <option value="price-low">Preț: Mic → Mare</option>
-                                        <option value="price-high">Preț: Mare → Mic</option>
-                                        <option value="experience">Experiență</option>
-                                    </select>
-                                </div>
-
-                                {/* Price Filter */}
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Preț per consultație</label>
-                                    <div className="space-y-2">
-                                        {[
-                                            { value: 'all', label: 'Toate prețurile' },
-                                            { value: 'free', label: 'Gratuit' },
-                                            { value: '0-200', label: '0 - 200 RON' },
-                                            { value: '200-500', label: '200 - 500 RON' },
-                                            { value: '500+', label: 'Peste 500 RON' }
-                                        ].map(option => (
-                                            <label key={option.value} className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="price"
-                                                    value={option.value}
-                                                    checked={priceFilter === option.value}
-                                                    onChange={(e) => setPriceFilter(e.target.value)}
-                                                    className="text-green-600 focus:ring-green-500"
-                                                />
-                                                <span className="ml-2 text-gray-700">{option.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Consultation Type */}
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Tip consultație</label>
-                                    <div className="space-y-2">
-                                        {[
-                                            { value: 'all', label: 'Toate' },
-                                            { value: 'online', label: 'Online' },
-                                            { value: 'in-person', label: 'În persoană' }
-                                        ].map(option => (
-                                            <label key={option.value} className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="consultation"
-                                                    value={option.value}
-                                                    checked={consultationFilter === option.value}
-                                                    onChange={(e) => setConsultationFilter(e.target.value)}
-                                                    className="text-green-600 focus:ring-green-500"
-                                                />
-                                                <span className="ml-2 text-gray-700">{option.label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Specialization Filter */}
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Specializare</label>
-                                    <select
-                                        value={specializationFilter}
-                                        onChange={(e) => setSpecializationFilter(e.target.value)}
-                                        className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                                    >
-                                        <option value="all">Toate specializările</option>
-                                        <option value="slăbire">Slăbire</option>
-                                        <option value="sportivă">Nutriție sportivă</option>
-                                        <option value="diabet">Diabet</option>
-                                        <option value="vegan">Vegetarian/Vegan</option>
-                                        <option value="alergii">Alergii alimentare</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    onClick={() => {
-                                        setPriceFilter('all')
-                                        setConsultationFilter('all')
-                                        setSpecializationFilter('all')
-                                        setSortBy('recommended')
-                                    }}
-                                    className="w-full text-green-600 hover:text-green-700 text-sm"
-                                >
-                                    Resetează filtrele
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Results Grid */}
-                        <div className="flex-1">
-                            {filteredNutritionists.length === 0 ? (
-                                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Nu am găsit rezultate</h3>
-                                    <p className="text-gray-600 mb-4">Încearcă să ajustezi filtrele pentru mai multe rezultate</p>
-                                    <button
-                                        onClick={() => {
-                                            setPriceFilter('all')
-                                            setConsultationFilter('all')
-                                            setSpecializationFilter('all')
-                                        }}
-                                        className="text-green-600 hover:text-green-700"
-                                    >
-                                        Resetează filtrele
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    {filteredNutritionists.map((nutritionist, index) => (
-                                        <div
-                                            key={nutritionist.id}
-                                            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-                                            style={{ animationDelay: `${index * 0.1}s` }}
-                                        >
-                                            <div className="p-6">
-                                                <div className="flex flex-col md:flex-row gap-6">
-                                                    {/* Profile Image */}
-                                                    <div className="flex-shrink-0">
-                                                        <img
-                                                            src={nutritionist.photo}
-                                                            alt={nutritionist.name}
-                                                            className="w-24 h-24 md:w-32 md:h-32 rounded-xl object-cover"
-                                                        />
-                                                    </div>
-
-                                                    {/* Main Info */}
-                                                    <div className="flex-1">
-                                                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                                                            <div>
-                                                                <div className="flex items-center gap-3 mb-2">
-                                                                    <h3 className="text-xl font-semibold text-gray-800">{nutritionist.name}</h3>
-                                                                    {nutritionist.badges.map(badge => (
-                                                                        <span
-                                                                            key={badge}
-                                                                            className={`px-2 py-1 text-xs rounded-full ${badge === 'Top Rated' ? 'bg-yellow-100 text-yellow-800' :
-                                                                                    badge === 'Verificat' ? 'bg-green-100 text-green-800' :
-                                                                                        badge === 'Ofertă specială' ? 'bg-red-100 text-red-800' :
-                                                                                            'bg-gray-100 text-gray-800'
-                                                                                }`}
-                                                                        >
-                                                                            {badge}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-
-                                                                <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                                                                    <span className="flex items-center gap-1">
-                                                                        <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                        </svg>
-                                                                        <span className="font-medium">{nutritionist.rating}</span>
-                                                                        <span>({nutritionist.reviewCount} recenzii)</span>
-                                                                    </span>
-                                                                    <span>{nutritionist.experience}</span>
-                                                                    <span className="text-green-600 font-medium">{nutritionist.responseTime}</span>
-                                                                </div>
-
-                                                                <p className="text-gray-600 mb-3">{nutritionist.description}</p>
-
-                                                                <div className="flex flex-wrap gap-2 mb-3">
-                                                                    {nutritionist.specializations.map(spec => (
-                                                                        <span key={spec} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                                                            {spec}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-
-                                                                <div className="flex items-center gap-4 text-sm">
-                                                                    <span className="flex items-center gap-1 text-gray-600">
-                                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        </svg>
-                                                                        {nutritionist.successStories} povești de succes
-                                                                    </span>
-                                                                    <span className="flex items-center gap-1 text-gray-600">
-                                                                        {nutritionist.consultationType.includes('online') && (
-                                                                            <>
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                                                </svg>
-                                                                                Online
-                                                                            </>
-                                                                        )}
-                                                                        {nutritionist.consultationType.includes('online') && nutritionist.consultationType.includes('in-person') && ' • '}
-                                                                        {nutritionist.consultationType.includes('in-person') && (
-                                                                            <>
-                                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                </svg>
-                                                                                În persoană
-                                                                            </>
-                                                                        )}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Price & Action */}
-                                                            <div className="flex md:flex-col items-center md:items-end gap-4">
-                                                                <div className="text-right">
-                                                                    <div className={`text-2xl font-bold ${nutritionist.price.includes('GRATUIT') ? 'text-green-600' : 'text-gray-800'}`}>
-                                                                        {nutritionist.price}
-                                                                    </div>
-                                                                    <div className="text-sm text-gray-500">per consultație</div>
-                                                                    <div className="text-sm text-green-600 font-medium mt-1">
-                                                                        {nutritionist.availability}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <Link href={`/nutritionists/${nutritionist.id}`}>
-                                                                        <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-all transform hover:scale-105 whitespace-nowrap">
-                                                                            Vezi profilul
-                                                                        </button>
-                                                                    </Link>
-                                                                    <button className="text-green-600 hover:text-green-700 text-sm">
-                                                                        Salvează
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Load More */}
-                            {filteredNutritionists.length > 0 && (
-                                <div className="text-center mt-8">
-                                    <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-3 rounded-full hover:bg-green-50 transition-all">
-                                        Vezi mai mulți nutriționiști
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Floating Help Button */}
-                <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all transform hover:scale-110">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </button>
-
-                {/* Success Notification - shown when coming from form */}
-                {savedFormData && (
-                    <div className="fixed top-20 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in">
-                        <svg className="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p className="font-medium">Căutare completă!</p>
-                            <p className="text-sm text-green-100">Am găsit nutriționiști perfecți pentru tine</p>
-                        </div>
-                        <button
-                            onClick={() => setSavedFormData(null)}
-                            className="ml-4 text-green-200 hover:text-white"
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            <style jsx>{`
-        @keyframes slide-in {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
-      `}</style>
-        </>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <svg
+            key={star}
+            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+        <span className="text-sm font-medium text-gray-700 ml-1">{rating}</span>
+      </div>
     )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-green-200 border-t-green-600 mx-auto mb-6"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl">🔍</span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">Căutăm nutriționiștii perfecți pentru tine</h3>
+          <p className="text-gray-600 max-w-md mx-auto">
+            Analizăm profilurile și găsim specialiștii care se potrivesc cel mai bine cu obiectivele tale
+          </p>
+          <div className="flex justify-center gap-2 mt-4">
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <button 
+            onClick={() => router.push('/nutritionists/find')}
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-2 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Modifică căutarea
+          </button>
+          <span className="text-2xl font-bold text-green-600">NutriConnect</span>
+          <button 
+            onClick={() => router.push('/')}
+            className="text-gray-500 text-sm hover:text-gray-700 transition-colors"
+          >
+            Acasă
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              {userPreferences?.name ? `Bună, ${userPreferences.name}! ` : ''}
+              Iată nutriționiștii tăi recomandați 🎯
+            </h1>
+            <p className="text-xl text-gray-600 mb-6">
+              Am găsit <span className="font-bold text-green-600">{filteredNutritionists.length} specialiști</span> potriviți pentru obiectivul tău
+            </p>
+            
+            {userPreferences?.goal && (
+              <div className="flex flex-wrap justify-center gap-3 mb-6">
+                <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium flex items-center gap-2">
+                  {getSpecializationEmoji(userPreferences.goal)} 
+                  Obiectiv: {getSpecializationLabel(userPreferences.goal)}
+                </span>
+                {userPreferences.budget && (
+                  <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-medium flex items-center gap-2">
+                    💰 Buget: {userPreferences.budget} RON
+                  </span>
+                )}
+                {userPreferences.consultationType && (
+                  <span className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium flex items-center gap-2">
+                    {userPreferences.consultationType === 'online' ? '💻' : userPreferences.consultationType === 'in-person' ? '🏢' : '🔄'} 
+                    {userPreferences.consultationType === 'online' ? 'Online' : userPreferences.consultationType === 'in-person' ? 'În persoană' : 'Hibrid'}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center justify-center gap-2 px-6 py-3 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-50 transition-all duration-200"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filtrează rezultatele
+              </button>
+              
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-6 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none bg-white"
+              >
+                <option value="relevance">🎯 Relevanță</option>
+                <option value="price-low">💰 Preț crescător</option>
+                <option value="rating">⭐ Rating</option>
+                <option value="experience">🏆 Experiență</option>
+                <option value="availability">⏰ Disponibilitate</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="bg-gray-50 rounded-2xl p-6 mb-8 transition-all duration-300">
+              <h3 className="font-bold text-gray-800 mb-4">Refinează căutarea</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">💰 Buget</label>
+                  <select
+                    value={selectedFilters.price}
+                    onChange={(e) => setSelectedFilters({...selectedFilters, price: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="all">Toate prețurile</option>
+                    <option value="0-150">0 - 150 RON</option>
+                    <option value="150-250">150 - 250 RON</option>
+                    <option value="250-400">250 - 400 RON</option>
+                    <option value="400+">400+ RON</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">🏆 Experiență</label>
+                  <select
+                    value={selectedFilters.experience}
+                    onChange={(e) => setSelectedFilters({...selectedFilters, experience: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="all">Orice experiență</option>
+                    <option value="beginner">Începător (1-3 ani)</option>
+                    <option value="intermediate">Intermediar (3-6 ani)</option>
+                    <option value="expert">Expert (6+ ani)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">📱 Tip consultație</label>
+                  <select
+                    value={selectedFilters.consultationType}
+                    onChange={(e) => setSelectedFilters({...selectedFilters, consultationType: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="all">Orice tip</option>
+                    <option value="online">💻 Online</option>
+                    <option value="in-person">🏢 În persoană</option>
+                    <option value="hybrid">🔄 Hibrid</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">⏰ Disponibilitate</label>
+                  <select
+                    value={selectedFilters.availability}
+                    onChange={(e) => setSelectedFilters({...selectedFilters, availability: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="all">Oricând</option>
+                    <option value="today">Astăzi</option>
+                    <option value="tomorrow">Mâine</option>
+                    <option value="week">Săptămâna aceasta</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Results List */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {filteredNutritionists.map((nutritionist, index) => (
+            <div 
+              key={nutritionist.id} 
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:transform hover:scale-[1.01]"
+            >
+              <div className="p-4 md:p-6">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+                  {/* Profile Section */}
+                  <div className="flex gap-4 lg:flex-shrink-0">
+                    <div className="relative">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl font-bold">
+                        {nutritionist.fullName.split(' ').map(n => n[0]).join('')}
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
+                        <div className="flex-1">
+                          <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-1">{nutritionist.fullName}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            {renderStars(nutritionist.rating!)}
+                            <span className="text-sm text-gray-500">({nutritionist.totalReviews} recenzii)</span>
+                          </div>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <div className="text-xl md:text-2xl font-bold text-green-600">
+                            {getLowestPrice(nutritionist.services)} RON
+                          </div>
+                          <div className="text-sm text-gray-500">de la</div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-gray-600 mb-3">
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                          </svg>
+                          <span className="whitespace-nowrap">{nutritionist.yearsExperience} ani exp.</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="truncate">{nutritionist.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="whitespace-nowrap">Disponibil {nutritionist.nextAvailable}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="flex-1 lg:pl-6 lg:border-l border-gray-100">
+                    {/* Specializations */}
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {nutritionist.specializations.slice(0, 3).map((spec) => (
+                          <span key={spec} className="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
+                            <span>{getSpecializationEmoji(spec)}</span>
+                            <span className="hidden sm:inline">{getSpecializationLabel(spec)}</span>
+                            <span className="sm:hidden">{getSpecializationLabel(spec).split(' ')[0]}</span>
+                          </span>
+                        ))}
+                        {nutritionist.specializations.length > 3 && (
+                          <span className="text-gray-500 text-sm px-2 py-1">+{nutritionist.specializations.length - 3} mai multe</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bio */}
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
+                      {nutritionist.bio}
+                    </p>
+
+                    {/* Services Preview */}
+                    {/* <div className="mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {nutritionist.services.slice(0, 2).map((service, serviceIndex) => (
+                          <div key={serviceIndex} className="bg-gray-50 rounded-lg p-3">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <span className="font-medium text-gray-800 text-sm">{service.name}</span>
+                                <div className="text-xs text-gray-500">{service.duration}</div>
+                              </div>
+                              <span className="font-bold text-green-600">{service.price} RON</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div> */}
+
+                    {/* Features */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {nutritionist.consultationTypes.includes('online') && (
+                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          💻 <span className="hidden sm:inline">Consultații </span>Online
+                        </span>
+                      )}
+                      {nutritionist.consultationTypes.includes('in-person') && (
+                        <span className="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          🏢 <span className="hidden sm:inline">Cabinet </span>Fizic
+                        </span>
+                      )}
+                      {nutritionist.languages.length > 1 && (
+                        <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          🌍 {nutritionist.languages.length} limbi
+                        </span>
+                      )}
+                      {nutritionist.certifications.length > 0 && (
+                        <span className="bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                          🏆 Certificat
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Section */}
+                  <div className="lg:flex-shrink-0 lg:w-44">
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => handleBookConsultation(nutritionist)}
+                        className="w-full bg-green-600 text-white px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm lg:text-base"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
+                        </svg>
+                        <span className="hidden sm:inline">Programează</span>
+                        <span className="sm:hidden">Program</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleViewProfile(nutritionist)}
+                        className="w-full border-2 border-green-600 text-green-600 px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium text-sm lg:text-base"
+                      >
+                        <span className="hidden sm:inline">Vezi profilul</span>
+                        <span className="sm:hidden">Profil</span>
+                      </button>
+
+                      <div className="text-center">
+                        <button className="text-gray-500 hover:text-red-500 text-sm flex items-center justify-center gap-1 mx-auto transition-colors p-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                          <span className="hidden lg:inline">Salvează</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Compatibility Score */}
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-green-600 font-bold text-lg">
+                          {Math.floor(Math.random() * 20) + 85}%
+                        </div>
+                        <div className="text-green-700 text-xs font-medium">Compatibilitate</div>
+                      </div>
+                      <div className="w-full bg-green-200 rounded-full h-1.5 mt-2">
+                        <div 
+                          className="bg-green-600 h-1.5 rounded-full transition-all duration-1000" 
+                          style={{ width: `${Math.floor(Math.random() * 20) + 85}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <div className="text-base md:text-lg font-bold text-gray-800">{Math.floor(Math.random() * 200) + 50}</div>
+                      <div className="text-xs text-gray-500">Clienți ajutați</div>
+                    </div>
+                    <div>
+                      <div className="text-base md:text-lg font-bold text-gray-800">{Math.floor(Math.random() * 10) + 15} zile</div>
+                      <div className="text-xs text-gray-500">Timp mediu rezultate</div>
+                    </div>
+                    <div>
+                      <div className="text-base md:text-lg font-bold text-gray-800">{Math.floor(Math.random() * 5) + 95}%</div>
+                      <div className="text-xs text-gray-500">Rate succes</div>
+                    </div>
+                    <div>
+                      <div className="text-base md:text-lg font-bold text-gray-800">&lt; 2h</div>
+                      <div className="text-xs text-gray-500">Timp răspuns</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        <div className="text-center mt-12">
+          <button className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2 mx-auto">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Încarcă mai mulți nutriționiști
+          </button>
+        </div>
+      </div>
+
+      {/* Call to Action Section */}
+      <div className="bg-white border-t mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <div className="text-center mb-8">
+            <h3 className="text-3xl font-bold text-gray-800 mb-4">Nu ai găsit ce căutai? 🤔</h3>
+            <p className="text-xl text-gray-600 mb-8">Îți putem trimite recomandări personalizate pe email sau îți putem ajuta să găsești exact ce ai nevoie</p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <button className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Trimite-mi recomandări
+              </button>
+              
+              <button 
+                onClick={() => router.push('/nutritionists/find')}
+                className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Refinează căutarea
+              </button>
+            </div>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center border-t pt-8">
+            <div>
+              <div className="text-3xl font-bold text-green-600 mb-2">100%</div>
+              <div className="text-sm font-medium text-gray-800">Verificați</div>
+              <div className="text-xs text-gray-500">Toți nutriționiștii sunt licențiați CDR</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-green-600 mb-2">500+</div>
+              <div className="text-sm font-medium text-gray-800">Specialiști</div>
+              <div className="text-xs text-gray-500">Cea mai mare rețea din România</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-green-600 mb-2">4.9★</div>
+              <div className="text-sm font-medium text-gray-800">Rating mediu</div>
+              <div className="text-xs text-gray-500">Peste 15,000 de recenzii reale</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-green-600 mb-2">24h</div>
+              <div className="text-sm font-medium text-gray-800">Conectare rapidă</div>
+              <div className="text-xs text-gray-500">Contact în maximum 24 de ore</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Action Button pentru mobile */}
+      <div className="fixed bottom-6 right-6 lg:hidden">
+        <button 
+          onClick={() => setShowFilters(!showFilters)}
+          className="bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
 }

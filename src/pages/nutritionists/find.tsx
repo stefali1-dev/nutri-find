@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../../lib/supabaseClient'
 
-
 interface FormData {
   goal: string
-  specificGoals: string[]
   healthConditions: string[]
   dietType: string
   budget: string
@@ -25,7 +23,6 @@ export default function FindNutritionist() {
   const [isAnimating, setIsAnimating] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     goal: '',
-    specificGoals: [],
     healthConditions: [],
     dietType: '',
     budget: '',
@@ -39,7 +36,7 @@ export default function FindNutritionist() {
     name: ''
   })
 
-  const totalSteps = 8
+  const totalSteps = 7 // Redus de la 8 la 7 după eliminarea pasului 2
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -59,6 +56,7 @@ export default function FindNutritionist() {
       setTimeout(() => {
         setCurrentStep(prev => Math.min(prev + 1, totalSteps))
         setIsAnimating(false)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 300)
     }
   }
@@ -68,6 +66,7 @@ export default function FindNutritionist() {
     setTimeout(() => {
       setCurrentStep(prev => Math.max(prev - 1, 1))
       setIsAnimating(false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 300)
   }
 
@@ -75,85 +74,50 @@ export default function FindNutritionist() {
     switch (currentStep) {
       case 1:
         return formData.goal !== ''
-      case 2:
-        return formData.specificGoals.length > 0
-      case 5:
+      case 4:
         return formData.budget !== ''
-      case 6:
+      case 5:
         return formData.consultationType !== ''
-      case 8:
+      case 7:
         return formData.email !== '' && formData.name !== ''
       default:
         return true
     }
   }
 
-  const handleSubmit = async () => {
-    try {
-      // Show loading state
-      setIsAnimating(true)
-      
-      // Prepare data for Supabase
-      const dataToSave = {
-        email: formData.email,
-        name: formData.name,
-        goal: formData.goal,
-        specific_goals: formData.specificGoals,
-        health_conditions: formData.healthConditions,
-        diet_type: formData.dietType || null,
-        budget: formData.budget,
-        consultation_type: formData.consultationType,
-        availability: formData.availability,
-        experience_preference: formData.experience || null,
-        location: formData.location || null,
-        age_range: formData.age || null,
-        gender: formData.gender || null
-      }
+const handleSubmit = async () => {
+  try {
+    setIsAnimating(true)
 
-      // Check if email already exists and update or insert
-      const { data: existingUser } = await supabase
-        .from('client_preferences')
-        .select('id')
-        .eq('email', formData.email)
-        .single()
-
-      let error
-      if (existingUser) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('client_preferences')
-          .update(dataToSave)
-          .eq('email', formData.email)
-        error = updateError
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
-          .from('client_preferences')
-          .insert([dataToSave])
-        error = insertError
-      }
-
-      if (error) {
-        console.error('Error saving preferences:', error)
-        alert('A apărut o eroare la salvarea preferințelor. Te rugăm să încerci din nou.')
-        setIsAnimating(false)
-        return
-      }
-
-      // Clear saved data from localStorage
-      localStorage.removeItem('nutriForm')
-      
-      // Save email in session storage for results page
-      sessionStorage.setItem('clientEmail', formData.email)
-      
-      // Redirect to results page
-      router.push('/nutritionists/results')
-    } catch (error) {
-      console.error('Unexpected error:', error)
-      alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
-      setIsAnimating(false)
+    const dataToSave = {
+      name: formData.name,
+      email: formData.email,
+      goal: formData.goal,
+      health_conditions: formData.healthConditions,
+      diet_type: formData.dietType || null,
+      budget: formData.budget,
+      consultation_type: formData.consultationType,
+      availability: formData.availability,
+      experience_preference: formData.experience || null,
+      location: formData.location || null,
+      age_range: formData.age || null,
+      gender: formData.gender || null
     }
+
+    console.log(dataToSave);
+
+    // Save in sessionStorage (serialize to JSON)
+    // Will be used later to fetch nutritionists
+    sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
+    router.push('/nutritionists/results')
+    
+  } catch (error) {
+    console.error('Unexpected error:', error)
+    alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
+    setIsAnimating(false)
   }
+}
+
 
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -245,85 +209,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 2: Specific Goals */}
+          {/* Step 2: Health Conditions (fostul Step 3) */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Excelent! Hai să fim mai specifici 🎪
-              </h2>
-              <p className="text-gray-600 mb-8">
-                Poți alege mai multe opțiuni care te reprezintă.
-              </p>
-              
-              <div className="space-y-3">
-                {(formData.goal === 'weight-loss' ? [
-                  '5-10 kg în 3 luni',
-                  '10-20 kg în 6 luni',
-                  'Peste 20 kg',
-                  'Menținere greutate',
-                  'Reducere grăsime abdominală'
-                ] : formData.goal === 'muscle-gain' ? [
-                  'Creștere masă musculară',
-                  'Definire musculară',
-                  'Creștere în forță',
-                  'Recuperare post-antrenament',
-                  'Nutriție pre-competiție'
-                ] : formData.goal === 'health-condition' ? [
-                  'Diabet',
-                  'Hipertensiune',
-                  'Colesterol crescut',
-                  'Probleme digestive',
-                  'Alergii alimentare',
-                  'Altă condiție'
-                ] : [
-                  'Energie crescută',
-                  'Îmbunătățire digestie',
-                  'Piele mai sănătoasă',
-                  'Somn mai bun',
-                  'Reducere stres'
-                ]).map((goal) => (
-                  <label
-                    key={goal}
-                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      formData.specificGoals.includes(goal)
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.specificGoals.includes(goal)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData('specificGoals', [...formData.specificGoals, goal])
-                        } else {
-                          updateFormData('specificGoals', formData.specificGoals.filter(g => g !== goal))
-                        }
-                      }}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-medium text-gray-800">{goal}</span>
-                      <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
-                        formData.specificGoals.includes(goal)
-                          ? 'bg-green-600 border-green-600'
-                          : 'border-gray-300'
-                      }`}>
-                        {formData.specificGoals.includes(goal) && (
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Health Conditions */}
-          {currentStep === 3 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Sănătatea ta este prioritatea noastră 🏥
@@ -396,8 +283,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 4: Diet Preferences */}
-          {currentStep === 4 && (
+          {/* Step 3: Diet Preferences (fostul Step 4) */}
+          {currentStep === 3 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Ai preferințe alimentare speciale? 🥗
@@ -413,7 +300,6 @@ export default function FindNutritionist() {
                   { value: 'vegan', label: 'Vegan', emoji: '🌱' },
                   { value: 'pescatarian', label: 'Pescatarian', emoji: '🐟' },
                   { value: 'keto', label: 'Keto', emoji: '🥑' },
-                  { value: 'mediterranean', label: 'Mediteraneană', emoji: '🫒' },
                   { value: 'other', label: 'Altă dietă', emoji: '✨' }
                 ].map((option) => (
                   <button
@@ -447,8 +333,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 5: Budget */}
-          {currentStep === 5 && (
+          {/* Step 4: Budget (fostul Step 5) */}
+          {currentStep === 4 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Care este bugetul tău lunar? 💰
@@ -492,8 +378,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 6: Consultation Type */}
-          {currentStep === 6 && (
+          {/* Step 5: Consultation Type (fostul Step 6) */}
+          {currentStep === 5 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Cum preferi să ai consultațiile? 💻
@@ -562,8 +448,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 7: Additional Info */}
-          {currentStep === 7 && (
+          {/* Step 6: Additional Info (fostul Step 7) */}
+          {currentStep === 6 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Câteva detalii despre tine 📝
@@ -654,8 +540,8 @@ export default function FindNutritionist() {
             </div>
           )}
 
-          {/* Step 8: Contact */}
-          {currentStep === 8 && (
+          {/* Step 7: Contact (fostul Step 8) */}
+          {currentStep === 7 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 Aproape gata! 🎉
