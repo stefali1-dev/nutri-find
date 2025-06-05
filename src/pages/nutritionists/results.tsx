@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../../lib/supabaseClient'
+import { NutritionistData } from '@/types/NutritionistData'
 
 interface FormData {
   goal: string
@@ -17,61 +18,11 @@ interface FormData {
   name: string
 }
 
-interface OnboardingData {
-  id?: string
-  email: string
-  fullName: string
-  phone: string
-  birthDate: string
-  gender: string
-  licenseNumber: string
-  yearsExperience: string
-  workType: string[]
-  specializations: string[]
-  education: {
-    degree: string
-    university: string
-    graduationYear: string
-  }[]
-  certifications: {
-    name: string
-    issuer: string
-    year: string
-  }[]
-  consultationTypes: string[]
-  services: {
-    name: string
-    duration: string
-    price: string
-    description: string
-  }[]
-  workDays: string[]
-  workHours: {
-    start: string
-    end: string
-  }
-  consultationDuration: string
-  bio: string
-  profilePhoto: string
-  languages: string[]
-  location: string
-  documents: {
-    diploma: File | null
-    license: File | null
-    insurance: File | null
-  }
-  termsAccepted: boolean
-  rating?: number
-  totalReviews?: number
-  nextAvailable?: string
-  isOnline?: boolean
-}
-
 export default function ResultsVertical() {
   const router = useRouter()
   const [userPreferences, setUserPreferences] = useState<FormData | null>(null)
-  const [nutritionists, setNutritionists] = useState<OnboardingData[]>([])
-  const [filteredNutritionists, setFilteredNutritionists] = useState<OnboardingData[]>([])
+  const [nutritionists, setNutritionists] = useState<NutritionistData[]>([])
+  const [filteredNutritionists, setFilteredNutritionists] = useState<NutritionistData[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('relevance')
   const [showFilters, setShowFilters] = useState(false)
@@ -83,7 +34,7 @@ export default function ResultsVertical() {
   })
 
   // Mock data extins cu informații pentru UX optimizat
-  const mockNutritionists: OnboardingData[] = [
+  const mockNutritionists: NutritionistData[] = [
     {
       id: '1',
       email: 'ana.popescu@email.com',
@@ -127,12 +78,11 @@ export default function ResultsVertical() {
       profilePhoto: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză'],
       location: 'București',
-      documents: { diploma: null, license: null, insurance: null },
+      documents: { diploma: null, certificate: null },
       termsAccepted: true,
       rating: 4.9,
       totalReviews: 156,
       nextAvailable: 'Mâine, 14:00',
-      isOnline: true
     },
     {
       id: '2',
@@ -173,12 +123,11 @@ export default function ResultsVertical() {
       profilePhoto: '/api/placeholder/80/80',
       languages: ['Română'],
       location: 'Cluj-Napoca',
-      documents: { diploma: null, license: null, insurance: null },
+      documents: { diploma: null, certificate: null },
       termsAccepted: true,
       rating: 4.7,
       totalReviews: 89,
       nextAvailable: 'Vineri, 16:30',
-      isOnline: true
     },
     {
       id: '3',
@@ -223,12 +172,11 @@ export default function ResultsVertical() {
       profilePhoto: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză', 'Germană'],
       location: 'Timișoara',
-      documents: { diploma: null, license: null, insurance: null },
+      documents: { diploma: null, certificate: null },
       termsAccepted: true,
       rating: 4.8,
       totalReviews: 124,
       nextAvailable: 'Marți, 10:00',
-      isOnline: false
     },
     {
       id: '4',
@@ -263,12 +211,11 @@ export default function ResultsVertical() {
       profilePhoto: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză'],
       location: 'București',
-      documents: { diploma: null, license: null, insurance: null },
+      documents: { diploma: null, certificate: null },
       termsAccepted: true,
       rating: 4.6,
       totalReviews: 42,
       nextAvailable: 'Astăzi, 18:00',
-      isOnline: true
     }
   ]
 
@@ -285,13 +232,13 @@ export default function ResultsVertical() {
     }, 1200)
   }, [])
 
-  const handleBookConsultation = (nutritionist: OnboardingData) => {
+  const handleBookConsultation = (nutritionist: NutritionistData) => {
     // Salvăm ID-ul nutriționistului pentru pagina de booking
     sessionStorage.setItem('selectedNutritionist', nutritionist.id!)
     router.push(`/nutritionists/${nutritionist.id}/booking`)
   }
 
-  const handleViewProfile = (nutritionist: OnboardingData) => {
+  const handleViewProfile = (nutritionist: NutritionistData) => {
     router.push(`/nutritionists/${nutritionist.id}`)
   }
 
