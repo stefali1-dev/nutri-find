@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '../../../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 
 interface FormData {
   goal: string
@@ -110,7 +110,7 @@ const handleSubmit = async () => {
     // Will be used later to fetch nutritionists
     sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
     router.push('/nutritionists/results')
-    
+
   } catch (error) {
     console.error('Unexpected error:', error)
     alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')

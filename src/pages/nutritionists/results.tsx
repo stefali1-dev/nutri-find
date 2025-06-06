@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '../../../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 import { NutritionistData } from '@/types/NutritionistData'
 
 interface FormData {
@@ -615,7 +615,7 @@ export default function ResultsVertical() {
                     </div>
 
                     {/* Compatibility Score */}
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                    {/* <div className="mt-4 p-3 bg-green-50 rounded-lg">
                       <div className="text-center">
                         <div className="text-green-600 font-bold text-lg">
                           {Math.floor(Math.random() * 20) + 85}%
@@ -628,7 +628,7 @@ export default function ResultsVertical() {
                           style={{ width: `${Math.floor(Math.random() * 20) + 85}%` }}
                         ></div>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 

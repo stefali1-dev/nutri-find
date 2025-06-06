@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { supabase } from '../../../lib/supabaseClient'
+import { supabase } from '../../lib/supabaseClient'
 
 // Tipuri de date simplificate
 interface FormData {
@@ -267,7 +267,7 @@ const handleSubmit = async () => {
                  sessionStorage.setItem('nutritionistEmail', nutritionistProfile.email);
                  // Poate vrei să salvezi și user_id din authData.user.id dacă e util în frontend
                  // sessionStorage.setItem('userId', authData.user.id);
-                 router.push('/nutritionists/dashboard');
+                 router.push(`/nutritionists/${nutritionistProfile.id}/edit`);
             } else {
                 // Ceva neașteptat, profilul nu a fost returnat
                 console.error('Nutritionist profile data was null after insert.');

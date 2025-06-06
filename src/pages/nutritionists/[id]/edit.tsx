@@ -2,63 +2,188 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { NutritionistData } from '@/types/NutritionistData'
+import { supabase } from '../../../lib/supabaseClient'
+import type { User } from '@supabase/supabase-js'
+
+interface NutritionistData {
+  id?: string
+  user_id?: string
+  email: string
+  full_name: string
+  phone: string
+  birth_date: string
+  gender: string
+  license_number: string
+  years_experience: string
+  work_types: string[]
+  specializations: string[]
+  education: {
+    degree: string
+    university: string
+    graduation_year: string
+  }[]
+  certifications: {
+    name: string
+    issuer: string
+    year: string
+  }[]
+  consultation_types: string[]
+  services: {
+    name: string
+    duration: string
+    price: string
+    description: string
+  }[]
+  work_days: string[]
+  work_hours: {
+    start: string
+    end: string
+  }
+  consultation_duration: number
+  bio: string
+  profile_photo_url: string
+  languages: string[]
+  location: string
+  documents_uploaded: {
+    diploma: boolean
+    certificate: boolean
+  }
+  verification_status: string
+  average_rating?: number
+  total_consultations?: number
+}
 
 export default function EditNutritionistProfile() {
   const router = useRouter()
+  const { id } = router.query
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [authorized, setAuthorized] = useState(false)
   const [activeTab, setActiveTab] = useState<'personal' | 'professional' | 'services' | 'availability' | 'documents'>('personal')
   const [isLoading, setIsLoading] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [nutritionistData, setNutritionistData] = useState<NutritionistData>({
-    id: '1',
-    email: 'maria.popescu@email.com',
-    fullName: 'Dr. Maria Popescu',
-    phone: '0721234567',
-    birthDate: '1985-05-15',
-    gender: 'Feminin',
-    licenseNumber: 'CDR12345',
-    yearsExperience: '8',
-    workType: ['online', 'in-person'],
-    specializations: ['weight-loss', 'sports-nutrition'],
-    education: [{
-      degree: 'Licență în Nutriție și Dietetică',
-      university: 'Universitatea de Medicină București',
-      graduationYear: '2015'
-    }],
-    certifications: [{
-      name: 'Certificat Nutriție Sportivă',
-      issuer: 'ACSM',
-      year: '2020'
-    }],
-    consultationTypes: ['online', 'in-person'],
-    services: [
-      {
-        name: 'Consultație inițială',
-        duration: '60',
-        price: '250',
-        description: 'Evaluare completă și plan personalizat'
-      },
-      {
-        name: 'Follow-up',
-        duration: '30',
-        price: '150',
-        description: 'Monitorizare și ajustări'
-      }
-    ],
-    workDays: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
-    workHours: { start: '09:00', end: '17:00' },
-    consultationDuration: '60',
-    bio: 'Sunt nutriționist cu 8 ani de experiență, specializată în pierderea în greutate și nutriția sportivă.',
-    profilePhoto: '',
-    languages: ['Română', 'Engleză'],
-    location: 'București',
-    documents: { diploma: null, certificate: null },
-    termsAccepted: true,
-    rating: 4.9,
-    totalReviews: 156
+    email: '',
+    full_name: '',
+    phone: '',
+    birth_date: '',
+    gender: '',
+    license_number: '',
+    years_experience: '',
+    work_types: [],
+    specializations: [],
+    education: [],
+    certifications: [],
+    consultation_types: [],
+    services: [],
+    work_days: [],
+    work_hours: { start: '09:00', end: '17:00' },
+    consultation_duration: 60,
+    bio: '',
+    profile_photo_url: '',
+    languages: ['Română'],
+    location: '',
+    documents_uploaded: { diploma: false, certificate: false },
+    verification_status: 'pending'
   })
+
+  // Check authentication and authorization
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Wait for router to be ready
+      if (!router.isReady) return
+
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/auth/login')
+        return
+      }
+
+      setUser(user)
+
+      // Check if user is authorized to edit this profile
+      if (id && id !== 'new') {
+        const { data: nutritionist, error } = await supabase
+          .from('nutritionists')
+          .select('user_id, id')
+          .eq('id', id)
+          .single()
+
+        if (error || !nutritionist || nutritionist.user_id !== user.id) {
+          router.push('/')
+          return
+        }
+      }
+
+      setAuthorized(true)
+      await loadNutritionistData(user.id)
+    }
+
+    checkAuth()
+  }, [id, router.isReady]) // Added router.isReady dependency
+
+  const loadNutritionistData = async (userId: string) => {
+    try {
+      setLoading(true)
+      
+      if (id === 'new') {
+        // Creating new profile - use defaults with user info
+        const { data: authUser } = await supabase.auth.getUser()
+        if (authUser.user?.email) {
+          setNutritionistData(prev => ({
+            ...prev,
+            email: authUser.user.email!,
+            user_id: userId
+          }))
+        }
+      } else if (id && id !== 'undefined') {
+        // Loading existing profile - only if id is valid
+        console.log('Loading data for ID:', id)
+        const { data, error } = await supabase
+          .from('nutritionists')
+          .select('*')
+          .eq('id', id)
+          .single()
+
+        console.log('Loaded nutritionist data:', data)
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            setError('Profilul nu a fost găsit.')
+          } else {
+            setError('Eroare la încărcarea datelor.')
+          }
+          console.error('Error loading nutritionist data:', error)
+          return
+        }
+
+        if (data) {
+          setNutritionistData({
+            ...data,
+            birth_date: data.birth_date?.split('T')[0] || '',
+            education: data.education || [],
+            certifications: data.certifications || [],
+            services: data.services || [],
+            work_types: data.work_types || [],
+            specializations: data.specializations || [],
+            consultation_types: data.consultation_types || [],
+            work_days: data.work_days || [],
+            languages: data.languages || ['Română'],
+            documents_uploaded: data.documents_uploaded || { diploma: false, certificate: false }
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error in loadNutritionistData:', error)
+      setError('Eroare la încărcarea datelor.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const updateData = (field: keyof NutritionistData, value: any) => {
     setNutritionistData(prev => ({ ...prev, [field]: value }))
@@ -68,7 +193,7 @@ export default function EditNutritionistProfile() {
   const addEducation = () => {
     updateData('education', [
       ...nutritionistData.education,
-      { degree: '', university: '', graduationYear: '' }
+      { degree: '', university: '', graduation_year: '' }
     ])
   }
 
@@ -116,35 +241,171 @@ export default function EditNutritionistProfile() {
     updateData('services', nutritionistData.services.filter((_, i) => i !== index))
   }
 
+  const validateData = () => {
+    const requiredFields = {
+      full_name: 'Numele complet',
+      email: 'Email',
+      phone: 'Telefon',
+      birth_date: 'Data nașterii',
+      gender: 'Gen',
+      license_number: 'Numărul de licență',
+      years_experience: 'Ani de experiență',
+      location: 'Locația',
+      bio: 'Descrierea profilului'
+    }
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!nutritionistData[field as keyof NutritionistData]) {
+        setError(`${label} este obligatoriu.`)
+        return false
+      }
+    }
+
+    if (nutritionistData.specializations.length === 0) {
+      setError('Selectează cel puțin o specializare.')
+      return false
+    }
+
+    if (nutritionistData.education.length === 0) {
+      setError('Adaugă cel puțin o educație.')
+      return false
+    }
+
+    if (nutritionistData.consultation_types.length === 0) {
+      setError('Selectează cel puțin un tip de consultație.')
+      return false
+    }
+
+    if (nutritionistData.services.length === 0) {
+      setError('Adaugă cel puțin un serviciu.')
+      return false
+    }
+
+    if (nutritionistData.work_days.length === 0) {
+      setError('Selectează cel puțin o zi de lucru.')
+      return false
+    }
+
+    return true
+  }
+
   const handleSave = async () => {
+    if (!validateData()) {
+      return
+    }
+
     setIsLoading(true)
+    setError(null)
+
     try {
-      // Aici ar fi logica de salvare în Supabase
-      console.log('Salvare date:', nutritionistData)
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulare request
+      const dataToSave = {
+        ...nutritionistData,
+        user_id: user?.id,
+        consultation_duration: parseInt(nutritionistData.consultation_duration.toString()),
+        updated_at: new Date().toISOString()
+      }
+
+      if (id === 'new') {
+        // Create new profile
+        const { data, error } = await supabase
+          .from('nutritionists')
+          .insert([dataToSave])
+          .select()
+          .single()
+
+        if (error) throw error
+
+        // Redirect to edit page with new ID
+        router.push(`/nutritionists/${data.id}/edit`)
+      } else {
+        // Update existing profile
+        const { error } = await supabase
+          .from('nutritionists')
+          .update(dataToSave)
+          .eq('id', id)
+
+        if (error) throw error
+      }
+
       setHasUnsavedChanges(false)
       setShowSaveConfirm(true)
       setTimeout(() => setShowSaveConfirm(false), 3000)
-    } catch (error) {
-      console.error('Eroare la salvare:', error)
+    } catch (error: any) {
+      console.error('Error saving nutritionist data:', error)
+      setError(error.message || 'A apărut o eroare la salvare.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleFileUpload = (field: 'diploma' | 'certificate', file: File) => {
-    updateData('documents', {
-      ...nutritionistData.documents,
-      [field]: file
-    })
+  const handleFileUpload = async (field: 'diploma' | 'certificate', file: File | null) => {
+    if (!file) {
+      // Remove file logic
+      updateData('documents_uploaded', {
+        ...nutritionistData.documents_uploaded,
+        [field]: false
+      })
+      return
+    }
+
+    try {
+      // Upload file to Supabase Storage
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user?.id}/${field}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('nutritionist-documents')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Update documents status
+      updateData('documents_uploaded', {
+        ...nutritionistData.documents_uploaded,
+        [field]: true
+      })
+
+      // Save document reference if needed
+      if (nutritionistData.id) {
+        await supabase
+          .from('nutritionist_documents')
+          .upsert({
+            nutritionist_id: nutritionistData.id,
+            document_type: field,
+            file_url: fileName,
+            file_name: file.name
+          })
+      }
+    } catch (error: any) {
+      console.error('Error uploading file:', error)
+      setError(`Eroare la încărcarea fișierului: ${error.message}`)
+    }
   }
 
-  const documentsValid = nutritionistData.documents.diploma && nutritionistData.documents.certificate
+  const addLanguage = (language: string) => {
+    if (language.trim() && !nutritionistData.languages.includes(language.trim())) {
+      updateData('languages', [...nutritionistData.languages, language.trim()])
+    }
+  }
+
+  // Show loading while checking authentication
+  if (loading || !authorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-xl font-medium text-gray-700">Se încarcă profilul...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const documentsValid = nutritionistData.documents_uploaded.diploma && nutritionistData.documents_uploaded.certificate
 
   return (
     <>
       <Head>
-        <title>Editare Profil - {nutritionistData.fullName} | NutriConnect</title>
+        <title>{id === 'new' ? 'Profil nou' : 'Editare profil'} - {nutritionistData.full_name || 'Nutriționist'} | NutriConnect</title>
         <meta name="description" content="Editează profilul tău de nutriționist" />
       </Head>
 
@@ -154,18 +415,20 @@ export default function EditNutritionistProfile() {
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link href="/dashboard">
+                <Link href="/">
                   <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
                 </Link>
                 <span className="text-gray-400">/</span>
-                <span className="text-gray-600">Editare profil</span>
+                <span className="text-gray-600">{id === 'new' ? 'Profil nou' : 'Editare profil'}</span>
               </div>
               <div className="flex items-center gap-4">
-                <Link href="/nutritionist/profile">
-                  <button className="text-gray-600 hover:text-green-600 transition-colors">
-                    Previzualizare profil
-                  </button>
-                </Link>
+                {nutritionistData.id && (
+                  <Link href={`/nutritionists/${nutritionistData.id}`}>
+                    <button className="text-gray-600 hover:text-green-600 transition-colors">
+                      Previzualizare profil
+                    </button>
+                  </Link>
+                )}
                 {hasUnsavedChanges && (
                   <span className="text-orange-600 text-sm">Modificări nesalvate</span>
                 )}
@@ -173,6 +436,29 @@ export default function EditNutritionistProfile() {
             </div>
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div>
+                <h3 className="font-semibold text-red-800">Eroare</h3>
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="ml-auto text-red-600 hover:text-red-800"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Success Message */}
         {showSaveConfirm && (
@@ -190,7 +476,7 @@ export default function EditNutritionistProfile() {
             <div className="flex flex-col md:flex-row gap-6 items-start">
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-                  {nutritionistData.fullName.split(' ').map(n => n[0]).join('')}
+                  {nutritionistData.full_name ? nutritionistData.full_name.split(' ').map(n => n[0]).join('') : 'NN'}
                 </div>
                 <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,10 +486,13 @@ export default function EditNutritionistProfile() {
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                  Editare profil - {nutritionistData.fullName}
+                  {id === 'new' ? 'Creează profil nou' : `Editare profil - ${nutritionistData.full_name || 'Nutriționist'}`}
                 </h1>
                 <p className="text-gray-600 mb-4">
-                  Menține-ți profilul actualizat pentru a atrage mai mulți clienți și a oferi informații corecte.
+                  {id === 'new' 
+                    ? 'Completează informațiile pentru a-ți crea profilul de nutriționist pe platformă.'
+                    : 'Menține-ți profilul actualizat pentru a atrage mai mulți clienți și a oferi informații corecte.'
+                  }
                 </p>
                 
                 {!documentsValid && (
@@ -225,12 +514,12 @@ export default function EditNutritionistProfile() {
                     <div className={`w-2 h-2 rounded-full ${documentsValid ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                     <span>Status profil: {documentsValid ? 'Activ' : 'În așteptare documente'}</span>
                   </div>
-                  {nutritionistData.rating && (
+                  {(nutritionistData.average_rating != 0 ? nutritionistData.average_rating : '') && (
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                      <span>{nutritionistData.rating} ({nutritionistData.totalReviews} recenzii)</span>
+                      <span>{nutritionistData.average_rating} ({nutritionistData.total_consultations} consultații)</span>
                     </div>
                   )}
                 </div>
@@ -284,8 +573,8 @@ export default function EditNutritionistProfile() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Nume complet *</label>
                     <input
                       type="text"
-                      value={nutritionistData.fullName}
-                      onChange={(e) => updateData('fullName', e.target.value)}
+                      value={nutritionistData.full_name}
+                      onChange={(e) => updateData('full_name', e.target.value)}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                       placeholder="ex: Dr. Maria Popescu"
                     />
@@ -317,8 +606,8 @@ export default function EditNutritionistProfile() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Data nașterii *</label>
                     <input
                       type="date"
-                      value={nutritionistData.birthDate}
-                      onChange={(e) => updateData('birthDate', e.target.value)}
+                      value={nutritionistData.birth_date}
+                      onChange={(e) => updateData('birth_date', e.target.value)}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                     />
                   </div>
@@ -370,13 +659,22 @@ export default function EditNutritionistProfile() {
                       placeholder="Adaugă limbă"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                          updateData('languages', [...nutritionistData.languages, e.currentTarget.value.trim()])
+                          addLanguage(e.currentTarget.value.trim())
                           e.currentTarget.value = ''
                         }
                       }}
                       className="flex-1 p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                     />
-                    <button className="px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors">
+                    <button 
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement
+                        if (input.value.trim()) {
+                          addLanguage(input.value.trim())
+                          input.value = ''
+                        }
+                      }}
+                      className="px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
+                    >
                       Adaugă
                     </button>
                   </div>
@@ -406,8 +704,8 @@ export default function EditNutritionistProfile() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Numărul de licență CDR *</label>
                     <input
                       type="text"
-                      value={nutritionistData.licenseNumber}
-                      onChange={(e) => updateData('licenseNumber', e.target.value)}
+                      value={nutritionistData.license_number}
+                      onChange={(e) => updateData('license_number', e.target.value)}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                       placeholder="ex: CDR12345"
                     />
@@ -416,8 +714,8 @@ export default function EditNutritionistProfile() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Ani de experiență *</label>
                     <select
-                      value={nutritionistData.yearsExperience}
-                      onChange={(e) => updateData('yearsExperience', e.target.value)}
+                      value={nutritionistData.years_experience}
+                      onChange={(e) => updateData('years_experience', e.target.value)}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                     >
                       <option value="">Selectează...</option>
@@ -508,8 +806,8 @@ export default function EditNutritionistProfile() {
                           />
                           <input
                             type="text"
-                            value={edu.graduationYear}
-                            onChange={(e) => updateEducation(index, 'graduationYear', e.target.value)}
+                            value={edu.graduation_year}
+                            onChange={(e) => updateEducation(index, 'graduation_year', e.target.value)}
                             placeholder="Anul absolviri"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
@@ -601,22 +899,22 @@ export default function EditNutritionistProfile() {
                       <label key={type.value} className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
                         <input
                           type="checkbox"
-                          checked={nutritionistData.consultationTypes.includes(type.value)}
+                          checked={nutritionistData.consultation_types.includes(type.value)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              updateData('consultationTypes', [...nutritionistData.consultationTypes, type.value])
+                              updateData('consultation_types', [...nutritionistData.consultation_types, type.value])
                             } else {
-                              updateData('consultationTypes', nutritionistData.consultationTypes.filter(t => t !== type.value))
+                              updateData('consultation_types', nutritionistData.consultation_types.filter(t => t !== type.value))
                             }
                           }}
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          nutritionistData.consultationTypes.includes(type.value)
+                          nutritionistData.consultation_types.includes(type.value)
                             ? 'bg-green-600 border-green-600'
                             : 'border-gray-300'
                         }`}>
-                          {nutritionistData.consultationTypes.includes(type.value) && (
+                          {nutritionistData.consultation_types.includes(type.value) && (
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
@@ -733,22 +1031,22 @@ export default function EditNutritionistProfile() {
                         <label key={day} className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
                           <input
                             type="checkbox"
-                            checked={nutritionistData.workDays.includes(day)}
+                            checked={nutritionistData.work_days.includes(day)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                updateData('workDays', [...nutritionistData.workDays, day])
+                                updateData('work_days', [...nutritionistData.work_days, day])
                               } else {
-                                updateData('workDays', nutritionistData.workDays.filter(d => d !== day))
+                                updateData('work_days', nutritionistData.work_days.filter(d => d !== day))
                               }
                             }}
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                            nutritionistData.workDays.includes(day)
+                            nutritionistData.work_days.includes(day)
                               ? 'bg-green-600 border-green-600'
                               : 'border-gray-300'
                           }`}>
-                            {nutritionistData.workDays.includes(day) && (
+                            {nutritionistData.work_days.includes(day) && (
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                               </svg>
@@ -767,8 +1065,8 @@ export default function EditNutritionistProfile() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Ora de început</label>
                         <input
                           type="time"
-                          value={nutritionistData.workHours.start}
-                          onChange={(e) => updateData('workHours', {...nutritionistData.workHours, start: e.target.value})}
+                          value={nutritionistData.work_hours.start}
+                          onChange={(e) => updateData('work_hours', {...nutritionistData.work_hours, start: e.target.value})}
                           className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                         />
                       </div>
@@ -776,22 +1074,22 @@ export default function EditNutritionistProfile() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Ora de sfârșit</label>
                         <input
                           type="time"
-                          value={nutritionistData.workHours.end}
-                          onChange={(e) => updateData('workHours', {...nutritionistData.workHours, end: e.target.value})}
+                          value={nutritionistData.work_hours.end}
+                          onChange={(e) => updateData('work_hours', {...nutritionistData.work_hours, end: e.target.value})}
                           className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Durata standard consultație</label>
                         <select
-                          value={nutritionistData.consultationDuration}
-                          onChange={(e) => updateData('consultationDuration', e.target.value)}
+                          value={nutritionistData.consultation_duration}
+                          onChange={(e) => updateData('consultation_duration', parseInt(e.target.value))}
                           className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                         >
-                          <option value="30">30 minute</option>
-                          <option value="45">45 minute</option>
-                          <option value="60">60 minute</option>
-                          <option value="90">90 minute</option>
+                          <option value={30}>30 minute</option>
+                          <option value={45}>45 minute</option>
+                          <option value={60}>60 minute</option>
+                          <option value={90}>90 minute</option>
                         </select>
                       </div>
                     </div>
@@ -838,19 +1136,19 @@ export default function EditNutritionistProfile() {
                           Documentul trebuie să fie lizibil și să conțină toate informațiile relevante.
                         </p>
                         
-                        {nutritionistData.documents.diploma ? (
+                        {nutritionistData.documents_uploaded.diploma ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               <div>
-                                <p className="font-medium text-green-800">{nutritionistData.documents.diploma.name}</p>
-                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
+                                <p className="font-medium text-green-800">Diplomă încărcată</p>
+                                <p className="text-sm text-green-600">Document verificat cu succes</p>
                               </div>
                             </div>
                             <button
-                              onClick={() => handleFileUpload('diploma', null as any)}
+                              onClick={() => handleFileUpload('diploma', null)}
                               className="text-red-600 hover:text-red-700"
                             >
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -901,19 +1199,19 @@ export default function EditNutritionistProfile() {
                           că ești autorizat să practici ca nutriționist în România.
                         </p>
                         
-                        {nutritionistData.documents.certificate ? (
+                        {nutritionistData.documents_uploaded.certificate ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               <div>
-                                <p className="font-medium text-green-800">{nutritionistData.documents.certificate.name}</p>
-                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
+                                <p className="font-medium text-green-800">Certificat CDR încărcat</p>
+                                <p className="text-sm text-green-600">Document verificat cu succes</p>
                               </div>
                             </div>
                             <button
-                              onClick={() => handleFileUpload('certificate', null as any)}
+                              onClick={() => handleFileUpload('certificate', null)}
                               className="text-red-600 hover:text-red-700"
                             >
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -982,7 +1280,7 @@ export default function EditNutritionistProfile() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Salvează modificările
+                  {id === 'new' ? 'Creează profil' : 'Salvează modificările'}
                 </>
               )}
             </button>

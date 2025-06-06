@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import Layout from '@/layouts/DashboardLayout'
 
 interface Appointment {
   id: string
@@ -23,18 +24,9 @@ interface MetricCard {
   color: string
 }
 
-interface Activity {
-  id: string
-  type: 'booking' | 'review' | 'message' | 'payment'
-  description: string
-  time: string
-  isNew: boolean
-}
-
 export default function NutritionistDashboard() {
   const router = useRouter()
   const [selectedPeriod, setSelectedPeriod] = useState('week')
-  const [showNotifications, setShowNotifications] = useState(false)
   const [currentDate] = useState(new Date())
 
   // Mock data
@@ -114,37 +106,6 @@ export default function NutritionistDashboard() {
     }
   ]
 
-  const recentActivities: Activity[] = [
-    {
-      id: '1',
-      type: 'booking',
-      description: 'Programare nouă de la Alexandru Popescu pentru mâine',
-      time: 'Acum 10 minute',
-      isNew: true
-    },
-    {
-      id: '2',
-      type: 'review',
-      description: 'Recenzie nouă 5★ de la Maria Georgescu',
-      time: 'Acum 2 ore',
-      isNew: true
-    },
-    {
-      id: '3',
-      type: 'message',
-      description: 'Mesaj nou de la Elena Radu',
-      time: 'Acum 3 ore',
-      isNew: false
-    },
-    {
-      id: '4',
-      type: 'payment',
-      description: 'Plată primită: 250 RON de la Ana Ionescu',
-      time: 'Ieri',
-      isNew: false
-    }
-  ]
-
   const chartData = {
     labels: ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum'],
     consultations: [8, 12, 10, 14, 16, 9, 6],
@@ -165,75 +126,14 @@ export default function NutritionistDashboard() {
     return 'Bună seara'
   }
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'booking': return '📅'
-      case 'review': return '⭐'
-      case 'message': return '💬'
-      case 'payment': return '💰'
-      default: return '📌'
-    }
-  }
-
   return (
-    <>
+    <Layout>
       <Head>
         <title>Dashboard - NutriConnect Pro</title>
         <meta name="description" content="Gestionează-ți practica de nutriție cu ușurință" />
       </Head>
 
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <Link href="/">
-                  <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
-                </Link>
-                <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">PRO</span>
-              </div>
-
-              <nav className="hidden md:flex items-center space-x-8">
-                <Link href="/nutritionists/dashboard">
-                  <span className="text-gray-900 font-medium cursor-pointer">Dashboard</span>
-                </Link>
-                <Link href="/nutritionist/appointments">
-                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Programări</span>
-                </Link>
-                <Link href="/nutritionist/clients">
-                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Clienți</span>
-                </Link>
-                <Link href="/nutritionist/profile">
-                  <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Profil</span>
-                </Link>
-              </nav>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={nutritionistData.photo}
-                    alt={nutritionistData.name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div className="hidden md:block">
-                    <p className="text-sm font-medium text-gray-900">{nutritionistData.name}</p>
-                    <p className="text-xs text-gray-500">Plan {nutritionistData.plan}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -426,7 +326,7 @@ export default function NutritionistDashboard() {
             {/* Right Column */}
             <div className="space-y-6">
               {/* Recent Activity */}
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              {/* <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Activitate recentă</h2>
                 <div className="space-y-4">
                   {recentActivities.map((activity) => (
@@ -446,7 +346,7 @@ export default function NutritionistDashboard() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Top Clients */}
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
@@ -489,37 +389,8 @@ export default function NutritionistDashboard() {
           </div>
         </main>
 
-        {/* Notifications Dropdown */}
-        {showNotifications && (
-          <div className="absolute top-16 right-4 w-96 bg-white rounded-xl shadow-xl border border-gray-100 z-50">
-            <div className="p-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Notificări</h3>
-            </div>
-            <div className="max-h-96 overflow-y-auto">
-              {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className={`p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 ${activity.isNew ? 'bg-green-50' : ''
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl">{getActivityIcon(activity.type)}</span>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{activity.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 border-t border-gray-100">
-              <button className="text-sm text-green-600 hover:text-green-700 font-medium">
-                Vezi toate notificările
-              </button>
-            </div>
-          </div>
-        )}
+        
       </div>
-    </>
+    </Layout>
   )
 }
