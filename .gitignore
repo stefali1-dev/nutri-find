@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+flatten_files_for_gpt.py
+/gpt-prompt

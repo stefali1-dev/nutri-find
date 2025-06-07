@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { NutritionistService } from '@/lib/services/nutritionistService'
+import type { NutritionistData } from '@/lib/types/nutritionist'
 
 interface Review {
   id: string
@@ -13,25 +15,20 @@ interface Review {
   verified: boolean
 }
 
-interface Certificate {
-  name: string
-  issuer: string
-  year: string
-}
-
 interface AvailableSlot {
   date: string
   time: string
   type: 'online' | 'in-person'
 }
 
+// Mock data pentru reviews și available slots
 const mockReviews: Review[] = [
   {
     id: '1',
     author: 'Ioana M.',
     rating: 5,
     date: '15 ianuarie 2024',
-    comment: 'Dr. Maria este extraordinară! Mi-a schimbat complet relația cu mâncarea. Am slăbit 12 kg în 3 luni, fără să mă înfometez. Planul ei personalizat a fost exact ce aveam nevoie.',
+    comment: 'Profesionist desăvârșit! Mi-a schimbat complet relația cu mâncarea. Am slăbit 12 kg în 3 luni, fără să mă înfometez. Planul personalizat a fost exact ce aveam nevoie.',
     helpful: 23,
     verified: true
   },
@@ -40,7 +37,7 @@ const mockReviews: Review[] = [
     author: 'Andrei P.',
     rating: 5,
     date: '3 februarie 2024',
-    comment: 'Profesionalism desăvârșit. Mi-a explicat tot ce trebuia să știu despre nutriție sportivă. Performanțele mele au crescut semnificativ.',
+    comment: 'Foarte atent la detalii și empatic. Mi-a explicat tot ce trebuia să știu despre nutriție sportivă. Performanțele mele au crescut semnificativ.',
     helpful: 15,
     verified: true
   },
@@ -55,13 +52,6 @@ const mockReviews: Review[] = [
   }
 ]
 
-const mockCertificates: Certificate[] = [
-  { name: 'Licență în Nutriție și Dietetică', issuer: 'Universitatea de Medicină București', year: '2016' },
-  { name: 'Master în Nutriție Clinică', issuer: 'Universitatea de Medicină București', year: '2018' },
-  { name: 'Certificare în Nutriție Sportivă', issuer: 'ISSN România', year: '2020' },
-  { name: 'Curs de Specializare în Diabet', issuer: 'Asociația Română de Diabet', year: '2021' }
-]
-
 const mockAvailableSlots: AvailableSlot[] = [
   { date: 'Mâine', time: '10:00', type: 'online' },
   { date: 'Mâine', time: '14:00', type: 'in-person' },
@@ -73,67 +63,39 @@ const mockAvailableSlots: AvailableSlot[] = [
 
 export default function NutritionistProfile() {
   const router = useRouter()
+  const { id } = router.query
+  const [nutritionist, setNutritionist] = useState<NutritionistData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'about' | 'services' | 'reviews' | 'certificates'>('about')
   const [showAllReviews, setShowAllReviews] = useState(false)
   const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
 
-  // Mock data - în producție ar veni din API bazat pe router.query.id
-  const nutritionist = {
-    id: '1',
-    name: 'Dr. Maria Popescu',
-    photo: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria&backgroundColor=b6e3f4',
-    specializations: ['Slăbire sănătoasă', 'Nutriție sportivă', 'Diabet'],
-    experience: '8 ani experiență',
-    rating: 4.9,
-    reviewCount: 127,
-    price: '250 RON',
-    consultationType: ['online', 'in-person'],
-    responseTime: 'Răspunde în ~2 ore',
-    successStories: 89,
-    completedConsultations: 450,
-    returnRate: 92,
-    languages: ['Română', 'Engleză'],
-    location: 'București, Sector 1',
-    about: `Sunt Dr. Maria Popescu, nutriționist cu peste 8 ani de experiență în domeniul nutriției clinice. Pasiunea mea este să ajut oamenii să își atingă obiectivele de sănătate prin schimbări sustenabile în stilul de viață.
+  useEffect(() => {
+    if (id && typeof id === 'string') {
+      loadNutritionistData(id)
+    }
+  }, [id])
 
-Am ajutat sute de clienți să slăbească sănătos, să își îmbunătățească performanțele sportive și să gestioneze condiții medicale precum diabetul. Cred cu tărie că o alimentație echilibrată nu înseamnă restricții severe, ci găsirea unui echilibru care funcționează pentru fiecare persoană în parte.
-
-Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan nutrițional pe care îl creez este adaptat nevoilor, preferințelor și stilului de viață al clientului.`,
-    approach: [
-      'Evaluare completă a stării de sănătate și obiceiurilor alimentare',
-      'Plan nutrițional personalizat și flexibil',
-      'Monitorizare constantă și ajustări în funcție de progres',
-      'Educație nutrițională pentru rezultate pe termen lung',
-      'Suport continuu între consultații'
-    ],
-    services: [
-      {
-        name: 'Consultație inițială completă',
-        duration: '60 minute',
-        price: '250 RON',
-        description: 'Evaluare completă, istoric medical, măsurători, plan personalizat'
-      },
-      {
-        name: 'Consultație de monitorizare',
-        duration: '30 minute',
-        price: '150 RON',
-        description: 'Verificare progres, ajustări plan, răspunsuri la întrebări'
-      },
-      {
-        name: 'Pachet lunar complet',
-        duration: '4 consultații',
-        price: '800 RON',
-        description: 'Consultație inițială + 3 monitorizări + suport WhatsApp'
-      },
-      {
-        name: 'Plan nutrițional sport',
-        duration: '90 minute',
-        price: '350 RON',
-        description: 'Plan special pentru sportivi, include timing nutrițional'
+  const loadNutritionistData = async (nutritionistId: string) => {
+    try {
+      setLoading(true)
+      const { data, error } = await NutritionistService.getNutritionistById(nutritionistId)
+      
+      if (error || !data) {
+        setError('Nu am putut încărca datele nutriționistului')
+        return
       }
-    ]
+
+      setNutritionist(data)
+    } catch (err) {
+      console.error('Error loading nutritionist:', err)
+      setError('A apărut o eroare la încărcarea datelor')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleBooking = () => {
@@ -146,13 +108,70 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
     e.preventDefault()
     // Handle contact form submission
     setShowContactModal(false)
+    // Aici vei implementa logica de trimitere mesaj
+  }
+
+  const getSpecializationLabel = (spec: string) => {
+    const labels: Record<string, string> = {
+      'weight-loss': 'Slăbire sănătoasă',
+      'muscle-gain': 'Creștere masă musculară',
+      'health-condition': 'Condiții medicale',
+      'sports-nutrition': 'Nutriție sportivă',
+      'general-health': 'Sănătate generală',
+      'pediatric': 'Nutriție pediatrică',
+      'elderly': 'Nutriție vârstnici',
+      'eating-disorders': 'Tulburări alimentare',
+      'diabetes': 'Diabet'
+    }
+    return labels[spec] || spec
+  }
+
+  const getConsultationTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      'online': 'Online',
+      'in-person': 'La cabinet',
+      'hybrid': 'Hibrid'
+    }
+    return labels[type] || type
+  }
+
+  const formatWorkDays = (days: string[]) => {
+    if (days.length === 7) return 'Toată săptămâna'
+    if (days.length === 5 && !days.includes('Sâmbătă') && !days.includes('Duminică')) return 'Luni - Vineri'
+    return days.join(', ')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-xl font-medium text-gray-700">Se încarcă profilul...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !nutritionist) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-medium text-red-600 mb-4">{error || 'Nutriționistul nu a fost găsit'}</p>
+          <Link href="/nutritionists/find">
+            <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">
+              Înapoi la căutare
+            </button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <>
       <Head>
-        <title>{nutritionist.name} - Profil Nutriționist | NutriConnect</title>
-        <meta name="description" content={`Programează o consultație cu ${nutritionist.name}. ${nutritionist.specializations.join(', ')}.`} />
+        <title>{nutritionist.full_name} - Profil Nutriționist | NutriConnect</title>
+        <meta name="description" content={`Programează o consultație cu ${nutritionist.full_name}. ${nutritionist.specializations.map(s => getSpecializationLabel(s)).join(', ')}.`} />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
@@ -168,7 +187,7 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                 <span className="text-gray-600 hover:text-green-600 cursor-pointer">Nutriționiști</span>
               </Link>
               <span className="text-gray-400">/</span>
-              <span className="text-gray-600">{nutritionist.name}</span>
+              <span className="text-gray-600">{nutritionist.full_name}</span>
             </div>
           </div>
         </div>
@@ -180,34 +199,43 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
               {/* Left Column - Profile Info */}
               <div className="md:w-2/3">
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <img
-                    src={nutritionist.photo}
-                    alt={nutritionist.name}
-                    className="w-32 h-32 rounded-2xl object-cover"
-                  />
+                  {nutritionist.profile_photo_url ? (
+                    <img
+                      src={nutritionist.profile_photo_url}
+                      alt={nutritionist.full_name}
+                      className="w-32 h-32 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-3xl font-bold">
+                      {nutritionist.full_name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                  )}
+                  
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{nutritionist.name}</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{nutritionist.full_name}</h1>
                         <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                          <span className="flex items-center gap-1">
-                            <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span className="font-medium text-lg">{nutritionist.rating}</span>
-                            <span>({nutritionist.reviewCount} recenzii)</span>
-                          </span>
+                          {nutritionist.average_rating && (
+                            <span className="flex items-center gap-1">
+                              <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                              <span className="font-medium text-lg">{nutritionist.average_rating}</span>
+                              <span>({nutritionist.total_reviews || 0} recenzii)</span>
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
                             <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {nutritionist.experience}
+                            {nutritionist.years_experience} ani experiență
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
                           {nutritionist.specializations.map((spec) => (
                             <span key={spec} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                              {spec}
+                              {getSpecializationLabel(spec)}
                             </span>
                           ))}
                         </div>
@@ -222,20 +250,20 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                     {/* Quick Stats */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.completedConsultations}</div>
+                        <div className="text-2xl font-bold text-green-600">{nutritionist.total_consultations || 0}</div>
                         <div className="text-sm text-gray-600">Consultații</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.successStories}</div>
-                        <div className="text-sm text-gray-600">Povești de succes</div>
+                        <div className="text-2xl font-bold text-green-600">{nutritionist.years_experience}</div>
+                        <div className="text-sm text-gray-600">Ani experiență</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.returnRate}%</div>
-                        <div className="text-sm text-gray-600">Rată de return</div>
+                        <div className="text-2xl font-bold text-green-600">{nutritionist.certifications.length}</div>
+                        <div className="text-sm text-gray-600">Certificări</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.responseTime}</div>
-                        <div className="text-sm text-gray-600">Timp răspuns</div>
+                        <div className="text-2xl font-bold text-green-600">{nutritionist.languages.length}</div>
+                        <div className="text-sm text-gray-600">Limbi vorbite</div>
                       </div>
                     </div>
                   </div>
@@ -246,8 +274,13 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
               <div className="md:w-1/3">
                 <div className="bg-white border-2 border-green-100 rounded-2xl p-6 sticky top-24">
                   <div className="text-center mb-4">
-                    <div className="text-3xl font-bold text-gray-800">{nutritionist.price}</div>
-                    <div className="text-gray-600">per consultație</div>
+                    <div className="text-3xl font-bold text-gray-800">
+                      {nutritionist.services.length > 0 
+                        ? `${Math.min(...nutritionist.services.map(s => parseInt(s.price)))} RON`
+                        : 'Preț variabil'
+                      }
+                    </div>
+                    <div className="text-gray-600">de la</div>
                   </div>
                   
                   <div className="space-y-3 mb-6">
@@ -255,13 +288,13 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                       <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Nutriționist verificat
+                      {nutritionist.verification_status === 'verified' ? 'Nutriționist verificat' : 'În proces de verificare'}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Disponibil în 24h
+                      Disponibil {nutritionist.next_available || 'în curând'}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -302,7 +335,7 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                 { id: 'about', label: 'Despre mine' },
                 { id: 'services', label: 'Servicii și prețuri' },
                 { id: 'reviews', label: 'Recenzii' },
-                { id: 'certificates', label: 'Certificări' }
+                { id: 'certificates', label: 'Educație și certificări' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -329,31 +362,54 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Despre mine</h2>
                   <div className="prose prose-green max-w-none">
-                    {nutritionist.about.split('\n\n').map((paragraph, index) => (
+                    {nutritionist.bio.split('\n').map((paragraph, index) => (
                       <p key={index} className="text-gray-600 mb-4">{paragraph}</p>
                     ))}
                   </div>
-                  
-                  <h3 className="text-xl font-semibold text-gray-800 mt-8 mb-4">Abordarea mea</h3>
-                  <ul className="space-y-3">
-                    {nutritionist.approach.map((item, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-gray-600">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
 
-                  <div className="grid grid-cols-2 gap-6 mt-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-2">Limbi vorbite</h4>
-                      <p className="text-gray-600">{nutritionist.languages.join(', ')}</p>
+                      <h3 className="font-semibold text-gray-800 mb-3">Tipuri de consultații</h3>
+                      <div className="space-y-2">
+                        {nutritionist.consultation_types.map((type) => (
+                          <div key={type} className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-gray-600">{getConsultationTypeLabel(type)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-2">Locație cabinet</h4>
-                      <p className="text-gray-600">{nutritionist.location}</p>
+                      <h3 className="font-semibold text-gray-800 mb-3">Limbi vorbite</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {nutritionist.languages.map((lang) => (
+                          <span key={lang} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-3">Locație cabinet</h3>
+                      <p className="text-gray-600 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {nutritionist.location}
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-3">Program de lucru</h3>
+                      <p className="text-gray-600 mb-1">{formatWorkDays(nutritionist.work_days)}</p>
+                      <p className="text-sm text-gray-500">
+                        {nutritionist.work_hours.start} - {nutritionist.work_hours.end}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -368,14 +424,14 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                       <div key={index} className="border-2 border-gray-100 rounded-xl p-6 hover:border-green-200 transition-colors">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-lg font-semibold text-gray-800">{service.name}</h3>
-                          <span className="text-xl font-bold text-green-600">{service.price}</span>
+                          <span className="text-xl font-bold text-green-600">{service.price} RON</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
                           <span className="flex items-center gap-1">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {service.duration}
+                            {service.duration} minute
                           </span>
                         </div>
                         <p className="text-gray-600">{service.description}</p>
@@ -383,12 +439,11 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                     ))}
                   </div>
                   
-                  <div className="mt-8 p-6 bg-green-50 rounded-xl">
-                    <h3 className="font-semibold text-gray-800 mb-2">🎁 Ofertă specială pentru clienți noi</h3>
-                    <p className="text-gray-600">
-                      Primești 20% reducere la prima consultație! Folosește codul <span className="font-semibold text-green-600">NUTRI20</span> la programare.
-                    </p>
-                  </div>
+                  {nutritionist.services.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Nu există servicii configurate momentan</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -397,17 +452,19 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Recenzii clienți</h2>
-                    <div className="flex items-center gap-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
+                    {nutritionist.average_rating && (
+                      <div className="flex items-center gap-2">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="font-semibold">{nutritionist.average_rating}</span>
+                        <span className="text-gray-600">({nutritionist.total_reviews || 0} recenzii)</span>
                       </div>
-                      <span className="font-semibold">{nutritionist.rating}</span>
-                      <span className="text-gray-600">({nutritionist.reviewCount} recenzii)</span>
-                    </div>
+                    )}
                   </div>
 
                   <div className="space-y-6">
@@ -460,6 +517,12 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                       Vezi toate recenziile ({mockReviews.length})
                     </button>
                   )}
+
+                  {(nutritionist.total_reviews === 0 || !nutritionist.total_reviews) && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Nu există recenzii încă</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -467,20 +530,68 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
               {activeTab === 'certificates' && (
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Educație și certificări</h2>
-                  <div className="space-y-4">
-                    {mockCertificates.map((cert, index) => (
-                      <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800">{cert.name}</h3>
-                          <p className="text-sm text-gray-600">{cert.issuer} • {cert.year}</p>
-                        </div>
+                  
+                  {/* Education */}
+                  {nutritionist.education.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Educație</h3>
+                      <div className="space-y-4">
+                        {nutritionist.education.map((edu, index) => (
+                          <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-800">{edu.degree}</h4>
+                              <p className="text-gray-600">{edu.university}</p>
+                              <p className="text-sm text-gray-500">Absolvit: {edu.graduation_year}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  {/* Certifications */}
+                  {nutritionist.certifications.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Certificări</h3>
+                      <div className="space-y-4">
+                        {nutritionist.certifications.map((cert, index) => (
+                          <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-800">{cert.name}</h4>
+                              <p className="text-gray-600">{cert.issuer}</p>
+                              <p className="text-sm text-gray-500">Obținut: {cert.year}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* License */}
+                  <div className="mt-8 p-4 bg-blue-50 rounded-xl">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-blue-800">Licență CDR</h4>
+                        <p className="text-blue-700">Număr licență: {nutritionist.license_number}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -553,31 +664,31 @@ Abordarea mea se bazează pe știință, empatie și personalizare. Fiecare plan
                     <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-gray-600">{nutritionist.responseTime}</span>
+                    <span className="text-gray-600">{formatWorkDays(nutritionist.work_days)}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Similar Nutritionists */}
+              {/* Quick Info */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Nutriționiști similari</h3>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Nutritionist${i}&backgroundColor=ffd5dc`}
-                        alt={`Nutritionist ${i}`}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800">Dr. Nume Exemplu</h4>
-                        <p className="text-sm text-gray-600">Nutriție sportivă</p>
-                      </div>
-                      <button className="text-green-600 hover:text-green-700 text-sm">
-                        Vezi profil
-                      </button>
-                    </div>
-                  ))}
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Informații rapide</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Durată consultație:</span>
+                    <span className="font-medium">{nutritionist.consultation_duration} min</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tipuri consultații:</span>
+                    <span className="font-medium">{nutritionist.consultation_types.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Specializări:</span>
+                    <span className="font-medium">{nutritionist.specializations.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Limbi vorbite:</span>
+                    <span className="font-medium">{nutritionist.languages.length}</span>
+                  </div>
                 </div>
               </div>
             </div>
