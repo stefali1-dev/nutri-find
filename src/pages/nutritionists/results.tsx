@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
-import { NutritionistData } from '@/types/NutritionistData'
+import { NutritionistData } from '@/lib/types/nutritionist'
 
 interface FormData {
   goal: string
@@ -38,184 +38,200 @@ export default function ResultsVertical() {
     {
       id: '1',
       email: 'ana.popescu@email.com',
-      fullName: 'Dr. Ana Popescu',
+      full_name: 'Dr. Ana Popescu',
       phone: '0721234567',
-      birthDate: '1985-05-15',
+      birth_date: '1985-05-15',
       gender: 'Feminin',
-      licenseNumber: 'CDR12345',
-      yearsExperience: '8',
-      workType: ['online', 'in-person'],
+      license_number: 'CDR12345',
+      years_experience: '8',
+      work_types: ['online', 'in-person'],
       specializations: ['weight-loss', 'sports-nutrition'],
-      education: [{
-        degree: 'Licență în Nutriție și Dietetică',
-        university: 'Universitatea de Medicină București',
-        graduationYear: '2015'
-      }],
-      certifications: [{
-        name: 'Certificat Nutriție Sportivă',
-        issuer: 'ACSM',
-        year: '2020'
-      }],
-      consultationTypes: ['online', 'in-person'],
+      education: [
+        {
+          degree: 'Licență în Nutriție și Dietetică',
+          university: 'Universitatea de Medicină București',
+          graduation_year: '2015'
+        }
+      ],
+      certifications: [
+        {
+          name: 'Certificat Nutriție Sportivă',
+          issuer: 'ACSM',
+          year: '2020'
+        }
+      ],
+      consultation_types: ['online', 'in-person'],
       services: [
         {
           name: 'Consultație inițială',
-          duration: '60 min',
+          duration: '60',
           price: '250',
           description: 'Evaluare completă și plan personalizat'
         },
         {
           name: 'Follow-up',
-          duration: '30 min',
+          duration: '30',
           price: '150',
           description: 'Monitorizare și ajustări'
         }
       ],
-      workDays: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
-      workHours: { start: '09:00', end: '17:00' },
-      consultationDuration: '60',
+      work_days: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
+      work_hours: { start: '09:00', end: '17:00' },
+      consultation_duration: 60,
       bio: 'Sunt nutriționist cu 8 ani de experiență, specializată în pierderea în greutate și nutriția sportivă. Îmi place să ajut oamenii să își atingă obiectivele de sănătate prin planuri personalizate și suport continuu.',
-      profilePhoto: '/api/placeholder/80/80',
+      profile_photo_url: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză'],
       location: 'București',
-      documents: { diploma: null, certificate: null },
-      termsAccepted: true,
-      rating: 4.9,
-      totalReviews: 156,
-      nextAvailable: 'Mâine, 14:00',
+      documents_uploaded: { diploma: false, certificate: false },
+      verification_status: 'verified',
+      average_rating: 4.9,
+      total_consultations: 0,
+      total_reviews: 156,
+      next_available: 'Mâine, 14:00'
     },
     {
       id: '2',
       email: 'maria.ionescu@email.com',
-      fullName: 'Maria Ionescu',
+      full_name: 'Maria Ionescu',
       phone: '0722345678',
-      birthDate: '1990-08-22',
+      birth_date: '1990-08-22',
       gender: 'Feminin',
-      licenseNumber: 'CDR23456',
-      yearsExperience: '5',
-      workType: ['online'],
+      license_number: 'CDR23456',
+      years_experience: '5',
+      work_types: ['online'],
       specializations: ['general-health', 'health-condition'],
-      education: [{
-        degree: 'Master în Nutriție Clinică',
-        university: 'UMF Cluj',
-        graduationYear: '2018'
-      }],
+      education: [
+        {
+          degree: 'Master în Nutriție Clinică',
+          university: 'UMF Cluj',
+          graduation_year: '2018'
+        }
+      ],
       certifications: [],
-      consultationTypes: ['online'],
+      consultation_types: ['online'],
       services: [
         {
           name: 'Consultație online',
-          duration: '45 min',
+          duration: '45',
           price: '180',
           description: 'Consultație video cu plan personalizat'
         },
         {
           name: 'Plan nutrițional',
-          duration: '30 min',
+          duration: '30',
           price: '120',
           description: 'Plan detaliat pe 4 săptămâni'
         }
       ],
-      workDays: ['Luni', 'Miercuri', 'Vineri', 'Sâmbătă'],
-      workHours: { start: '10:00', end: '18:00' },
-      consultationDuration: '45',
+      work_days: ['Luni', 'Miercuri', 'Vineri', 'Sâmbătă'],
+      work_hours: { start: '10:00', end: '18:00' },
+      consultation_duration: 45,
       bio: 'Nutriționist specializat în nutriția clinică și gestionarea condițiilor medicale prin alimentație. Abordez fiecare caz cu atenție și empatie.',
-      profilePhoto: '/api/placeholder/80/80',
+      profile_photo_url: '/api/placeholder/80/80',
       languages: ['Română'],
       location: 'Cluj-Napoca',
-      documents: { diploma: null, certificate: null },
-      termsAccepted: true,
-      rating: 4.7,
-      totalReviews: 89,
-      nextAvailable: 'Vineri, 16:30',
+      documents_uploaded: { diploma: false, certificate: false },
+      verification_status: 'verified',
+      average_rating: 4.7,
+      total_consultations: 0,
+      total_reviews: 89,
+      next_available: 'Vineri, 16:30'
     },
     {
       id: '3',
       email: 'alex.tudor@email.com',
-      fullName: 'Alexandru Tudor',
+      full_name: 'Alexandru Tudor',
       phone: '0723456789',
-      birthDate: '1988-12-10',
+      birth_date: '1988-12-10',
       gender: 'Masculin',
-      licenseNumber: 'CDR34567',
-      yearsExperience: '6',
-      workType: ['in-person', 'hybrid'],
+      license_number: 'CDR34567',
+      years_experience: '6',
+      work_types: ['in-person', 'hybrid'],
       specializations: ['muscle-gain', 'sports-nutrition'],
-      education: [{
-        degree: 'Licență Nutriție și Dietă',
-        university: 'Universitatea de Vest Timișoara',
-        graduationYear: '2016'
-      }],
-      certifications: [{
-        name: 'ISSA Nutrition Specialist',
-        issuer: 'ISSA',
-        year: '2019'
-      }],
-      consultationTypes: ['in-person', 'hybrid'],
+      education: [
+        {
+          degree: 'Licență Nutriție și Dietă',
+          university: 'Universitatea de Vest Timișoara',
+          graduation_year: '2016'
+        }
+      ],
+      certifications: [
+        {
+          name: 'ISSA Nutrition Specialist',
+          issuer: 'ISSA',
+          year: '2019'
+        }
+      ],
+      consultation_types: ['in-person', 'hybrid'],
       services: [
         {
           name: 'Consultație cabinet',
-          duration: '60 min',
+          duration: '60',
           price: '300',
           description: 'Consultație completă cu măsurători corporale'
         },
         {
           name: 'Plan nutriție sportivă',
-          duration: '90 min',
+          duration: '90',
           price: '450',
           description: 'Plan specializat pentru performanță sportivă'
         }
       ],
-      workDays: ['Marți', 'Joi', 'Vineri', 'Sâmbătă'],
-      workHours: { start: '08:00', end: '16:00' },
-      consultationDuration: '60',
+      work_days: ['Marți', 'Joi', 'Vineri', 'Sâmbătă'],
+      work_hours: { start: '08:00', end: '16:00' },
+      consultation_duration: 60,
       bio: 'Specialist în nutriția sportivă cu focus pe creșterea masei musculare și optimizarea performanței. Lucrez cu atleți profesioniști și amatori.',
-      profilePhoto: '/api/placeholder/80/80',
+      profile_photo_url: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză', 'Germană'],
       location: 'Timișoara',
-      documents: { diploma: null, certificate: null },
-      termsAccepted: true,
-      rating: 4.8,
-      totalReviews: 124,
-      nextAvailable: 'Marți, 10:00',
+      documents_uploaded: { diploma: false, certificate: false },
+      verification_status: 'verified',
+      average_rating: 4.8,
+      total_consultations: 0,
+      total_reviews: 124,
+      next_available: 'Marți, 10:00'
     },
     {
       id: '4',
       email: 'cristina.popescu@email.com',
-      fullName: 'Cristina Popescu',
+      full_name: 'Cristina Popescu',
       phone: '0724567890',
-      birthDate: '1992-03-18',
+      birth_date: '1992-03-18',
       gender: 'Feminin',
-      licenseNumber: 'CDR45678',
-      yearsExperience: '3',
-      workType: ['online'],
+      license_number: 'CDR45678',
+      years_experience: '3',
+      work_types: ['online'],
       specializations: ['weight-loss', 'general-health'],
-      education: [{
-        degree: 'Licență în Nutriție',
-        university: 'Universitatea București',
-        graduationYear: '2021'
-      }],
+      education: [
+        {
+          degree: 'Licență în Nutriție',
+          university: 'Universitatea București',
+          graduation_year: '2021'
+        }
+      ],
       certifications: [],
-      consultationTypes: ['online'],
+      consultation_types: ['online'],
       services: [
         {
           name: 'Consultație începători',
-          duration: '45 min',
+          duration: '45',
           price: '120',
           description: 'Perfect pentru primul pas către o viață sănătoasă'
         }
       ],
-      workDays: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
-      workHours: { start: '14:00', end: '20:00' },
-      consultationDuration: '45',
+      work_days: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
+      work_hours: { start: '14:00', end: '20:00' },
+      consultation_duration: 45,
       bio: 'Nutriționist tânăr și entuziast, specializat în îndrumarea persoanelor care fac primii pași către o alimentație sănătoasă.',
-      profilePhoto: '/api/placeholder/80/80',
+      profile_photo_url: '/api/placeholder/80/80',
       languages: ['Română', 'Engleză'],
       location: 'București',
-      documents: { diploma: null, certificate: null },
-      termsAccepted: true,
-      rating: 4.6,
-      totalReviews: 42,
-      nextAvailable: 'Astăzi, 18:00',
+      documents_uploaded: { diploma: false, certificate: false },
+      verification_status: 'verified',
+      average_rating: 4.6,
+      total_consultations: 0,
+      total_reviews: 42,
+      next_available: 'Astăzi, 18:00'
     }
   ]
 
@@ -472,17 +488,17 @@ export default function ResultsVertical() {
                   <div className="flex gap-4 lg:flex-shrink-0">
                     <div className="relative">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl font-bold">
-                        {nutritionist.fullName.split(' ').map(n => n[0]).join('')}
+                        {nutritionist.full_name.split(' ').map(n => n[0]).join('')}
                       </div>
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
                         <div className="flex-1">
-                          <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-1">{nutritionist.fullName}</h3>
+                          <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-1">{nutritionist.full_name}</h3>
                           <div className="flex items-center gap-2 mb-2">
-                            {renderStars(nutritionist.rating!)}
-                            <span className="text-sm text-gray-500">({nutritionist.totalReviews} recenzii)</span>
+                            {renderStars(nutritionist.average_rating!)}
+                            <span className="text-sm text-gray-500">({nutritionist.total_reviews} recenzii)</span>
                           </div>
                         </div>
                         <div className="text-left md:text-right">
@@ -498,7 +514,7 @@ export default function ResultsVertical() {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
                           </svg>
-                          <span className="whitespace-nowrap">{nutritionist.yearsExperience} ani exp.</span>
+                          <span className="whitespace-nowrap">{nutritionist.years_experience} ani exp.</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -511,7 +527,7 @@ export default function ResultsVertical() {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="whitespace-nowrap">Disponibil {nutritionist.nextAvailable}</span>
+                          <span className="whitespace-nowrap">Disponibil {nutritionist.next_available}</span>
                         </div>
                       </div>
                     </div>
@@ -559,12 +575,12 @@ export default function ResultsVertical() {
 
                     {/* Features */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {nutritionist.consultationTypes.includes('online') && (
+                      {nutritionist.consultation_types.includes('online') && (
                         <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                           💻 <span className="hidden sm:inline">Consultații </span>Online
                         </span>
                       )}
-                      {nutritionist.consultationTypes.includes('in-person') && (
+                      {nutritionist.consultation_types.includes('in-person') && (
                         <span className="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                           🏢 <span className="hidden sm:inline">Cabinet </span>Fizic
                         </span>

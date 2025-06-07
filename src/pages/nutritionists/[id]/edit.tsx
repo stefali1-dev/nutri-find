@@ -2,60 +2,24 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { supabase } from '../../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
+import { useNutritionist } from '@/lib/hooks/useNutritionist'
+import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { User } from '@supabase/supabase-js'
-
-interface NutritionistData {
-  id?: string
-  user_id?: string
-  email: string
-  full_name: string
-  phone: string
-  birth_date: string
-  gender: string
-  license_number: string
-  years_experience: string
-  work_types: string[]
-  specializations: string[]
-  education: {
-    degree: string
-    university: string
-    graduation_year: string
-  }[]
-  certifications: {
-    name: string
-    issuer: string
-    year: string
-  }[]
-  consultation_types: string[]
-  services: {
-    name: string
-    duration: string
-    price: string
-    description: string
-  }[]
-  work_days: string[]
-  work_hours: {
-    start: string
-    end: string
-  }
-  consultation_duration: number
-  bio: string
-  profile_photo_url: string
-  languages: string[]
-  location: string
-  documents_uploaded: {
-    diploma: boolean
-    certificate: boolean
-  }
-  verification_status: string
-  average_rating?: number
-  total_consultations?: number
-}
+import type { NutritionistData } from '@/lib/types/nutritionist'
 
 export default function EditNutritionistProfile() {
   const router = useRouter()
   const { id } = router.query
+  const { 
+    nutritionist, 
+    loading: hookLoading, 
+    error: hookError, 
+    loadNutritionistByUserId,
+    updateNutritionist,
+    setError: setHookError
+  } = useNutritionist()
+  
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
@@ -90,6 +54,20 @@ export default function EditNutritionistProfile() {
     verification_status: 'pending'
   })
 
+  // Actualizează state-ul local când hook-ul încarcă datele
+  useEffect(() => {
+    if (nutritionist) {
+      setNutritionistData(nutritionist)
+    }
+  }, [nutritionist])
+
+  // Actualizează eroarea dacă există eroare în hook
+  useEffect(() => {
+    if (hookError) {
+      setError(hookError)
+    }
+  }, [hookError])
+
   // Check authentication and authorization
   useEffect(() => {
     const checkAuth = async () => {
@@ -99,7 +77,7 @@ export default function EditNutritionistProfile() {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        router.push('/auth/login')
+        router.push('/nutritionists/login')
         return
       }
 
@@ -107,83 +85,32 @@ export default function EditNutritionistProfile() {
 
       // Check if user is authorized to edit this profile
       if (id && id !== 'new') {
-        const { data: nutritionist, error } = await supabase
-          .from('nutritionists')
-          .select('user_id, id')
-          .eq('id', id)
-          .single()
+        const { data: nutritionist, error } = await NutritionistService.getNutritionistById(id as string)
 
         if (error || !nutritionist || nutritionist.user_id !== user.id) {
-          router.push('/')
+          router.push('/dashboard')
           return
         }
+        
+        // Load existing nutritionist data
+        setNutritionistData(nutritionist)
+      } else {
+        // Set default data for new profile
+        setNutritionistData(prev => ({
+          ...prev,
+          email: user.email!,
+          user_id: user.id
+        }))
       }
 
       setAuthorized(true)
-      await loadNutritionistData(user.id)
+      setLoading(false)
     }
 
     checkAuth()
-  }, [id, router.isReady]) // Added router.isReady dependency
+  }, [id, router.isReady]) // Simplified dependencies
 
-  const loadNutritionistData = async (userId: string) => {
-    try {
-      setLoading(true)
-      
-      if (id === 'new') {
-        // Creating new profile - use defaults with user info
-        const { data: authUser } = await supabase.auth.getUser()
-        if (authUser.user?.email) {
-          setNutritionistData(prev => ({
-            ...prev,
-            email: authUser.user.email!,
-            user_id: userId
-          }))
-        }
-      } else if (id && id !== 'undefined') {
-        // Loading existing profile - only if id is valid
-        console.log('Loading data for ID:', id)
-        const { data, error } = await supabase
-          .from('nutritionists')
-          .select('*')
-          .eq('id', id)
-          .single()
-
-        console.log('Loaded nutritionist data:', data)
-
-        if (error) {
-          if (error.code === 'PGRST116') {
-            setError('Profilul nu a fost găsit.')
-          } else {
-            setError('Eroare la încărcarea datelor.')
-          }
-          console.error('Error loading nutritionist data:', error)
-          return
-        }
-
-        if (data) {
-          setNutritionistData({
-            ...data,
-            birth_date: data.birth_date?.split('T')[0] || '',
-            education: data.education || [],
-            certifications: data.certifications || [],
-            services: data.services || [],
-            work_types: data.work_types || [],
-            specializations: data.specializations || [],
-            consultation_types: data.consultation_types || [],
-            work_days: data.work_days || [],
-            languages: data.languages || ['Română'],
-            documents_uploaded: data.documents_uploaded || { diploma: false, certificate: false }
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Error in loadNutritionistData:', error)
-      setError('Eroare la încărcarea datelor.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Remove the old loadNutritionistData function since we're using the hook now
 
   const updateData = (field: keyof NutritionistData, value: any) => {
     setNutritionistData(prev => ({ ...prev, [field]: value }))
@@ -298,33 +225,30 @@ export default function EditNutritionistProfile() {
     setError(null)
 
     try {
-      const dataToSave = {
-        ...nutritionistData,
-        user_id: user?.id,
-        consultation_duration: parseInt(nutritionistData.consultation_duration.toString()),
-        updated_at: new Date().toISOString()
-      }
-
       if (id === 'new') {
-        // Create new profile
-        const { data, error } = await supabase
-          .from('nutritionists')
-          .insert([dataToSave])
-          .select()
-          .single()
+        // Create new profile using service
+        const { data, error } = await NutritionistService.createNutritionist({
+          ...nutritionistData,
+          user_id: user?.id!
+        })
 
         if (error) throw error
 
         // Redirect to edit page with new ID
-        router.push(`/nutritionists/${data.id}/edit`)
+        router.push(`/nutritionists/${data!.id}/edit`)
       } else {
-        // Update existing profile
-        const { error } = await supabase
-          .from('nutritionists')
-          .update(dataToSave)
-          .eq('id', id)
+        // Update existing profile using service
+        const { data, error } = await NutritionistService.updateNutritionist({
+          ...nutritionistData,
+          id: nutritionistData.id!
+        })
 
         if (error) throw error
+
+        // Update local state with returned data but preserve user edits
+        if (data) {
+          setNutritionistData(data)
+        }
       }
 
       setHasUnsavedChanges(false)
@@ -348,16 +272,22 @@ export default function EditNutritionistProfile() {
       return
     }
 
+    if (!user?.id || !nutritionistData.id) {
+      setError('Profilul trebuie salvat înainte de a încărca documente.')
+      return
+    }
+
     try {
-      // Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user?.id}/${field}.${fileExt}`
+      const { success, error } = await NutritionistService.uploadDocument(
+        user.id,
+        nutritionistData.id,
+        field,
+        file
+      )
 
-      const { error: uploadError } = await supabase.storage
-        .from('nutritionist-documents')
-        .upload(fileName, file, { upsert: true })
-
-      if (uploadError) throw uploadError
+      if (!success) {
+        throw error
+      }
 
       // Update documents status
       updateData('documents_uploaded', {
@@ -365,17 +295,6 @@ export default function EditNutritionistProfile() {
         [field]: true
       })
 
-      // Save document reference if needed
-      if (nutritionistData.id) {
-        await supabase
-          .from('nutritionist_documents')
-          .upsert({
-            nutritionist_id: nutritionistData.id,
-            document_type: field,
-            file_url: fileName,
-            file_name: file.name
-          })
-      }
     } catch (error: any) {
       console.error('Error uploading file:', error)
       setError(`Eroare la încărcarea fișierului: ${error.message}`)
@@ -415,7 +334,7 @@ export default function EditNutritionistProfile() {
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link href="/">
+                <Link href="/dashboard">
                   <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
                 </Link>
                 <span className="text-gray-400">/</span>
@@ -514,7 +433,7 @@ export default function EditNutritionistProfile() {
                     <div className={`w-2 h-2 rounded-full ${documentsValid ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                     <span>Status profil: {documentsValid ? 'Activ' : 'În așteptare documente'}</span>
                   </div>
-                  {(nutritionistData.average_rating != 0 ? nutritionistData.average_rating : '') && (
+                  {nutritionistData.average_rating && (
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />

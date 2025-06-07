@@ -60,7 +60,7 @@ export default function Navbar() {
                         <Link href="/nutritionist/clients">
                             <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Clienți</span>
                         </Link>
-                        <Link href="/nutritionist/profile">
+                        <Link href={`/nutritionists/${nutritionist.id}/edit`}>
                             <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Profil</span>
                         </Link>
                     </nav>
