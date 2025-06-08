@@ -452,14 +452,10 @@ export default function EditNutritionistProfile() {
                       />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                     </svg>
+
                   )}
                   <input
                     type="file"
@@ -529,8 +525,8 @@ export default function EditNutritionistProfile() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
-                      ? 'border-green-600 text-green-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-800'
+                    ? 'border-green-600 text-green-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
                     }`}
                 >
                   <span>{tab.icon}</span>
@@ -740,8 +736,8 @@ export default function EditNutritionistProfile() {
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.specializations.includes(spec.value)
-                            ? 'bg-green-600 border-green-600'
-                            : 'border-gray-300'
+                          ? 'bg-green-600 border-green-600'
+                          : 'border-gray-300'
                           }`}>
                           {nutritionistData.specializations.includes(spec.value) && (
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -894,8 +890,8 @@ export default function EditNutritionistProfile() {
                           className="sr-only"
                         />
                         <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.consultation_types.includes(type.value)
-                            ? 'bg-green-600 border-green-600'
-                            : 'border-gray-300'
+                          ? 'bg-green-600 border-green-600'
+                          : 'border-gray-300'
                           }`}>
                           {nutritionistData.consultation_types.includes(type.value) && (
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1025,8 +1021,8 @@ export default function EditNutritionistProfile() {
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.work_days.includes(day)
-                              ? 'bg-green-600 border-green-600'
-                              : 'border-gray-300'
+                            ? 'bg-green-600 border-green-600'
+                            : 'border-gray-300'
                             }`}>
                             {nutritionistData.work_days.includes(day) && (
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1245,8 +1241,8 @@ export default function EditNutritionistProfile() {
               onClick={handleSave}
               disabled={isLoading}
               className={`px-8 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${isLoading
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
                 }`}
             >
               {isLoading ? (

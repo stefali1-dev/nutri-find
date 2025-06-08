@@ -18,7 +18,6 @@ export default function NutritionistLogin() {
     setIsLoading(true)
     setError('')
 
-    // Basic validation
     if (!email || !password) {
       setError('Email și parola sunt obligatorii.')
       setIsLoading(false)
@@ -31,20 +30,33 @@ export default function NutritionistLogin() {
       return
     }
 
-    // ✅ Supabase auth login
-    const { error, data } = await supabase.auth.signInWithPassword({
+    // ✅ Autentificare
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
+    if (error || !data.user) {
       setError('Email sau parolă incorectă.')
-      // setError(error.message)
-    } else {
-      router.push('/nutritionists/dashboard')
-      console.log('Logged in user:', data.user)
+      setIsLoading(false)
+      return
     }
 
+    // 🔍 Obține nutritionist.id din tabelul nutritionists
+    const { data: nutritionists, error: nutritionistError } = await supabase
+      .from('nutritionists')
+      .select('id')
+      .eq('user_id', data.user.id)
+      .single()
+
+    if (nutritionistError || !nutritionists) {
+      setError('Nu s-a putut găsi contul nutriționistului.')
+      setIsLoading(false)
+      return
+    }
+
+    // ✅ Redirecționează către pagina de editare
+    router.push(`/nutritionists/${nutritionists.id}/edit`)
     setIsLoading(false)
   }
 

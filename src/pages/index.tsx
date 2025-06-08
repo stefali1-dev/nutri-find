@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import Footer from '@/components/Footer'
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -97,9 +98,9 @@ export default function Home() {
                         Găsește un nutriționist
                       </button>
                     </Link>
-                    <Link href="/nutritionists/onboarding">
+                    <Link href="/nutritionists/benefits">
                       <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
-                        Sunt nutriționist
+                        Devino nutriționist partener
                       </button>
                     </Link>
                   </div>
@@ -109,8 +110,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-16 bg-white">
+        {/* TODO: Stats Section */}
+        {/* <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="transform hover:scale-105 transition-transform">
@@ -127,7 +128,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* How it works */}
         <section id="how-it-works" className="py-20 bg-gray-50">
@@ -256,9 +257,11 @@ export default function Home() {
             <p className="text-xl text-green-100 mb-8">
               Conectează-te cu nutriționiști la început de carieră care oferă consultații gratuite sau la prețuri foarte accesibile
             </p>
+            <Link href="/nutritionists/benefits">
             <button className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
               Descoperă ofertele speciale
             </button>
+            </Link>
           </div>
         </section>
 
@@ -268,7 +271,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Ce spun clienții noștri</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Mii de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriFind
+                Sute de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriFind
               </p>
             </div>
 
@@ -325,7 +328,7 @@ export default function Home() {
               Gata să îți transformi viața?
             </h2>
             <p className="text-xl text-green-100 mb-8">
-              Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriFind
+              Alătură-te celor peste 1000 de români care și-au îmbunătățit sănătatea cu NutriFind
             </p>
             <Link href="/nutritionists/find">
               <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
@@ -336,53 +339,7 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4 text-green-400">NutriFind</h3>
-                <p className="text-gray-400">
-                  Platforma #1 din România pentru conectarea cu nutriționiști verificați
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-4">Platformă</h4>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Cum funcționează</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Găsește nutriționiști</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Prețuri</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Pentru nutriționiști</a></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-4">Companie</h4>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Despre noi</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Contact</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Cariere</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Blog</a></li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold mb-4">Legal</h4>
-                <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Termeni și condiții</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">Politica de confidențialitate</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-green-400 transition-colors">GDPR</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-              <p className="text-gray-400">
-                © 2024 NutriFind. Toate drepturile rezervate. Făcut cu ❤️ în România.
-              </p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   )
