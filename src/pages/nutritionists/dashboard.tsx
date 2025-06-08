@@ -129,7 +129,7 @@ export default function NutritionistDashboard() {
   return (
     <Layout>
       <Head>
-        <title>Dashboard - NutriConnect Pro</title>
+        <title>Dashboard - NutriFind Pro</title>
         <meta name="description" content="Gestionează-ți practica de nutriție cu ușurință" />
       </Head>
 

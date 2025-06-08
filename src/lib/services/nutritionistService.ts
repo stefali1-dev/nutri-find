@@ -130,8 +130,10 @@ export class NutritionistService {
         .from('nutritionists')
         .select('*')
         .eq('verification_status', 'verified')
-        .eq('account_status', 'active')
+        .eq('account_status', 'active');
 
+      console.log('Fetched verified nutritionists:', data)
+        
       if (error) {
         return { data: [], error }
       }
@@ -158,9 +160,9 @@ export class NutritionistService {
 
   // Upload fișier document
   static async uploadDocument(
-    userId: string, 
+    userId: string,
     nutritionistId: string,
-    documentType: 'diploma' | 'certificate', 
+    documentType: 'diploma' | 'certificate',
     file: File
   ): Promise<{ success: boolean, error: any }> {
     try {
@@ -196,5 +198,27 @@ export class NutritionistService {
     } catch (error) {
       return { success: false, error }
     }
+  }
+
+  static async uploadProfilePhoto(
+    userId: string,
+    file: File
+  ): Promise<{ url: string | null; error: any }> {
+    // 1. upload (upsert) to bucket
+    const path = `${userId}/avatar.jpg`         // or keep original file.name
+    const { error: uploadError } = await supabase
+      .storage
+      .from('profile-photos')
+      .upload(path, file, { upsert: true })
+
+    if (uploadError) return { url: null, error: uploadError }
+
+    // 2. get public URL
+    const { data } = supabase
+      .storage
+      .from('profile-photos')
+      .getPublicUrl(path)
+
+    return { url: data?.publicUrl ?? null, error: null }
   }
 }

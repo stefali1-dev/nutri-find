@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
 import { NutritionistData } from '@/lib/types/nutritionist'
+import { NutritionistService } from '@/lib/services/nutritionistService'
+import { BookingData } from '@/components/BookingModal'
+import { getSpecializationEmoji, getSpecializationLabel } from '@/lib/utils'
 
 interface FormData {
   goal: string
@@ -21,10 +24,15 @@ interface FormData {
 export default function ResultsVertical() {
   const router = useRouter()
   const [userPreferences, setUserPreferences] = useState<FormData | null>(null)
+
   const [nutritionists, setNutritionists] = useState<NutritionistData[]>([])
-  const [filteredNutritionists, setFilteredNutritionists] = useState<NutritionistData[]>([])
+  const [filteredNutritionists, setFilteredNutritionists] = useState<
+    NutritionistData[]
+  >([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState('relevance')
+  const [sortBy, setSortBy] = useState<'relevance' | 'price' | 'experience'>(
+    'relevance'
+  )
   const [showFilters, setShowFilters] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState({
     price: 'all',
@@ -33,219 +41,32 @@ export default function ResultsVertical() {
     availability: 'all'
   })
 
-  // Mock data extins cu informații pentru UX optimizat
-  const mockNutritionists: NutritionistData[] = [
-    {
-      id: '1',
-      email: 'ana.popescu@email.com',
-      full_name: 'Dr. Ana Popescu',
-      phone: '0721234567',
-      birth_date: '1985-05-15',
-      gender: 'Feminin',
-      license_number: 'CDR12345',
-      years_experience: '8',
-      work_types: ['online', 'in-person'],
-      specializations: ['weight-loss', 'sports-nutrition'],
-      education: [
-        {
-          degree: 'Licență în Nutriție și Dietetică',
-          university: 'Universitatea de Medicină București',
-          graduation_year: '2015'
-        }
-      ],
-      certifications: [
-        {
-          name: 'Certificat Nutriție Sportivă',
-          issuer: 'ACSM',
-          year: '2020'
-        }
-      ],
-      consultation_types: ['online', 'in-person'],
-      services: [
-        {
-          name: 'Consultație inițială',
-          duration: '60',
-          price: '250',
-          description: 'Evaluare completă și plan personalizat'
-        },
-        {
-          name: 'Follow-up',
-          duration: '30',
-          price: '150',
-          description: 'Monitorizare și ajustări'
-        }
-      ],
-      work_days: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
-      work_hours: { start: '09:00', end: '17:00' },
-      consultation_duration: 60,
-      bio: 'Sunt nutriționist cu 8 ani de experiență, specializată în pierderea în greutate și nutriția sportivă. Îmi place să ajut oamenii să își atingă obiectivele de sănătate prin planuri personalizate și suport continuu.',
-      profile_photo_url: '/api/placeholder/80/80',
-      languages: ['Română', 'Engleză'],
-      location: 'București',
-      documents_uploaded: { diploma: false, certificate: false },
-      verification_status: 'verified',
-      average_rating: 4.9,
-      total_consultations: 0,
-      total_reviews: 156,
-      next_available: 'Mâine, 14:00'
-    },
-    {
-      id: '2',
-      email: 'maria.ionescu@email.com',
-      full_name: 'Maria Ionescu',
-      phone: '0722345678',
-      birth_date: '1990-08-22',
-      gender: 'Feminin',
-      license_number: 'CDR23456',
-      years_experience: '5',
-      work_types: ['online'],
-      specializations: ['general-health', 'health-condition'],
-      education: [
-        {
-          degree: 'Master în Nutriție Clinică',
-          university: 'UMF Cluj',
-          graduation_year: '2018'
-        }
-      ],
-      certifications: [],
-      consultation_types: ['online'],
-      services: [
-        {
-          name: 'Consultație online',
-          duration: '45',
-          price: '180',
-          description: 'Consultație video cu plan personalizat'
-        },
-        {
-          name: 'Plan nutrițional',
-          duration: '30',
-          price: '120',
-          description: 'Plan detaliat pe 4 săptămâni'
-        }
-      ],
-      work_days: ['Luni', 'Miercuri', 'Vineri', 'Sâmbătă'],
-      work_hours: { start: '10:00', end: '18:00' },
-      consultation_duration: 45,
-      bio: 'Nutriționist specializat în nutriția clinică și gestionarea condițiilor medicale prin alimentație. Abordez fiecare caz cu atenție și empatie.',
-      profile_photo_url: '/api/placeholder/80/80',
-      languages: ['Română'],
-      location: 'Cluj-Napoca',
-      documents_uploaded: { diploma: false, certificate: false },
-      verification_status: 'verified',
-      average_rating: 4.7,
-      total_consultations: 0,
-      total_reviews: 89,
-      next_available: 'Vineri, 16:30'
-    },
-    {
-      id: '3',
-      email: 'alex.tudor@email.com',
-      full_name: 'Alexandru Tudor',
-      phone: '0723456789',
-      birth_date: '1988-12-10',
-      gender: 'Masculin',
-      license_number: 'CDR34567',
-      years_experience: '6',
-      work_types: ['in-person', 'hybrid'],
-      specializations: ['muscle-gain', 'sports-nutrition'],
-      education: [
-        {
-          degree: 'Licență Nutriție și Dietă',
-          university: 'Universitatea de Vest Timișoara',
-          graduation_year: '2016'
-        }
-      ],
-      certifications: [
-        {
-          name: 'ISSA Nutrition Specialist',
-          issuer: 'ISSA',
-          year: '2019'
-        }
-      ],
-      consultation_types: ['in-person', 'hybrid'],
-      services: [
-        {
-          name: 'Consultație cabinet',
-          duration: '60',
-          price: '300',
-          description: 'Consultație completă cu măsurători corporale'
-        },
-        {
-          name: 'Plan nutriție sportivă',
-          duration: '90',
-          price: '450',
-          description: 'Plan specializat pentru performanță sportivă'
-        }
-      ],
-      work_days: ['Marți', 'Joi', 'Vineri', 'Sâmbătă'],
-      work_hours: { start: '08:00', end: '16:00' },
-      consultation_duration: 60,
-      bio: 'Specialist în nutriția sportivă cu focus pe creșterea masei musculare și optimizarea performanței. Lucrez cu atleți profesioniști și amatori.',
-      profile_photo_url: '/api/placeholder/80/80',
-      languages: ['Română', 'Engleză', 'Germană'],
-      location: 'Timișoara',
-      documents_uploaded: { diploma: false, certificate: false },
-      verification_status: 'verified',
-      average_rating: 4.8,
-      total_consultations: 0,
-      total_reviews: 124,
-      next_available: 'Marți, 10:00'
-    },
-    {
-      id: '4',
-      email: 'cristina.popescu@email.com',
-      full_name: 'Cristina Popescu',
-      phone: '0724567890',
-      birth_date: '1992-03-18',
-      gender: 'Feminin',
-      license_number: 'CDR45678',
-      years_experience: '3',
-      work_types: ['online'],
-      specializations: ['weight-loss', 'general-health'],
-      education: [
-        {
-          degree: 'Licență în Nutriție',
-          university: 'Universitatea București',
-          graduation_year: '2021'
-        }
-      ],
-      certifications: [],
-      consultation_types: ['online'],
-      services: [
-        {
-          name: 'Consultație începători',
-          duration: '45',
-          price: '120',
-          description: 'Perfect pentru primul pas către o viață sănătoasă'
-        }
-      ],
-      work_days: ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri'],
-      work_hours: { start: '14:00', end: '20:00' },
-      consultation_duration: 45,
-      bio: 'Nutriționist tânăr și entuziast, specializat în îndrumarea persoanelor care fac primii pași către o alimentație sănătoasă.',
-      profile_photo_url: '/api/placeholder/80/80',
-      languages: ['Română', 'Engleză'],
-      location: 'București',
-      documents_uploaded: { diploma: false, certificate: false },
-      verification_status: 'verified',
-      average_rating: 4.6,
-      total_consultations: 0,
-      total_reviews: 42,
-      next_available: 'Astăzi, 18:00'
-    }
-  ]
-
+  /** ─────────────────────────────────────────────────────────────
+   *  Fetch only VERIFIED + ACTIVE nutritionists once on mount
+   *  (MVP → nu ne uităm la preferințele user-ului încă)
+   *  ─────────────────────────────────────────────────────────── */
   useEffect(() => {
-    const preferences = sessionStorage.getItem('nutriPreferences')
-    if (preferences) {
-      setUserPreferences(JSON.parse(preferences))
+    const fetchNutritionists = async () => {
+
+      const preferences = sessionStorage.getItem('nutriPreferences')
+      if (preferences) {
+        setUserPreferences(JSON.parse(preferences))
+      }
+
+      const { data, error } = await NutritionistService.getVerifiedNutritionists()
+
+      if (error) {
+        // TODO: poți adăuga un toast / mesaj de eroare
+        console.error('Failed to load nutritionists:', error)
+      } else {
+        setNutritionists(data)
+        setFilteredNutritionists(data) // momentan fără filtre
+      }
+
+      setLoading(false)
     }
 
-    setTimeout(() => {
-      setNutritionists(mockNutritionists)
-      setFilteredNutritionists(mockNutritionists)
-      setLoading(false)
-    }, 1200)
+    fetchNutritionists()
   }, [])
 
   const handleBookConsultation = (nutritionist: NutritionistData) => {
@@ -258,31 +79,15 @@ export default function ResultsVertical() {
     router.push(`/nutritionists/${nutritionist.id}`)
   }
 
-  const getSpecializationEmoji = (spec: string) => {
-    const emojiMap: { [key: string]: string } = {
-      'weight-loss': '⚖️',
-      'muscle-gain': '💪',
-      'health-condition': '🏥',
-      'sports-nutrition': '🏃‍♂️',
-      'general-health': '🥗'
-    }
-    return emojiMap[spec] || '✨'
-  }
-
-  const getSpecializationLabel = (spec: string) => {
-    const labelMap: { [key: string]: string } = {
-      'weight-loss': 'Slăbire',
-      'muscle-gain': 'Masa musculară',
-      'health-condition': 'Condiții medicale',
-      'sports-nutrition': 'Nutriție sportivă',
-      'general-health': 'Sănătate generală'
-    }
-    return labelMap[spec] || spec
-  }
-
   const getLowestPrice = (services: any[]) => {
     return Math.min(...services.map(s => parseInt(s.price)))
   }
+
+  const handleBookingConfirmed = (data: BookingData) => {
+    // 👉 here you can push to Supabase, send an email, etc.
+    console.log('Booking confirmed:', data)
+  }
+
 
   const renderStars = (rating: number) => {
     return (
@@ -331,7 +136,7 @@ export default function ResultsVertical() {
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => router.push('/nutritionists/find')}
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2 transition-colors"
           >
@@ -340,8 +145,8 @@ export default function ResultsVertical() {
             </svg>
             Modifică căutarea
           </button>
-          <span className="text-2xl font-bold text-green-600">NutriConnect</span>
-          <button 
+          <span className="text-2xl font-bold text-green-600">NutriFind</span>
+          <button
             onClick={() => router.push('/')}
             className="text-gray-500 text-sm hover:text-gray-700 transition-colors"
           >
@@ -361,11 +166,11 @@ export default function ResultsVertical() {
             <p className="text-xl text-gray-600 mb-6">
               Am găsit <span className="font-bold text-green-600">{filteredNutritionists.length} specialiști</span> potriviți pentru obiectivul tău
             </p>
-            
+
             {userPreferences?.goal && (
               <div className="flex flex-wrap justify-center gap-3 mb-6">
                 <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium flex items-center gap-2">
-                  {getSpecializationEmoji(userPreferences.goal)} 
+                  {getSpecializationEmoji(userPreferences.goal)}
                   Obiectiv: {getSpecializationLabel(userPreferences.goal)}
                 </span>
                 {userPreferences.budget && (
@@ -375,14 +180,16 @@ export default function ResultsVertical() {
                 )}
                 {userPreferences.consultationType && (
                   <span className="bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-medium flex items-center gap-2">
-                    {userPreferences.consultationType === 'online' ? '💻' : userPreferences.consultationType === 'in-person' ? '🏢' : '🔄'} 
+                    {userPreferences.consultationType === 'online' ? '💻' : userPreferences.consultationType === 'in-person' ? '🏢' : '🔄'}
                     {userPreferences.consultationType === 'online' ? 'Online' : userPreferences.consultationType === 'in-person' ? 'În persoană' : 'Hibrid'}
                   </span>
                 )}
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            {/* TODO: */}
+            {/* Filter Buttons */}
+            {/* <div className="flex flex-col sm:flex-row justify-center gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center justify-center gap-2 px-6 py-3 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-50 transition-all duration-200"
@@ -392,10 +199,10 @@ export default function ResultsVertical() {
                 </svg>
                 Filtrează rezultatele
               </button>
-              
+
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => setSortBy(e.target.value as 'relevance' | 'price' | 'experience')}
                 className="px-6 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none bg-white"
               >
                 <option value="relevance">🎯 Relevanță</option>
@@ -404,7 +211,7 @@ export default function ResultsVertical() {
                 <option value="experience">🏆 Experiență</option>
                 <option value="availability">⏰ Disponibilitate</option>
               </select>
-            </div>
+            </div> */}
           </div>
 
           {/* Filters Panel */}
@@ -416,7 +223,7 @@ export default function ResultsVertical() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">💰 Buget</label>
                   <select
                     value={selectedFilters.price}
-                    onChange={(e) => setSelectedFilters({...selectedFilters, price: e.target.value})}
+                    onChange={(e) => setSelectedFilters({ ...selectedFilters, price: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                   >
                     <option value="all">Toate prețurile</option>
@@ -426,12 +233,12 @@ export default function ResultsVertical() {
                     <option value="400+">400+ RON</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">🏆 Experiență</label>
                   <select
                     value={selectedFilters.experience}
-                    onChange={(e) => setSelectedFilters({...selectedFilters, experience: e.target.value})}
+                    onChange={(e) => setSelectedFilters({ ...selectedFilters, experience: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                   >
                     <option value="all">Orice experiență</option>
@@ -440,12 +247,12 @@ export default function ResultsVertical() {
                     <option value="expert">Expert (6+ ani)</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">📱 Tip consultație</label>
                   <select
                     value={selectedFilters.consultationType}
-                    onChange={(e) => setSelectedFilters({...selectedFilters, consultationType: e.target.value})}
+                    onChange={(e) => setSelectedFilters({ ...selectedFilters, consultationType: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                   >
                     <option value="all">Orice tip</option>
@@ -454,12 +261,12 @@ export default function ResultsVertical() {
                     <option value="hybrid">🔄 Hibrid</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">⏰ Disponibilitate</label>
                   <select
                     value={selectedFilters.availability}
-                    onChange={(e) => setSelectedFilters({...selectedFilters, availability: e.target.value})}
+                    onChange={(e) => setSelectedFilters({ ...selectedFilters, availability: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                   >
                     <option value="all">Oricând</option>
@@ -478,27 +285,38 @@ export default function ResultsVertical() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="space-y-6">
           {filteredNutritionists.map((nutritionist, index) => (
-            <div 
-              key={nutritionist.id} 
+            <div
+              key={nutritionist.id}
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:transform hover:scale-[1.01]"
             >
               <div className="p-4 md:p-6">
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
                   {/* Profile Section */}
                   <div className="flex gap-4 lg:flex-shrink-0">
-                    <div className="relative">
-                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl font-bold">
-                        {nutritionist.full_name.split(' ').map(n => n[0]).join('')}
+
+                    {/*  */}
+                    {nutritionist.profile_photo_url ? (
+                      <img
+                        src={nutritionist.profile_photo_url}
+                        alt="Avatar"
+                        className="w-24 h-24 rounded-2xl object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex
+        items-center justify-center text-white text-2xl font-bold">
+                        {nutritionist.full_name
+                          ? nutritionist.full_name.split(' ').map(n => n[0]).join('')
+                          : 'NN'}
                       </div>
-                    </div>
-                    
+                    )}
+
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2">
                         <div className="flex-1">
                           <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-1">{nutritionist.full_name}</h3>
                           <div className="flex items-center gap-2 mb-2">
                             {renderStars(nutritionist.average_rating!)}
-                            <span className="text-sm text-gray-500">({nutritionist.total_reviews} recenzii)</span>
+                            <span className="text-sm text-gray-500">({nutritionist.total_reviews || 3} recenzii)</span>
                           </div>
                         </div>
                         <div className="text-left md:text-right">
@@ -508,7 +326,7 @@ export default function ResultsVertical() {
                           <div className="text-sm text-gray-500">de la</div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-gray-600 mb-3">
                         <div className="flex items-center gap-1">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -611,7 +429,13 @@ export default function ResultsVertical() {
                         <span className="hidden sm:inline">Programează</span>
                         <span className="sm:hidden">Program</span>
                       </button>
-                      
+
+                      {/* TODO */}
+                      {/* <BookingModal
+                        nutritionist={nutritionist}
+                        onBook={handleBookingConfirmed}
+                      /> */}
+
                       <button
                         onClick={() => handleViewProfile(nutritionist)}
                         className="w-full border-2 border-green-600 text-green-600 px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium text-sm lg:text-base"
@@ -691,7 +515,7 @@ export default function ResultsVertical() {
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold text-gray-800 mb-4">Nu ai găsit ce căutai? 🤔</h3>
             <p className="text-xl text-gray-600 mb-8">Îți putem trimite recomandări personalizate pe email sau îți putem ajuta să găsești exact ce ai nevoie</p>
-            
+
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <button className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -699,8 +523,8 @@ export default function ResultsVertical() {
                 </svg>
                 Trimite-mi recomandări
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => router.push('/nutritionists/find')}
                 className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
@@ -740,7 +564,7 @@ export default function ResultsVertical() {
 
       {/* Floating Action Button pentru mobile */}
       <div className="fixed bottom-6 right-6 lg:hidden">
-        <button 
+        <button
           onClick={() => setShowFilters(!showFilters)}
           className="bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200"
         >

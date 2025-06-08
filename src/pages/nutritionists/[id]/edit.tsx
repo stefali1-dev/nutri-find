@@ -11,15 +11,15 @@ import type { NutritionistData } from '@/lib/types/nutritionist'
 export default function EditNutritionistProfile() {
   const router = useRouter()
   const { id } = router.query
-  const { 
-    nutritionist, 
-    loading: hookLoading, 
-    error: hookError, 
+  const {
+    nutritionist,
+    loading: hookLoading,
+    error: hookError,
     loadNutritionistByUserId,
     updateNutritionist,
     setError: setHookError
   } = useNutritionist()
-  
+
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
@@ -28,6 +28,7 @@ export default function EditNutritionistProfile() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
 
   const [nutritionistData, setNutritionistData] = useState<NutritionistData>({
     email: '',
@@ -75,7 +76,7 @@ export default function EditNutritionistProfile() {
       if (!router.isReady) return
 
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (!user) {
         router.push('/nutritionists/login')
         return
@@ -88,10 +89,10 @@ export default function EditNutritionistProfile() {
         const { data: nutritionist, error } = await NutritionistService.getNutritionistById(id as string)
 
         if (error || !nutritionist || nutritionist.user_id !== user.id) {
-          router.push('/dashboard')
+          router.push('/')
           return
         }
-        
+
         // Load existing nutritionist data
         setNutritionistData(nutritionist)
       } else {
@@ -301,6 +302,27 @@ export default function EditNutritionistProfile() {
     }
   }
 
+  const handleProfilePhotoUpload = async (file: File) => {
+    if (!user) return
+    setPhotoUploading(true)
+    const { url, error } = await NutritionistService.uploadProfilePhoto(
+      user.id,
+      file
+    )
+    if (error || !url) {
+      setError('Eroare la încărcarea fotografiei.')
+    } else {
+      // update DB row
+      await NutritionistService.updateNutritionist({
+        id: nutritionistData.id!,
+        profile_photo_url: url
+      })
+      // update local state
+      setNutritionistData(prev => ({ ...prev, profile_photo_url: url }))
+    }
+    setPhotoUploading(false)
+  }
+
   const addLanguage = (language: string) => {
     if (language.trim() && !nutritionistData.languages.includes(language.trim())) {
       updateData('languages', [...nutritionistData.languages, language.trim()])
@@ -324,7 +346,7 @@ export default function EditNutritionistProfile() {
   return (
     <>
       <Head>
-        <title>{id === 'new' ? 'Profil nou' : 'Editare profil'} - {nutritionistData.full_name || 'Nutriționist'} | NutriConnect</title>
+        <title>{id === 'new' ? 'Profil nou' : 'Editare profil'} - {nutritionistData.full_name || 'Nutriționist'} | NutriFind</title>
         <meta name="description" content="Editează profilul tău de nutriționist" />
       </Head>
 
@@ -334,8 +356,8 @@ export default function EditNutritionistProfile() {
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link href="/dashboard">
-                  <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                <Link href="/">
+                  <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
                 </Link>
                 <span className="text-gray-400">/</span>
                 <span className="text-gray-600">{id === 'new' ? 'Profil nou' : 'Editare profil'}</span>
@@ -393,27 +415,72 @@ export default function EditNutritionistProfile() {
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/*  */}
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-                  {nutritionistData.full_name ? nutritionistData.full_name.split(' ').map(n => n[0]).join('') : 'NN'}
-                </div>
-                <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
+                {nutritionistData.profile_photo_url ? (
+                  <img
+                    src={nutritionistData.profile_photo_url}
+                    alt="Avatar"
+                    className="w-24 h-24 rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex
+        items-center justify-center text-white text-2xl font-bold">
+                    {nutritionistData.full_name
+                      ? nutritionistData.full_name.split(' ').map(n => n[0]).join('')
+                      : 'NN'}
+                  </div>
+                )}
+
+                {/* transparent file input over the edit button */}
+                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full
+                    flex items-center justify-center hover:bg-green-700 cursor-pointer">
+                  {photoUploading ? (
+                    <svg className="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => e.target.files && handleProfilePhotoUpload(e.target.files[0])}
+                  />
+                </label>
               </div>
+
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                   {id === 'new' ? 'Creează profil nou' : `Editare profil - ${nutritionistData.full_name || 'Nutriționist'}`}
                 </h1>
                 <p className="text-gray-600 mb-4">
-                  {id === 'new' 
+                  {id === 'new'
                     ? 'Completează informațiile pentru a-ți crea profilul de nutriționist pe platformă.'
                     : 'Menține-ți profilul actualizat pentru a atrage mai mulți clienți și a oferi informații corecte.'
                   }
                 </p>
-                
+
                 {!documentsValid && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-start gap-3">
                     <svg className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -461,11 +528,10 @@ export default function EditNutritionistProfile() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
-                    activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                       ? 'border-green-600 text-green-600'
                       : 'border-transparent text-gray-600 hover:text-gray-800'
-                  }`}
+                    }`}
                 >
                   <span>{tab.icon}</span>
                   {tab.label}
@@ -481,12 +547,12 @@ export default function EditNutritionistProfile() {
         {/* Tab Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            
+
             {/* Personal Data Tab */}
             {activeTab === 'personal' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Date personale și de contact</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Nume complet *</label>
@@ -584,7 +650,7 @@ export default function EditNutritionistProfile() {
                       }}
                       className="flex-1 p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                     />
-                    <button 
+                    <button
                       onClick={(e) => {
                         const input = e.currentTarget.previousElementSibling as HTMLInputElement
                         if (input.value.trim()) {
@@ -617,7 +683,7 @@ export default function EditNutritionistProfile() {
             {activeTab === 'professional' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Date profesionale</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Numărul de licență CDR *</label>
@@ -673,11 +739,10 @@ export default function EditNutritionistProfile() {
                           }}
                           className="sr-only"
                         />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          nutritionistData.specializations.includes(spec.value)
+                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.specializations.includes(spec.value)
                             ? 'bg-green-600 border-green-600'
                             : 'border-gray-300'
-                        }`}>
+                          }`}>
                           {nutritionistData.specializations.includes(spec.value) && (
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -704,7 +769,7 @@ export default function EditNutritionistProfile() {
                       Adaugă educație
                     </button>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {nutritionistData.education.map((edu, index) => (
                       <div key={index} className="p-4 border-2 border-gray-200 rounded-xl">
@@ -759,7 +824,7 @@ export default function EditNutritionistProfile() {
                       Adaugă certificare
                     </button>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {nutritionistData.certifications.map((cert, index) => (
                       <div key={index} className="p-4 border-2 border-gray-200 rounded-xl">
@@ -806,7 +871,7 @@ export default function EditNutritionistProfile() {
             {activeTab === 'services' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Servicii și prețuri</h2>
-                
+
                 <div className="mb-8">
                   <label className="block text-sm font-medium text-gray-700 mb-3">Tipuri de consultații oferite *</label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -828,11 +893,10 @@ export default function EditNutritionistProfile() {
                           }}
                           className="sr-only"
                         />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                          nutritionistData.consultation_types.includes(type.value)
+                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.consultation_types.includes(type.value)
                             ? 'bg-green-600 border-green-600'
                             : 'border-gray-300'
-                        }`}>
+                          }`}>
                           {nutritionistData.consultation_types.includes(type.value) && (
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -861,7 +925,7 @@ export default function EditNutritionistProfile() {
                       Adaugă serviciu
                     </button>
                   </div>
-                  
+
                   <div className="space-y-6">
                     {nutritionistData.services.map((service, index) => (
                       <div key={index} className="p-6 border-2 border-gray-200 rounded-xl bg-gray-50">
@@ -941,7 +1005,7 @@ export default function EditNutritionistProfile() {
             {activeTab === 'availability' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Disponibilitate</h2>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Zilele în care lucrezi *</h3>
@@ -960,11 +1024,10 @@ export default function EditNutritionistProfile() {
                             }}
                             className="sr-only"
                           />
-                          <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                            nutritionistData.work_days.includes(day)
+                          <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.work_days.includes(day)
                               ? 'bg-green-600 border-green-600'
                               : 'border-gray-300'
-                          }`}>
+                            }`}>
                             {nutritionistData.work_days.includes(day) && (
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -985,7 +1048,7 @@ export default function EditNutritionistProfile() {
                         <input
                           type="time"
                           value={nutritionistData.work_hours.start}
-                          onChange={(e) => updateData('work_hours', {...nutritionistData.work_hours, start: e.target.value})}
+                          onChange={(e) => updateData('work_hours', { ...nutritionistData.work_hours, start: e.target.value })}
                           className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                         />
                       </div>
@@ -994,7 +1057,7 @@ export default function EditNutritionistProfile() {
                         <input
                           type="time"
                           value={nutritionistData.work_hours.end}
-                          onChange={(e) => updateData('work_hours', {...nutritionistData.work_hours, end: e.target.value})}
+                          onChange={(e) => updateData('work_hours', { ...nutritionistData.work_hours, end: e.target.value })}
                           className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
                         />
                       </div>
@@ -1016,7 +1079,7 @@ export default function EditNutritionistProfile() {
                     <div className="mt-6 p-4 bg-blue-50 rounded-xl">
                       <h4 className="font-semibold text-blue-800 mb-2">💡 Sfat pentru disponibilitate</h4>
                       <p className="text-blue-700 text-sm">
-                        Nutriționiștii cu disponibilitate flexibilă primesc cu 40% mai multe programări. 
+                        Nutriționiștii cu disponibilitate flexibilă primesc cu 40% mai multe programări.
                         Încearcă să incluzi weekend-uri sau seara pentru mai mulți clienți.
                       </p>
                     </div>
@@ -1029,7 +1092,7 @@ export default function EditNutritionistProfile() {
             {activeTab === 'documents' && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Documente obligatorii</h2>
-                
+
                 <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
                   <h3 className="font-semibold text-orange-800 mb-2">📋 Documente necesare pentru activare</h3>
                   <p className="text-orange-700 text-sm">
@@ -1051,10 +1114,10 @@ export default function EditNutritionistProfile() {
                           Diploma de licență în Nutriție și Dietetică *
                         </h3>
                         <p className="text-gray-600 text-sm mb-4">
-                          Încarcă o copie scanată sau fotografiată a diplomei tale de licență în domeniul nutriției. 
+                          Încarcă o copie scanată sau fotografiată a diplomei tale de licență în domeniul nutriției.
                           Documentul trebuie să fie lizibil și să conțină toate informațiile relevante.
                         </p>
-                        
+
                         {nutritionistData.documents_uploaded.diploma ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -1114,10 +1177,10 @@ export default function EditNutritionistProfile() {
                           Certificat de membru CDR *
                         </h3>
                         <p className="text-gray-600 text-sm mb-4">
-                          Certificatul de membru al Colegiului Dieteticienilor din România (CDR) este obligatoriu pentru a demonstra 
+                          Certificatul de membru al Colegiului Dieteticienilor din România (CDR) este obligatoriu pentru a demonstra
                           că ești autorizat să practici ca nutriționist în România.
                         </p>
-                        
+
                         {nutritionistData.documents_uploaded.certificate ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -1168,7 +1231,7 @@ export default function EditNutritionistProfile() {
                 <div className="mt-8 p-4 bg-blue-50 rounded-xl">
                   <h4 className="font-semibold text-blue-800 mb-2">🔒 Securitatea documentelor</h4>
                   <p className="text-blue-700 text-sm">
-                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 48 de ore. 
+                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 48 de ore.
                     După verificare, vei primi o confirmare prin email și profilul tău va fi activat.
                   </p>
                 </div>
@@ -1181,11 +1244,10 @@ export default function EditNutritionistProfile() {
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className={`px-8 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
-                isLoading
+              className={`px-8 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${isLoading
                   ? 'bg-gray-400 text-white cursor-not-allowed'
                   : 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
-              }`}
+                }`}
             >
               {isLoading ? (
                 <>

@@ -139,7 +139,7 @@ const handleSubmit = async () => {
             </svg>
             Înapoi
           </button>
-          <span className="text-2xl font-bold text-green-600">NutriConnect</span>
+          <span className="text-2xl font-bold text-green-600">NutriFind</span>
           <button className="text-gray-500 text-sm">
             Salvează și continuă mai târziu
           </button>

@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>NutriConnect - Găsește nutriționistul perfect pentru tine</title>
+        <title>NutriFind - Găsește nutriționistul perfect pentru tine</title>
         <meta name="description" content="Conectează-te cu nutriționiști verificați din România. Consultații personalizate, prețuri transparente, rezultate garantate." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -20,7 +20,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <span className="text-2xl font-bold text-green-600">NutriConnect</span>
+                <span className="text-2xl font-bold text-green-600">NutriFind</span>
               </div>
 
               {/* Desktop Navigation */}
@@ -177,7 +177,7 @@ export default function Home() {
         <section id="benefits" className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">De ce NutriConnect?</h2>
+              <h2 className="text-4xl font-bold text-gray-800 mb-4">De ce NutriFind?</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Platforma noastră îți oferă tot ce ai nevoie pentru a-ți atinge obiectivele de sănătate
               </p>
@@ -268,7 +268,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Ce spun clienții noștri</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Mii de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriConnect
+                Mii de români și-au transformat viața cu ajutorul nutriționiștilor de pe NutriFind
               </p>
             </div>
 
@@ -325,7 +325,7 @@ export default function Home() {
               Gata să îți transformi viața?
             </h2>
             <p className="text-xl text-green-100 mb-8">
-              Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriConnect
+              Alătură-te celor peste 10,000 de români care și-au îmbunătățit sănătatea cu NutriFind
             </p>
             <Link href="/nutritionists/find">
               <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
@@ -340,7 +340,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <h3 className="text-2xl font-bold mb-4 text-green-400">NutriConnect</h3>
+                <h3 className="text-2xl font-bold mb-4 text-green-400">NutriFind</h3>
                 <p className="text-gray-400">
                   Platforma #1 din România pentru conectarea cu nutriționiști verificați
                 </p>

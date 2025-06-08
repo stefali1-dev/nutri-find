@@ -303,7 +303,7 @@ const handleSubmit = async () => {
     return (
         <>
             <Head>
-                <title>Înregistrare Nutriționist - NutriConnect</title>
+                <title>Înregistrare Nutriționist - NutriFind</title>
                 <meta name="description" content="Alătură-te comunității de nutriționiști profesioniști" />
             </Head>
 
@@ -312,7 +312,7 @@ const handleSubmit = async () => {
                 <header className="bg-white shadow-sm">
                     <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
                         <Link href="/">
-                            <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                            <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
                         </Link>
                         <Link href="/nutritionist/login">
                             <span className="text-green-600 hover:text-green-700 cursor-pointer">
@@ -345,7 +345,7 @@ const handleSubmit = async () => {
                         <div className="bg-white rounded-2xl shadow-lg p-8 animate-fadeIn">
                             <div className="text-center mb-8">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                    Bun venit în familia NutriConnect! 🌟
+                                    Bun venit în familia NutriFind! 🌟
                                 </h1>
                                 <p className="text-gray-600">
                                     Creează-ți contul în doar câteva minute

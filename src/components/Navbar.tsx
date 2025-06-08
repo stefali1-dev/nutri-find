@@ -45,7 +45,7 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center">
                         <Link href="/">
-                            <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                            <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
                         </Link>
                         <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">PRO</span>
                     </div>

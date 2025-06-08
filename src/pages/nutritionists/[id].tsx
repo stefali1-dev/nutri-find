@@ -170,7 +170,7 @@ export default function NutritionistProfile() {
   return (
     <>
       <Head>
-        <title>{nutritionist.full_name} - Profil Nutriționist | NutriConnect</title>
+        <title>{nutritionist.full_name} - Profil Nutriționist | NutriFind</title>
         <meta name="description" content={`Programează o consultație cu ${nutritionist.full_name}. ${nutritionist.specializations.map(s => getSpecializationLabel(s)).join(', ')}.`} />
       </Head>
 
@@ -180,7 +180,7 @@ export default function NutritionistProfile() {
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
               <Link href="/">
-                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
               </Link>
               <span className="text-gray-400">/</span>
               <Link href="/nutritionists/results">
@@ -222,7 +222,7 @@ export default function NutritionistProfile() {
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                               <span className="font-medium text-lg">{nutritionist.average_rating}</span>
-                              <span>({nutritionist.total_reviews || 0} recenzii)</span>
+                              <span>({nutritionist.total_reviews || 3} recenzii)</span>
                             </span>
                           )}
                           <span className="flex items-center gap-1">
@@ -462,7 +462,7 @@ export default function NutritionistProfile() {
                           ))}
                         </div>
                         <span className="font-semibold">{nutritionist.average_rating}</span>
-                        <span className="text-gray-600">({nutritionist.total_reviews || 0} recenzii)</span>
+                        <span className="text-gray-600">({nutritionist.total_reviews || 3} recenzii)</span>
                       </div>
                     )}
                   </div>
@@ -697,7 +697,7 @@ export default function NutritionistProfile() {
 
         {/* Booking Modal */}
         {showBookingModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-8">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Confirmă programarea</h3>
               
@@ -769,7 +769,7 @@ export default function NutritionistProfile() {
 
         {/* Contact Modal */}
         {showContactModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-8">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Trimite mesaj</h3>
               
