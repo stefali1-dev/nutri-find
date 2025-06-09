@@ -22,7 +22,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/#how-it-works"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Cum funcționează</span></Link>
             <Link href="/#benefits"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Beneficii</span></Link>
-            <Link href="/nutritionists/find"><button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">Găsește Nutriționist</button></Link>
+            <Link href="/coming-soon?for=client"><button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">Găsește Nutriționist</button></Link>
             <Link href="/nutritionists/login"><button className="bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">Login</button></Link>
           </div>
           <div className="md:hidden">
@@ -39,7 +39,7 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link href="/#how-it-works"><span className="block px-3 py-2 text-gray-700 hover:text-green-600">Cum funcționează</span></Link>
             <Link href="/#benefits"><span className="block px-3 py-2 text-gray-700 hover:text-green-600">Beneficii</span></Link>
-            <Link href="/nutritionists/find"><button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">Găsește Nutriționist</button></Link>
+            <Link href="/coming-soon?for=client"><button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">Găsește Nutriționist</button></Link>
           </div>
         </div>
       )}

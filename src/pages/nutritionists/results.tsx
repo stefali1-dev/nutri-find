@@ -235,7 +235,7 @@ export default function Results() {
                     Înapoi la pagina principală
                   </button>
                 </Link>
-                <Link href="/nutritionists/find">
+                <Link href="/coming-soon?for=client">
                   <button className="px-8 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all font-medium">
                     Fă o nouă căutare
                   </button>

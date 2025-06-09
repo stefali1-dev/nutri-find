@@ -103,7 +103,7 @@ export default function About() {
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors">Acasă</Link>
                 <Link href="/about" className="text-green-600 font-medium">Despre noi</Link>
-                <Link href="/nutritionists/find" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
+                <Link href="/coming-soon?for=client" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
                 <Link href="/contact" className="text-gray-700 hover:text-green-600 transition-colors">Contact</Link>
                 <Link href="/nutritionists/login">
                   <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
@@ -136,7 +136,7 @@ export default function About() {
               <div className="px-2 pt-2 pb-3 space-y-1">
                 <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-green-600">Acasă</Link>
                 <Link href="/about" className="block px-3 py-2 text-green-600 font-medium">Despre noi</Link>
-                <Link href="/nutritionists/find" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
+                <Link href="/coming-soon?for=client" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
                 <Link href="/contact" className="block px-3 py-2 text-gray-700 hover:text-green-600">Contact</Link>
                 <Link href="/nutritionists/login">
                   <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
@@ -191,7 +191,7 @@ export default function About() {
                   verificați, făcând sănătatea mai accesibilă pentru toți.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Link href="/nutritionists/find">
+                  <Link href="/coming-soon?for=client">
                     <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                       Găsește un nutriționist
                     </button>
@@ -340,7 +340,7 @@ export default function About() {
               te așteptăm în comunitatea NutriFind
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/nutritionists/find">
+              <Link href="/coming-soon?for=client">
                 <button className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
                   Găsește un nutriționist
                 </button>

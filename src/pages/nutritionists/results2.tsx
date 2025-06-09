@@ -137,7 +137,7 @@ export default function ResultsVertical() {
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
-            onClick={() => router.push('/nutritionists/find')}
+            onClick={() => router.push('/coming-soon?for=client')}
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -525,7 +525,7 @@ export default function ResultsVertical() {
               </button>
 
               <button
-                onClick={() => router.push('/nutritionists/find')}
+                onClick={() => router.push('/coming-soon?for=client')}
                 className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

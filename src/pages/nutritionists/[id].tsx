@@ -157,7 +157,7 @@ export default function NutritionistProfile() {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl font-medium text-red-600 mb-4">{error || 'Nutriționistul nu a fost găsit'}</p>
-          <Link href="/nutritionists/find">
+          <Link href="/coming-soon?for=client">
             <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">
               Înapoi la căutare
             </button>

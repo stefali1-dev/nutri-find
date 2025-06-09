@@ -145,7 +145,7 @@ export default function Contact() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors">Acasă</Link>
-                <Link href="/nutritionists/find" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
+                <Link href="/coming-soon?for=client" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
                 <Link href="/nutritionists/benefits" className="text-gray-700 hover:text-green-600 transition-colors">Pentru nutriționiști</Link>
                 <Link href="/contact" className="text-green-600 font-medium">Contact</Link>
                 <Link href="/nutritionists/login">
@@ -178,7 +178,7 @@ export default function Contact() {
             <div className="md:hidden bg-white border-t border-gray-100">
               <div className="px-2 pt-2 pb-3 space-y-1">
                 <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-green-600">Acasă</Link>
-                <Link href="/nutritionists/find" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
+                <Link href="/coming-soon?for=client" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
                 <Link href="/nutritionists/benefits" className="block px-3 py-2 text-gray-700 hover:text-green-600">Pentru nutriționiști</Link>
                 <Link href="/contact" className="block px-3 py-2 text-green-600 font-medium">Contact</Link>
                 <Link href="/nutritionists/login">
