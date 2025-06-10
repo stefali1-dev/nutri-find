@@ -201,7 +201,7 @@ function NutritionistComingSoon() {
                             </h1>
 
                             <p className="text-xl text-gray-600 mb-8">
-                                Pregătim o platformă completă pentru nutriționiști - de la gestionarea
+                                Pregătim platforma completă pentru nutriționiști - de la gestionarea
                                 clienților până la tools-uri profesionale de planificare nutrițională.
                             </p>
 
@@ -455,7 +455,7 @@ function ClientComingSoon() {
                             </h1>
 
                             <p className="text-xl text-gray-600 mb-8">
-                                Pregătim o platformă care te va ajuta să găsești nutriționiști calificați,
+                                Pregătim platforma care te va ajuta să găsești nutriționiști calificați,
                                 cu planuri personalizate și consultații accesibile.
                             </p>
 
