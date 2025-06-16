@@ -542,7 +542,7 @@ export default function NutritionistsPage() {
                                     />
                                     <div className="ml-3">
                                         <p className="font-semibold">Ana, 29 ani</p>
-                                        <p className="text-sm text-gray-500">Nutriționist Dietetician, Iași</p>
+                                        <p className="text-sm text-gray-500">Nutriționist Dietetician</p>
                                     </div>
                                 </div>
                                 <p className="text-gray-600 italic">
@@ -561,7 +561,7 @@ export default function NutritionistsPage() {
                                     />
                                     <div className="ml-3">
                                         <p className="font-semibold">Mihaela, 34 ani</p>
-                                        <p className="text-sm text-gray-500">Nutriționist Dietetician, Cluj</p>
+                                        <p className="text-sm text-gray-500">Nutriționist Dietetician</p>
                                     </div>
                                 </div>
                                 <p className="text-gray-600 italic">
@@ -580,7 +580,7 @@ export default function NutritionistsPage() {
                                     />
                                     <div className="ml-3">
                                         <p className="font-semibold">Laura, 26 ani</p>
-                                        <p className="text-sm text-gray-500">Absolventă, Timișoara</p>
+                                        <p className="text-sm text-gray-500">Absolventă</p>
                                     </div>
                                 </div>
                                 <p className="text-gray-600 italic">
