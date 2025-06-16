@@ -13,8 +13,8 @@ const Footer = () => {
                         <h4 className="text-lg font-semibold mb-4">Platformă</h4>
                         <ul className="space-y-2">
                             <li><Link href="/#how-it-works"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Cum funcționează</span></Link></li>
-                            <li><Link href="/coming-soon?for=client"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Găsește nutriționiști</span></Link></li>
-                            <li><Link href="/nutritionists/benefits"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Pentru nutriționiști</span></Link></li>
+                            <li><Link href="/#find-nutritionists"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Găsește nutriționiști</span></Link></li>
+                            <li><Link href="/nutritionisti"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Pentru nutriționiști</span></Link></li>
                         </ul>
                     </div>
                     <div>

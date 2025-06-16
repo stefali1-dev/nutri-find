@@ -60,7 +60,7 @@ export default function Benefits() {
                 <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors">Cum funcționează</a>
                 <a href="#testimonials" className="text-gray-700 hover:text-green-600 transition-colors">Testimoniale</a>
                 <a href="#faq" className="text-gray-700 hover:text-green-600 transition-colors">Întrebări frecvente</a>
-                <Link href="//coming-soon?for=nutritionist">
+                <Link href="/nutritionisti">
                   <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                     Începe acum
                   </button>
@@ -93,7 +93,7 @@ export default function Benefits() {
                 <a href="#how-it-works" className="block px-3 py-2 text-gray-700 hover:text-green-600">Cum funcționează</a>
                 <a href="#testimonials" className="block px-3 py-2 text-gray-700 hover:text-green-600">Testimoniale</a>
                 <a href="#faq" className="block px-3 py-2 text-gray-700 hover:text-green-600">Întrebări frecvente</a>
-                <Link href="//coming-soon?for=nutritionist">
+                <Link href="/nutritionisti">
                   <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
                     Începe acum
                   </button>
@@ -127,7 +127,7 @@ export default function Benefits() {
                     Construiește-ți portofoliul, stabilește-ți propriile prețuri și dezvoltă-ți afacerea în propriul ritm.
                   </p>
                   <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="//coming-soon?for=nutritionist">
+                    <Link href="/nutritionisti">
                       <button className="bg-green-600 text-white px-8 py-4 rounded-full text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
                         Înscrie-te gratuit acum
                       </button>
@@ -414,7 +414,7 @@ export default function Benefits() {
             <p className="text-green-100 text-lg mb-8">
               *După deducerea comisionului platformei de 15%
             </p>
-            <Link href="//coming-soon?for=nutritionist">
+            <Link href="/nutritionisti">
               <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
                 Începe să câștigi acum
               </button>
@@ -472,7 +472,7 @@ export default function Benefits() {
               Alătură-te comunității de peste 50 de nutriționiști care își construiesc succesul pe NutriFind
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="//coming-soon?for=nutritionist">
+              <Link href="/nutritionisti">
                 <button className="bg-green-600 text-white px-10 py-4 rounded-full text-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-105 shadow-xl">
                   Înscrie-te gratuit acum
                 </button>

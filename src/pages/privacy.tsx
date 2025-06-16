@@ -25,7 +25,7 @@ const Navbar = () => {
             <Link href="/#benefits">
               <span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Beneficii</span>
             </Link>
-            <Link href="/coming-soon?for=client">
+            <Link href="/">
               <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                 Găsește Nutriționist
               </button>
@@ -50,7 +50,7 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link href="/#how-it-works"><span className="block px-3 py-2 text-gray-700 hover:text-green-600">Cum funcționează</span></Link>
             <Link href="/#benefits"><span className="block px-3 py-2 text-gray-700 hover:text-green-600">Beneficii</span></Link>
-            <Link href="/coming-soon?for=client">
+            <Link href="/">
               <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
                 Găsește Nutriționist
               </button>

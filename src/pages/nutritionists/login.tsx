@@ -78,7 +78,7 @@ export default function NutritionistLogin() {
               </Link>
               <div className="flex items-center">
                 <span className="text-sm text-gray-600 mr-2">Nu ai cont?</span>
-                <Link href="//coming-soon?for=nutritionist">
+                <Link href="/nutritionisti">
                   <button className="text-green-600 hover:text-green-700 font-medium transition-colors">
                     Înregistrează-te
                   </button>
@@ -247,7 +247,7 @@ export default function NutritionistLogin() {
             </div>
             <p className="mt-8 text-center text-sm text-gray-600">
               Ești client și cauți un nutriționist?{' '}
-              <Link href="/coming-soon?for=client" className="font-medium text-green-600 hover:text-green-500 transition-colors">
+              <Link href="/" className="font-medium text-green-600 hover:text-green-500 transition-colors">
                 Găsește aici
               </Link>
             </p>
