@@ -603,7 +603,7 @@ export default function NutritionistsPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-800">Dificultatea în găsirea clienților</p>
-                                            <p className="text-sm text-gray-600">78% cheltuie prea mult timp cu marketingul</p>
+                                            <p className="text-sm text-gray-600">Mulți nutriționiști cheltuie prea mult timp cu marketingul</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start">
