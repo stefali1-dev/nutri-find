@@ -694,7 +694,7 @@ export default function NutritionistsPage() {
                     <div className="max-w-6xl mx-auto px-4">
                         <div className="text-center mb-12">
                             <h2 className="text-4xl font-bold text-white mb-4">
-                                Ready să-ți transformi cariera?
+                                Gata să-ți transformi cariera?
                             </h2>
                             <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
                                 Alătură-te primilor nutriționiști pe platformă și beneficiază de listare 100% gratuită plus promovare prioritară
