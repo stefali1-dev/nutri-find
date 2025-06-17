@@ -23,7 +23,7 @@ const Navbar = () => {
             <Link href="/#how-it-works"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Cum funcționează</span></Link>
             <Link href="/#benefits"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Beneficii</span></Link>
             <Link href="/"><button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">Găsește Nutriționist</button></Link>
-            <Link href="/nutritionists/login"><button className="bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">Login</button></Link>
+            <Link href="/nutritionists/login"><button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">Login</button></Link>
           </div>
           <div className="md:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 hover:text-green-600 focus:outline-none">

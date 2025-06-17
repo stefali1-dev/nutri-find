@@ -67,14 +67,14 @@ function NutritionistWaitlistForm({ placement, className = "" }: NutritionistWai
 
     if (isSubmitted) {
         return (
-            <div className={`bg-green-50 border border-green-200 rounded-lg p-6 text-center ${className}`}>
+            <div className={`bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6 text-center ${className}`}>
                 <div className="flex items-center justify-center mb-3">
-                    <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-green-800 mb-2">Bine ai venit în echipa NutriFind!</h3>
-                <p className="text-green-700">
+                <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-2">Bine ai venit în echipa NutriFind!</h3>
+                <p className="text-sm sm:text-base text-green-700">
                     Te-ai înscris cu succes! Vei primi acces prioritar la clienții potențiali și listare 100% gratuită.
                 </p>
             </div>
@@ -82,23 +82,23 @@ function NutritionistWaitlistForm({ placement, className = "" }: NutritionistWai
     }
 
     return (
-        <div className={`bg-white rounded-2xl p-8 shadow-xl ${className}`}>
-            <div className="text-center mb-6">
-                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                    <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className={`bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl ${className}`}>
+            <div className="text-center mb-4 sm:mb-6">
+                <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-pulse">
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
 
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 px-2">
                     Listare <span className="text-green-600">100% gratuită</span> pe platformă!
                 </h3>
-                <p className="text-gray-600 max-w-md mx-auto">
+                <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-2">
                     <strong>100% gratuit. </strong>Primești promovare gratuită, listare completă și acces la clienți.
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div className="relative">
                     <input
                         type="email"
@@ -107,30 +107,32 @@ function NutritionistWaitlistForm({ placement, className = "" }: NutritionistWai
                         placeholder="Adresa ta de email"
                         required
                         disabled={isLoading}
-                        className="w-full px-5 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-all shadow-sm hover:shadow-md"
+                        className="w-full px-4 py-3 sm:px-5 sm:py-4 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-all shadow-sm hover:shadow-md pr-10 sm:pr-12"
+                        autoComplete="email"
+                        inputMode="email"
                     />
-                    <svg className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
 
                 {error && (
-                    <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg animate-shake">
-                        <svg className="inline w-5 h-5 mr-2 -mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="text-red-600 text-xs sm:text-sm bg-red-50 p-2.5 sm:p-3 rounded-lg animate-shake flex items-start">
+                        <svg className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {error}
+                        <span className="break-words">{error}</span>
                     </div>
                 )}
 
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
                 >
                     {isLoading ? (
                         <span className="flex items-center justify-center">
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -141,9 +143,15 @@ function NutritionistWaitlistForm({ placement, className = "" }: NutritionistWai
                     )}
                 </button>
 
-                <div className="text-xs text-gray-500 text-center space-y-1">
-                    <p>✅ Primești acces prioritar la cererile venite de la primii clienți care caută un nutriționist potrivit</p>
-                    <p>✅ Ești liber(ă) să te retragi oricând. Nu există nicio obligație, iar listarea e complet gratuită</p>
+                <div className="text-[11px] sm:text-xs text-gray-500 text-center space-y-1 px-2">
+                    <p className="flex items-start justify-center">
+                        <span className="text-green-600 mr-1 flex-shrink-0">✅</span>
+                        <span className="text-left max-w-[280px] sm:max-w-none">Primești acces prioritar la cererile venite de la primii clienți care caută un nutriționist potrivit</span>
+                    </p>
+                    <p className="flex items-start justify-center">
+                        <span className="text-green-600 mr-1 flex-shrink-0">✅</span>
+                        <span className="text-left max-w-[280px] sm:max-w-none">Ești liber(ă) să te retragi oricând. Nu există nicio obligație, iar listarea e complet gratuită</span>
+                    </p>
                 </div>
             </form>
         </div>
@@ -385,7 +393,7 @@ export default function NutritionistsPage() {
                                             </button>
                                         </Link>
                                         <Link href="#income-potential">
-                                            <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
+                                            <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
                                                 Vezi potențialul de câștig
                                             </button>
                                         </Link>
@@ -397,33 +405,35 @@ export default function NutritionistsPage() {
                 </section>
 
                 {/* Prima secțiune de înregistrare */}
-                <section id="waitlist-hero" className="py-16 bg-gradient-to-r from-green-500 to-emerald-600">
+                <section id="waitlist-hero" className="py-12 sm:py-16 bg-gradient-to-r from-green-500 to-emerald-600">
                     <div className="max-w-4xl mx-auto px-4">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-                            <div className="text-white md:w-1/2">
-                                <h2 className="text-3xl md:text-4xl font-bold mb-4">Fii printre primii nutriționiști pe platformă!</h2>
-                                <div className="space-y-3">
+                        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-10">
+                            <div className="text-white lg:w-1/2">
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+                                    Fii printre primii nutriționiști pe platformă!
+                                </h2>
+                                <div className="space-y-2 sm:space-y-3">
                                     <div className="flex items-center text-green-100">
-                                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
-                                        <span>Listare și promovare 100% gratuită</span>
+                                        <span className="text-sm sm:text-base">Listare și promovare 100% gratuită</span>
                                     </div>
                                     <div className="flex items-center text-green-100">
-                                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
-                                        <span>Suport dedicat pentru configurarea profilului</span>
+                                        <span className="text-sm sm:text-base">Suport dedicat pentru configurarea profilului</span>
                                     </div>
                                     <div className="flex items-center text-green-100">
-                                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
-                                        <span>Acces prioritar la primii clienți înregistrați</span>
+                                        <span className="text-sm sm:text-base">Acces prioritar la primii clienți înregistrați</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="md:w-1/2">
+                            <div className="w-full lg:w-1/2 max-w-md">
                                 <NutritionistWaitlistForm
                                     placement="hero_section"
                                     className="transform hover:-translate-y-1 transition-transform duration-300"
@@ -690,51 +700,51 @@ export default function NutritionistsPage() {
                 </section>
 
                 {/* Final Waitlist Section */}
-                <section id="waitlist-final" className="py-20 bg-gradient-to-br from-green-600 to-emerald-700">
+                <section id="waitlist-final" className="py-16 sm:py-20 bg-gradient-to-br from-green-600 to-emerald-700">
                     <div className="max-w-6xl mx-auto px-4">
-                        <div className="text-center mb-12">
-                            <h2 className="text-4xl font-bold text-white mb-4">
+                        <div className="text-center mb-8 sm:mb-12">
+                            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-2">
                                 Gata să-ți transformi cariera?
                             </h2>
-                            <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+                            <p className="text-lg sm:text-xl text-green-100 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
                                 Alătură-te primilor nutriționiști pe platformă și beneficiază de listare 100% gratuită plus promovare prioritară
                             </p>
 
-                            <div className="inline-flex items-center justify-center bg-yellow-50 text-yellow-800 px-6 py-3 rounded-full mb-8 animate-bounce">
-                                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="inline-flex items-center justify-center bg-yellow-50 text-yellow-800 px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-6 sm:mb-8 animate-bounce text-sm sm:text-base">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
                                 </svg>
                                 <span className="font-bold">Primii înscriși primesc acces prioritar la clienți!</span>
                             </div>
                         </div>
 
-                        <div className="max-w-2xl mx-auto bg-white/20 backdrop-blur-sm p-1 rounded-2xl">
+                        <div className="max-w-2xl mx-auto bg-white/20 backdrop-blur-sm p-0.5 sm:p-1 rounded-xl sm:rounded-2xl">
                             <NutritionistWaitlistForm
                                 placement="final_cta"
-                                className="bg-white rounded-2xl shadow-xl"
+                                className="bg-white rounded-xl sm:rounded-2xl shadow-xl"
                             />
                         </div>
 
-                        <div className="text-center mt-8">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                        <div className="text-center mt-6 sm:mt-8">
+                            <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg sm:max-w-3xl mx-auto">
                                 <div className="text-green-100">
-                                    <div className="text-2xl font-bold">100%</div>
-                                    <div className="text-sm">complet gratuit</div>
+                                    <div className="text-xl sm:text-2xl font-bold">100%</div>
+                                    <div className="text-xs sm:text-sm">complet gratuit</div>
                                 </div>
                                 <div className="text-green-100">
-                                    <div className="text-2xl font-bold">0</div>
-                                    <div className="text-sm">taxe sau comisioane</div>
+                                    <div className="text-xl sm:text-2xl font-bold">0</div>
+                                    <div className="text-xs sm:text-sm">taxe sau comisioane</div>
                                 </div>
                                 <div className="text-green-100">
-                                    <div className="text-2xl font-bold">24/7</div>
-                                    <div className="text-sm">suport dedicat</div>
+                                    <div className="text-xl sm:text-2xl font-bold">24/7</div>
+                                    <div className="text-xs sm:text-sm">suport dedicat</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="text-center mt-10">
-                            <p className="text-green-100">
-                                <svg className="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="text-center mt-8 sm:mt-10 px-4">
+                            <p className="text-green-100 text-sm sm:text-base flex items-center justify-center">
+                                <svg className="inline w-4 h-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                                 <span>Datele tale sunt protejate și nu vor fi partajate cu terți.</span>
@@ -746,6 +756,16 @@ export default function NutritionistsPage() {
                 {/* Footer */}
                 <Footer />
             </div>
+            <style jsx global>{`
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Optional: Add scroll padding to account for sticky navbar */
+  html {
+    scroll-padding-top: 80px; /* Adjust based on your navbar height */
+  }
+`}</style>
         </>
     )
 }

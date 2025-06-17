@@ -133,7 +133,7 @@ export default function Benefits() {
                       </button>
                     </Link>
                     <a href="#how-it-works">
-                      <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
+                      <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
                         Vezi cum funcționează
                       </button>
                     </a>
@@ -415,7 +415,7 @@ export default function Benefits() {
               *După deducerea comisionului platformei de 15%
             </p>
             <Link href="/nutritionisti">
-              <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
+              <button className="cursor-pointer bg-white text-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
                 Începe să câștigi acum
               </button>
             </Link>
@@ -478,7 +478,7 @@ export default function Benefits() {
                 </button>
               </Link>
               <Link href="/contact">
-                <button className="bg-white text-green-600 border-2 border-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-green-50 transition-all">
+                <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-10 py-4 rounded-full text-lg font-semibold hover:bg-green-50 transition-all">
                   Contactează-ne
                 </button>
               </Link>

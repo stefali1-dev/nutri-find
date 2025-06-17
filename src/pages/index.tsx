@@ -180,7 +180,7 @@ export default function Home() {
                   </button>
                 </Link>
                 {/* <Link href="nutritionists/login">
-                  <button className="bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">
+                  <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">
                     Login
                   </button>
                 </Link> */}
@@ -244,7 +244,7 @@ export default function Home() {
                       </button>
                     </Link>
                     <Link href="/nutritionisti">
-                      <button className="bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
+                      <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-8 py-4 rounded-full text-lg hover:bg-green-50 transition-all">
                         Sunt nutriționist
                       </button>
                     </Link>

@@ -197,7 +197,7 @@ export default function About() {
                     </button>
                   </Link>
                   <Link href="/nutritionisti">
-                    <button className="bg-white text-green-600 border-2 border-green-600 px-6 py-3 rounded-full hover:bg-green-50 transition-all">
+                    <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-3 rounded-full hover:bg-green-50 transition-all">
                       Devino partener
                     </button>
                   </Link>
@@ -341,7 +341,7 @@ export default function About() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/">
-                <button className="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
+                <button className="cursor-pointer bg-white text-green-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
                   Găsește un nutriționist
                 </button>
               </Link>

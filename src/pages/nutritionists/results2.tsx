@@ -500,7 +500,7 @@ export default function ResultsVertical() {
 
         {/* Load More Button */}
         <div className="text-center mt-12">
-          <button className="bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2 mx-auto">
+          <button className="cursor-pointer bg-white border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl hover:bg-green-50 transition-all duration-200 font-medium flex items-center justify-center gap-2 mx-auto">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
