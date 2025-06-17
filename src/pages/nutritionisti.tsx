@@ -94,7 +94,7 @@ function NutritionistWaitlistForm({ placement, className = "" }: NutritionistWai
                     Listare <span className="text-green-600">100% gratuită</span> pe platformă!
                 </h3>
                 <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-2">
-                    <strong>100% gratuit. </strong>Primești promovare gratuită, listare completă și acces la clienți.
+                    Primești promovare gratuită, listare completă și acces la clienți.
                 </p>
             </div>
 
