@@ -30,7 +30,7 @@ const Navbar = () => {
                 Găsește Nutriționist
               </button>
             </Link>
-            <Link href="/nutritionists/login">
+            <Link href="/nutritionisti/login">
               <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">
                 Login
               </button>

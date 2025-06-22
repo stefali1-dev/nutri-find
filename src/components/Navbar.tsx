@@ -51,7 +51,7 @@ export default function Navbar() {
                     </div>
 
                     <nav className="hidden md:flex items-center space-x-8">
-                        <Link href="/nutritionists/dashboard">
+                        <Link href="/nutritionisti/dashboard">
                             <span className="text-gray-900 font-medium cursor-pointer">Dashboard</span>
                         </Link>
                         <Link href="/nutritionist/appointments">
@@ -60,7 +60,7 @@ export default function Navbar() {
                         <Link href="/nutritionist/clients">
                             <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Clienți</span>
                         </Link>
-                        <Link href={`/nutritionists/${nutritionist.id}/edit`}>
+                        <Link href={`/nutritionisti/${nutritionist.id}/edit`}>
                             <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Profil</span>
                         </Link>
                     </nav>

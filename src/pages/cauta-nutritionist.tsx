@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
+import Footer from '@/components/Footer'
+import LocationSearch from '@/components/LocationSearch'
 
-interface FormData {
+export interface FormData {
   goal: string
   healthConditions: string[]
   dietType: string
@@ -85,41 +87,41 @@ export default function FindNutritionist() {
     }
   }
 
-const handleSubmit = async () => {
-  try {
-    setIsAnimating(true)
+  const handleSubmit = async () => {
+    try {
+      setIsAnimating(true)
 
-    const dataToSave = {
-      name: formData.name,
-      email: formData.email,
-      goal: formData.goal,
-      health_conditions: formData.healthConditions,
-      diet_type: formData.dietType || null,
-      budget: formData.budget,
-      consultation_type: formData.consultationType,
-      availability: formData.availability,
-      experience_preference: formData.experience || null,
-      location: formData.location || null,
-      age_range: formData.age || null,
-      gender: formData.gender || null
+      const dataToSave = {
+        name: formData.name,
+        email: formData.email,
+        goal: formData.goal,
+        health_conditions: formData.healthConditions,
+        diet_type: formData.dietType || null,
+        budget: formData.budget,
+        consultation_type: formData.consultationType,
+        availability: formData.availability,
+        experience_preference: formData.experience || null,
+        location: formData.location || null,
+        age_range: formData.age || null,
+        gender: formData.gender || null
+      }
+
+      console.log(dataToSave);
+
+      // Save in sessionStorage (serialize to JSON)
+      // Will be used later to fetch nutritionists
+      sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
+      router.push('/nutritionisti/results')
+
+    } catch (error) {
+      console.error('Unexpected error:', error)
+      alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
+      setIsAnimating(false)
     }
-
-    console.log(dataToSave);
-
-    // Save in sessionStorage (serialize to JSON)
-    // Will be used later to fetch nutritionists
-    sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
-    router.push('/nutritionists/results')
-
-  } catch (error) {
-    console.error('Unexpected error:', error)
-    alert('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
-    setIsAnimating(false)
   }
-}
 
 
-  const updateFormData = (field: keyof FormData, value: any) => {
+  const updateFormData = (field: keyof FormData | string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -130,7 +132,7 @@ const handleSubmit = async () => {
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => router.push('/')}
             className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
           >
@@ -154,7 +156,7 @@ const handleSubmit = async () => {
             <span className="text-sm text-gray-600">{Math.round(progressPercentage)}% completat</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-green-600 h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercentage}%` }}
             />
@@ -163,9 +165,9 @@ const handleSubmit = async () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-2xl mx-auto px-4 pt-12 py-12">
         <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'}`}>
-          
+
           {/* Step 1: Main Goal */}
           {currentStep === 1 && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -175,7 +177,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Alegerea ta ne va ajuta să găsim nutriționiști specializați exact pe ceea ce ai nevoie.
               </p>
-              
+
               <div className="space-y-4">
                 {[
                   { value: 'weight-loss', label: 'Slăbire sănătoasă', emoji: '⚖️' },
@@ -188,11 +190,10 @@ const handleSubmit = async () => {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('goal', option.value)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${
-                      formData.goal === option.value
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${formData.goal === option.value
+                      ? 'border-green-600 bg-green-50'
+                      : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
+                      }`}
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">{option.emoji}</span>
@@ -218,7 +219,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Ai condiții medicale pe care nutriționistul ar trebui să le ia în considerare?
               </p>
-              
+
               <div className="space-y-3">
                 {[
                   'Nu am condiții medicale',
@@ -233,11 +234,10 @@ const handleSubmit = async () => {
                 ].map((condition) => (
                   <label
                     key={condition}
-                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      formData.healthConditions.includes(condition)
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400'
-                    }`}
+                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${formData.healthConditions.includes(condition)
+                      ? 'border-green-600 bg-green-50'
+                      : 'border-gray-200 hover:border-green-400'
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -258,11 +258,10 @@ const handleSubmit = async () => {
                     />
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-gray-800">{condition}</span>
-                      <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
-                        formData.healthConditions.includes(condition)
-                          ? 'bg-green-600 border-green-600'
-                          : 'border-gray-300'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${formData.healthConditions.includes(condition)
+                        ? 'bg-green-600 border-green-600'
+                        : 'border-gray-300'
+                        }`}>
                         {formData.healthConditions.includes(condition) && (
                           <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -292,7 +291,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Acest lucru ne ajută să găsim nutriționiști familiarizați cu stilul tău de viață.
               </p>
-              
+
               <div className="space-y-4">
                 {[
                   { value: 'omnivore', label: 'Mănânc de toate', emoji: '🍽️' },
@@ -305,11 +304,10 @@ const handleSubmit = async () => {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('dietType', option.value)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${
-                      formData.dietType === option.value
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${formData.dietType === option.value
+                      ? 'border-green-600 bg-green-50'
+                      : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
+                      }`}
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-2xl">{option.emoji}</span>
@@ -342,7 +340,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Nu-ți face griji, avem opțiuni pentru toate buzunarele, inclusiv consultații gratuite!
               </p>
-              
+
               <div className="space-y-4">
                 {[
                   { value: 'free', label: 'Caut consultații gratuite', desc: 'Nutriționiști începători', emoji: '🎁' },
@@ -354,11 +352,10 @@ const handleSubmit = async () => {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('budget', option.value)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${
-                      formData.budget === option.value
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
-                    }`}
+                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between group ${formData.budget === option.value
+                      ? 'border-green-600 bg-green-50'
+                      : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
+                      }`}
                   >
                     <div className="flex items-center gap-3 text-left">
                       <span className="text-2xl">{option.emoji}</span>
@@ -387,26 +384,26 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Flexibilitate maximă pentru stilul tău de viață.
               </p>
-              
+
               <div className="space-y-4">
                 {[
-                  { 
-                    value: 'online', 
-                    label: 'Online', 
+                  {
+                    value: 'online',
+                    label: 'Online',
                     desc: 'Video call din confortul casei tale',
                     emoji: '💻',
                     benefits: ['Fără deplasare', 'Program flexibil', 'Înregistrări disponibile']
                   },
-                  { 
-                    value: 'in-person', 
-                    label: 'În persoană', 
+                  {
+                    value: 'in-person',
+                    label: 'În persoană',
                     desc: 'Întâlniri față în față la cabinet',
                     emoji: '🏢',
                     benefits: ['Contact direct', 'Măsurători precise', 'Experiență completă']
                   },
-                  { 
-                    value: 'hybrid', 
-                    label: 'Hibrid', 
+                  {
+                    value: 'hybrid',
+                    label: 'Hibrid',
                     desc: 'Combinație online + față în față',
                     emoji: '🔄',
                     benefits: ['Flexibilitate maximă', 'Best of both worlds', 'Personalizat']
@@ -415,11 +412,10 @@ const handleSubmit = async () => {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('consultationType', option.value)}
-                    className={`w-full p-6 rounded-xl border-2 transition-all duration-200 text-left ${
-                      formData.consultationType === option.value
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
-                    }`}
+                    className={`w-full p-6 rounded-xl border-2 transition-all duration-200 text-left ${formData.consultationType === option.value
+                      ? 'border-green-600 bg-green-50'
+                      : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -457,7 +453,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Opțional, dar ne ajută să facem recomandări mai bune.
               </p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Vârsta ta</label>
@@ -482,11 +478,10 @@ const handleSubmit = async () => {
                       <button
                         key={gender}
                         onClick={() => updateFormData('gender', gender)}
-                        className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                          formData.gender === gender
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-200 hover:border-green-400'
-                        }`}
+                        className={`p-3 rounded-xl border-2 transition-all duration-200 ${formData.gender === gender
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-green-400'
+                          }`}
                       >
                         {gender}
                       </button>
@@ -495,39 +490,10 @@ const handleSubmit = async () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Localitatea</label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => updateFormData('location', e.target.value)}
-                    placeholder="ex: București, Cluj-Napoca"
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                  <LocationSearch
+                    formData={formData}
+                    updateFormData={updateFormData}
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nivel de experiență dorit</label>
-                  <div className="space-y-3">
-                    {[
-                      { value: 'beginner', label: 'Nutriționist începător', desc: 'Prețuri mai mici, entuziasm maxim' },
-                      { value: 'intermediate', label: 'Experiență medie', desc: '2-5 ani experiență' },
-                      { value: 'expert', label: 'Expert', desc: '5+ ani, specializări multiple' },
-                      { value: 'any', label: 'Nu contează', desc: 'Orice nivel de experiență' }
-                    ].map((level) => (
-                      <button
-                        key={level.value}
-                        onClick={() => updateFormData('experience', level.value)}
-                        className={`w-full p-3 rounded-xl border-2 transition-all duration-200 text-left ${
-                          formData.experience === level.value
-                            ? 'border-green-600 bg-green-50'
-                            : 'border-gray-200 hover:border-green-400'
-                        }`}
-                      >
-                        <span className="font-medium text-gray-800 block">{level.label}</span>
-                        <span className="text-sm text-gray-500">{level.desc}</span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -549,7 +515,7 @@ const handleSubmit = async () => {
               <p className="text-gray-600 mb-8">
                 Ultimul pas - cum te putem contacta cu recomandările personalizate?
               </p>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Numele tău</label>
@@ -587,7 +553,7 @@ const handleSubmit = async () => {
                     className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
                   />
                   <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                    Sunt de acord cu <a href="#" className="text-green-600 hover:underline">termenii și condițiile</a> și 
+                    Sunt de acord cu <a href="#" className="text-green-600 hover:underline">termenii și condițiile</a> și
                     <a href="#" className="text-green-600 hover:underline"> politica de confidențialitate</a>
                   </label>
                 </div>
@@ -609,16 +575,15 @@ const handleSubmit = async () => {
               Înapoi
             </button>
           )}
-          
+
           {currentStep < totalSteps ? (
             <button
               onClick={handleNext}
               disabled={!validateStep()}
-              className={`ml-auto flex items-center gap-2 px-8 py-3 rounded-full font-medium transition-all ${
-                validateStep()
-                  ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className={`ml-auto flex items-center gap-2 px-8 py-3 rounded-full font-medium transition-all ${validateStep()
+                ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
             >
               Continuă
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -629,11 +594,10 @@ const handleSubmit = async () => {
             <button
               onClick={handleSubmit}
               disabled={!validateStep()}
-              className={`ml-auto flex items-center gap-2 px-8 py-3 rounded-full font-medium transition-all ${
-                validateStep()
-                  ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className={`ml-auto flex items-center gap-2 px-8 py-3 rounded-full font-medium transition-all ${validateStep()
+                ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
             >
               Vezi nutriționiștii recomandați
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -645,7 +609,7 @@ const handleSubmit = async () => {
       </div>
 
       {/* Trust Badges */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex flex-wrap justify-center gap-8 text-center">
           <div>
             <div className="text-2xl font-bold text-gray-800">100%</div>
@@ -664,7 +628,8 @@ const handleSubmit = async () => {
             <div className="text-sm text-gray-600">Pentru clienți</div>
           </div>
         </div>
-      </div>
+      </div> */}
+      <Footer />
     </div>
   )
 }

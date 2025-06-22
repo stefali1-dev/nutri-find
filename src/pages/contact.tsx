@@ -148,7 +148,7 @@ export default function Contact() {
                 <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
                 <Link href="/nutritionisti" className="text-gray-700 hover:text-green-600 transition-colors">Pentru nutriționiști</Link>
                 <Link href="/contact" className="text-green-600 font-medium">Contact</Link>
-                <Link href="/nutritionists/login">
+                <Link href="/nutritionisti/login">
                   <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                     Login
                   </button>
@@ -181,7 +181,7 @@ export default function Contact() {
                 <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
                 <Link href="/nutritionisti" className="block px-3 py-2 text-gray-700 hover:text-green-600">Pentru nutriționiști</Link>
                 <Link href="/contact" className="block px-3 py-2 text-green-600 font-medium">Contact</Link>
-                <Link href="/nutritionists/login">
+                <Link href="/nutritionisti/login">
                   <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
                     Login
                   </button>

@@ -21,14 +21,14 @@ const Footer = () => {
                         <h4 className="text-lg font-semibold mb-4">Companie</h4>
                         <ul className="space-y-2">
                              <li><Link href="/contact"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Contact</span></Link></li>
-                             <li><Link href="/about"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Despre noi</span></Link></li>
+                             <li><Link href="/despre"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Despre noi</span></Link></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Legal</h4>
                         <ul className="space-y-2">
-                            <li><Link href="/terms"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Termeni și condiții</span></Link></li>
-                            <li><Link href="/privacy"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Politica de confidențialitate</span></Link></li>
+                            <li><Link href="/termeni"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Termeni și condiții</span></Link></li>
+                            <li><Link href="/confidentialitate"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Politica de confidențialitate</span></Link></li>
                             <li><Link href="/gdpr"><span className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer">Centru GDPR</span></Link></li>
                         </ul>
                     </div>

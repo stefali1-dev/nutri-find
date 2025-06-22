@@ -3,6 +3,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
+import Footer from '@/components/Footer'
+import LocationSearch from '@/components/LocationSearch'
 
 // Tipuri de date simplificate
 interface FormData {
@@ -175,7 +177,7 @@ export default function NutritionistOnboarding() {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-const handleSubmit = async () => {
+    const handleSubmit = async () => {
         if (!validateCurrentStep()) { // Validează ultimul pas înainte de submit
             setIsSubmitting(false);
             return;
@@ -236,12 +238,16 @@ const handleSubmit = async () => {
                 verification_status: 'pending',
                 account_status: 'active',
                 subscription_plan: 'free', // Sau alt plan implicit
+                
+                
                 // license_number: formData.license_number || 'NECOMPLETAT', // Important: asigură-te că gestionezi acest câmp. 'NECOMPLETAT' dacă e permis NULL, altfel trebuie să fie din form.
                 // Alte câmpuri din tabelul nutritionists care au valori default sau pot fi null la început:
                 // birth_date: null, gender: null, profile_photo_url: null, education: '[]', certifications: '[]',
                 // work_days: '{}', work_hours: '{"start": "09:00", "end": "18:00"}', consultation_duration: 60,
                 // documents_uploaded: '{"diploma": false, "license": false, "insurance": false}'
             };
+
+            console.log('Nutritionist payload:', nutritionistPayload);
 
             // Pasul 3: Inserează profilul nutriționistului
             const { data: nutritionistProfile, error: insertProfileError } = await supabase
@@ -263,11 +269,11 @@ const handleSubmit = async () => {
 
             // Pasul 4: Succes! Salvează informații în sesiune și redirecționează
             if (nutritionistProfile) { // Verifică dacă nutritionistProfile nu e null
-                 sessionStorage.setItem('nutritionistId', nutritionistProfile.id); // ID-ul profilului din tabelul nutritionists
-                 sessionStorage.setItem('nutritionistEmail', nutritionistProfile.email);
-                 // Poate vrei să salvezi și user_id din authData.user.id dacă e util în frontend
-                 // sessionStorage.setItem('userId', authData.user.id);
-                 router.push(`/nutritionists/${nutritionistProfile.id}/edit`);
+                sessionStorage.setItem('nutritionistId', nutritionistProfile.id); // ID-ul profilului din tabelul nutritionists
+                sessionStorage.setItem('nutritionistEmail', nutritionistProfile.email);
+                // Poate vrei să salvezi și user_id din authData.user.id dacă e util în frontend
+                // sessionStorage.setItem('userId', authData.user.id);
+                router.push(`/nutritionisti/${nutritionistProfile.id}/edit`);
             } else {
                 // Ceva neașteptat, profilul nu a fost returnat
                 console.error('Nutritionist profile data was null after insert.');
@@ -469,9 +475,9 @@ const handleSubmit = async () => {
                                     )}
                                 </div>
 
-                                <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-800">
+                                {/* <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-800">
                                     💡 <strong>Sfat:</strong> Folosește datele reale. Clienții apreciază transparența și profesionalismul.
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     )}
@@ -503,8 +509,8 @@ const handleSubmit = async () => {
                                             <label
                                                 key={spec}
                                                 className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${formData.specializations.includes(spec)
-                                                        ? 'border-green-600 bg-green-50'
-                                                        : 'border-gray-200 hover:border-green-400'
+                                                    ? 'border-green-600 bg-green-50'
+                                                    : 'border-gray-200 hover:border-green-400'
                                                     }`}
                                             >
                                                 <input
@@ -545,8 +551,8 @@ const handleSubmit = async () => {
                                                 type="button"
                                                 onClick={() => updateField('experience', exp.value)}
                                                 className={`p-3 rounded-xl border-2 transition-all ${formData.experience === exp.value
-                                                        ? 'border-green-600 bg-green-50'
-                                                        : 'border-gray-200 hover:border-green-400'
+                                                    ? 'border-green-600 bg-green-50'
+                                                    : 'border-gray-200 hover:border-green-400'
                                                     }`}
                                             >
                                                 {exp.label}
@@ -572,8 +578,8 @@ const handleSubmit = async () => {
                                             <label
                                                 key={type.value}
                                                 className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.consultationTypes.includes(type.value)
-                                                        ? 'border-green-600 bg-green-50'
-                                                        : 'border-gray-200 hover:border-green-400'
+                                                    ? 'border-green-600 bg-green-50'
+                                                    : 'border-gray-200 hover:border-green-400'
                                                     }`}
                                             >
                                                 <input
@@ -646,8 +652,8 @@ const handleSubmit = async () => {
                                                     }
                                                 }}
                                                 className={`px-4 py-2 rounded-full border-2 transition-all ${formData.languages.includes(lang)
-                                                        ? 'border-green-600 bg-green-50 text-green-700'
-                                                        : 'border-gray-200 hover:border-green-400'
+                                                    ? 'border-green-600 bg-green-50 text-green-700'
+                                                    : 'border-gray-200 hover:border-green-400'
                                                     }`}
                                             >
                                                 {lang}
@@ -657,20 +663,10 @@ const handleSubmit = async () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Locație
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => updateField('location', e.target.value)}
-                                        className={`w-full px-4 py-3 rounded-xl border ${errors.location ? 'border-red-500' : 'border-gray-300'
-                                            } focus:outline-none focus:ring-2 focus:ring-green-500`}
-                                        placeholder="ex: București, Sector 1"
+                                    <LocationSearch
+                                        formData={formData}
+                                        updateFormData={updateField}
                                     />
-                                    {errors.location && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -815,8 +811,8 @@ const handleSubmit = async () => {
                                             className="mt-1 w-4 h-4 text-green-600 rounded focus:ring-green-500"
                                         />
                                         <span className="ml-3 text-sm text-gray-700">
-                                            Accept <Link href="/terms"><button className="text-green-600 hover:underline">Termenii și Condițiile</button></Link> și{' '}
-                                            <Link href="/privacy"><button className="text-green-600 hover:underline">Politica de Confidențialitate</button></Link>.
+                                            Accept <Link href="/termeni"><button className="text-green-600 hover:underline">Termenii și Condițiile</button></Link> și{' '}
+                                            <Link href="/confidentialitate"><button className="text-green-600 hover:underline">Politica de Confidențialitate</button></Link>.
                                             Înțeleg că datele mele vor fi verificate și profilul va deveni public.
                                         </span>
                                     </label>
@@ -857,8 +853,8 @@ const handleSubmit = async () => {
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
                                 className={`ml-auto px-8 py-3 rounded-full transition-all transform hover:scale-105 flex items-center gap-2 ${isSubmitting
-                                        ? 'bg-gray-400 text-white cursor-not-allowed'
-                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                                    : 'bg-green-600 text-white hover:bg-green-700'
                                     }`}
                             >
                                 {isSubmitting ? (
@@ -907,6 +903,7 @@ const handleSubmit = async () => {
           animation: fadeIn 0.3s ease-out;
         }
       `}</style>
+            <Footer />
         </>
     )
 }

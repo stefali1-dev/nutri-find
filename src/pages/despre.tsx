@@ -102,10 +102,10 @@ export default function About() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors">Acasă</Link>
-                <Link href="/about" className="text-green-600 font-medium">Despre noi</Link>
+                <Link href="/despre" className="text-green-600 font-medium">Despre noi</Link>
                 <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors">Găsește nutriționiști</Link>
                 <Link href="/contact" className="text-gray-700 hover:text-green-600 transition-colors">Contact</Link>
-                <Link href="/nutritionists/login">
+                <Link href="/nutritionisti/login">
                   <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                     Login
                   </button>
@@ -135,10 +135,10 @@ export default function About() {
             <div className="md:hidden bg-white border-t border-gray-100">
               <div className="px-2 pt-2 pb-3 space-y-1">
                 <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-green-600">Acasă</Link>
-                <Link href="/about" className="block px-3 py-2 text-green-600 font-medium">Despre noi</Link>
+                <Link href="/despre" className="block px-3 py-2 text-green-600 font-medium">Despre noi</Link>
                 <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-green-600">Găsește nutriționiști</Link>
                 <Link href="/contact" className="block px-3 py-2 text-gray-700 hover:text-green-600">Contact</Link>
-                <Link href="/nutritionists/login">
+                <Link href="/nutritionisti/login">
                   <button className="w-full mt-2 bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors">
                     Login
                   </button>

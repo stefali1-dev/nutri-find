@@ -208,6 +208,14 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
+                <Image
+                  src="/images/logo.png"
+                  alt="NutriFind Logo"
+                  width={40}
+                  height={40}
+                  className="w-8 h-8 sm:w-10 sm:h-10 mr-2"
+                  priority
+                />
                 <span className="text-xl sm:text-2xl font-bold text-green-600">NutriFind</span>
               </div>
 
@@ -515,7 +523,7 @@ export default function Home() {
                   />
                   <div className="ml-3">
                     <p className="font-semibold text-sm sm:text-base">Andrei, 28 ani</p>
-                    <p className="text-xs sm:text-sm text-gray-500">Cluj</p>
+                    <p className="text-xs sm:text-sm text-gray-500"></p>
                   </div>
                 </div>
                 <p className="text-sm sm:text-base text-gray-600 italic">

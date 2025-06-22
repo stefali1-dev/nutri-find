@@ -32,7 +32,7 @@ const Navbar = () => {
                 Găsește Nutriționist
               </button>
             </Link>
-            <Link href="/nutritionists/login">
+            <Link href="/nutritionisti/login">
               <button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">
                 Login
               </button>
@@ -166,7 +166,7 @@ export default function TermsAndConditionsPage() {
             <p>Platforma este furnizată "așa cum este" și "așa cum este disponibilă", fără garanții de orice fel.</p>
             
             <h2 id="confidentialitate">9. Protecția Datelor cu Caracter Personal</h2>
-            <p>Ne angajăm să protejăm confidențialitatea datelor dumneavoastră. Colectarea și prelucrarea datelor cu caracter personal sunt guvernate de <Link href="/privacy"><span className="text-green-600 hover:underline cursor-pointer">Politica de Confidențialitate</span></Link>, care este parte integrantă a acestor Termeni. Vă rugăm să o consultați pentru a înțelege cum colectăm, folosim și protejăm datele dumneavoastră.</p>
+            <p>Ne angajăm să protejăm confidențialitatea datelor dumneavoastră. Colectarea și prelucrarea datelor cu caracter personal sunt guvernate de <Link href="/confidentialitate"><span className="text-green-600 hover:underline cursor-pointer">Politica de Confidențialitate</span></Link>, care este parte integrantă a acestor Termeni. Vă rugăm să o consultați pentru a înțelege cum colectăm, folosim și protejăm datele dumneavoastră.</p>
 
             <h2 id="incetare">10. Încetarea utilizării</h2>
             <p>Puteți înceta utilizarea Platformei și șterge contul în orice moment. NutriFind își rezervă dreptul de a suspenda sau de a înceta accesul dumneavoastră la Platformă, fără notificare prealabilă, în cazul încălcării acestor Termeni, a legii sau a conduitei neadecvate.</p>

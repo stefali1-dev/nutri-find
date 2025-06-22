@@ -56,7 +56,7 @@ export default function NutritionistLogin() {
     }
 
     // ✅ Redirecționează către pagina de editare
-    router.push(`/nutritionists/${nutritionists.id}/edit`)
+    router.push(`/nutritionisti/${nutritionists.id}/edit`)
     setIsLoading(false)
   }
 

@@ -23,7 +23,7 @@ const Navbar = () => {
             <Link href="/#how-it-works"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Cum funcționează</span></Link>
             <Link href="/#benefits"><span className="text-gray-700 hover:text-green-600 transition-colors cursor-pointer">Beneficii</span></Link>
             <Link href="/"><button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">Găsește Nutriționist</button></Link>
-            <Link href="/nutritionists/login"><button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">Login</button></Link>
+            <Link href="/nutritionisti/login"><button className="cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-50 transition-all">Login</button></Link>
           </div>
           <div className="md:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 hover:text-green-600 focus:outline-none">
@@ -96,7 +96,7 @@ export default function GdprPage() {
                     {/* Dreptul la Informare */}
                     <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-600">
                         <h3 className="text-xl font-semibold mb-2">Dreptul la Informare</h3>
-                        <p className="text-gray-600">Ai dreptul să știi ce date colectăm, de ce și cum le folosim. Toate aceste detalii sunt disponibile în <Link href="/privacy"><span className="text-green-600 hover:underline cursor-pointer">Politica noastră de Confidențialitate</span></Link>.</p>
+                        <p className="text-gray-600">Ai dreptul să știi ce date colectăm, de ce și cum le folosim. Toate aceste detalii sunt disponibile în <Link href="/confidentialitate"><span className="text-green-600 hover:underline cursor-pointer">Politica noastră de Confidențialitate</span></Link>.</p>
                     </div>
 
                     {/* Dreptul de Acces */}
@@ -148,8 +148,8 @@ export default function GdprPage() {
                 <h3 className="text-xl font-semibold">Documente Legale Complete</h3>
                 <p>Acest centru este un ghid simplificat. Pentru informații complete și detaliate, care constituie baza legală a relației noastre, te rugăm să consulți documentele de mai jos:</p>
                 <ul>
-                    <li><Link href="/privacy"><span className="text-green-600 hover:underline cursor-pointer font-semibold">Politica de Confidențialitate</span></Link> - Explică în detaliu ce date colectăm, de ce, cum le folosim și cui le partajăm.</li>
-                    <li><Link href="/terms"><span className="text-green-600 hover:underline cursor-pointer font-semibold">Termeni și Condiții</span></Link> - Definește regulile de utilizare a platformei NutriFind.</li>
+                    <li><Link href="/confidentialitate"><span className="text-green-600 hover:underline cursor-pointer font-semibold">Politica de Confidențialitate</span></Link> - Explică în detaliu ce date colectăm, de ce, cum le folosim și cui le partajăm.</li>
+                    <li><Link href="/termeni"><span className="text-green-600 hover:underline cursor-pointer font-semibold">Termeni și Condiții</span></Link> - Definește regulile de utilizare a platformei NutriFind.</li>
                 </ul>
                 <h3 className="text-xl font-semibold mt-6">Autoritatea de Supraveghere</h3>
                 <p>Dacă consideri că drepturile tale nu au fost respectate, ai dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP). Website: <a href="https://www.dataprotection.ro/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">www.dataprotection.ro</a>.</p>

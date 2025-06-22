@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { NutritionistData } from '@/lib/types/nutritionist'
+import Footer from '@/components/Footer'
 
 interface Review {
   id: string
@@ -183,7 +184,7 @@ export default function NutritionistProfile() {
                 <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
               </Link>
               <span className="text-gray-400">/</span>
-              <Link href="/nutritionists/results">
+              <Link href="/nutritionisti/results">
                 <span className="text-gray-600 hover:text-green-600 cursor-pointer">Nutriționiști</span>
               </Link>
               <span className="text-gray-400">/</span>
@@ -819,6 +820,7 @@ export default function NutritionistProfile() {
           </div>
         )}
       </div>
+      <Footer />
     </>
   )
 }

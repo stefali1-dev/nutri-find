@@ -72,11 +72,11 @@ export default function ResultsVertical() {
   const handleBookConsultation = (nutritionist: NutritionistData) => {
     // Salvăm ID-ul nutriționistului pentru pagina de booking
     sessionStorage.setItem('selectedNutritionist', nutritionist.id!)
-    router.push(`/nutritionists/${nutritionist.id}/booking`)
+    router.push(`/nutritionisti/${nutritionist.id}/booking`)
   }
 
   const handleViewProfile = (nutritionist: NutritionistData) => {
-    router.push(`/nutritionists/${nutritionist.id}`)
+    router.push(`/nutritionisti/${nutritionist.id}`)
   }
 
   const getLowestPrice = (services: any[]) => {

@@ -7,6 +7,7 @@ import { useNutritionist } from '@/lib/hooks/useNutritionist'
 import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { User } from '@supabase/supabase-js'
 import type { NutritionistData } from '@/lib/types/nutritionist'
+import Footer from '@/components/Footer'
 
 export default function EditNutritionistProfile() {
   const router = useRouter()
@@ -78,7 +79,7 @@ export default function EditNutritionistProfile() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push('/nutritionists/login')
+        router.push('/nutritionisti/login')
         return
       }
 
@@ -236,7 +237,7 @@ export default function EditNutritionistProfile() {
         if (error) throw error
 
         // Redirect to edit page with new ID
-        router.push(`/nutritionists/${data!.id}/edit`)
+        router.push(`/nutritionisti/${data!.id}/edit`)
       } else {
         // Update existing profile using service
         const { data, error } = await NutritionistService.updateNutritionist({
@@ -350,7 +351,7 @@ export default function EditNutritionistProfile() {
         <meta name="description" content="Editează profilul tău de nutriționist" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pb-12">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 py-4">
@@ -364,7 +365,7 @@ export default function EditNutritionistProfile() {
               </div>
               <div className="flex items-center gap-4">
                 {nutritionistData.id && (
-                  <Link href={`/nutritionists/${nutritionistData.id}`}>
+                  <Link href={`/nutritionisti/${nutritionistData.id}`}>
                     <button className="text-gray-600 hover:text-green-600 transition-colors">
                       Previzualizare profil
                     </button>
@@ -1311,6 +1312,7 @@ export default function EditNutritionistProfile() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   )
 }
