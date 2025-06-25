@@ -1,5 +1,5 @@
 // Nutritionist specialization utilities
-type Specialization = 
+type Specialization =
   | 'weight-loss'
   | 'muscle-gain'
   | 'health-condition'
@@ -26,7 +26,7 @@ export const getSpecializationEmoji = (spec: Specialization | string): string =>
     'weight-gain': '📈',
     'eating-disorders': '💔'
   };
-  
+
   return emojiMap[spec as Specialization] || '✨';
 };
 
@@ -44,7 +44,7 @@ export const getSpecializationLabel = (spec: Specialization | string): string =>
     'weight-gain': 'Creștere în greutate',
     'eating-disorders': 'Tulburări de alimentație'
   };
-  
+
   return labelMap[spec as Specialization] || spec;
 };
 
@@ -55,3 +55,21 @@ export const getSpecializationDisplay = (spec: Specialization | string) => {
     label: getSpecializationLabel(spec)
   };
 };
+
+export const specializations = [
+  { value: 'weight-loss', label: 'Slăbire sănătoasă' },
+  { value: 'muscle-gain', label: 'Creștere masă musculară' },
+  { value: 'health-condition', label: 'Condiții medicale' },
+  { value: 'sports-nutrition', label: 'Nutriție sportivă' },
+  { value: 'general-health', label: 'Sănătate generală' },
+  { value: 'pediatric', label: 'Nutriție pediatrică' },
+  { value: 'elderly', label: 'Nutriție vârstnici' },
+  { value: 'eating-disorders', label: 'Tulburări alimentare' },
+  { value: 'diabetes', label: 'Diabet' }
+];
+
+export const consultationTypes = [
+  { value: 'online', label: 'Online (Video call)', icon: '💻', desc: 'Video call, flexibilitate maximă' },
+  { value: 'cabinet', label: 'La cabinet', icon: '🏢', desc: 'Întâlniri față în față' },
+  { value: 'hybrid', label: 'Hibrid', icon: '🔄', desc: 'Combină online și întâlniri la cabinet' }
+]

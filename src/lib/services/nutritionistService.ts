@@ -74,7 +74,6 @@ export class NutritionistService {
     try {
       const dataToSave = {
         ...nutritionistData,
-        consultation_duration: parseInt(nutritionistData.consultation_duration.toString()),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }

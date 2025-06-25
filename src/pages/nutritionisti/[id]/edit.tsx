@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -8,6 +8,7 @@ import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { User } from '@supabase/supabase-js'
 import type { NutritionistData } from '@/lib/types/nutritionist'
 import Footer from '@/components/Footer'
+import { consultationTypes, specializations } from '@/lib/utils'
 
 export default function EditNutritionistProfile() {
   const router = useRouter()
@@ -27,9 +28,9 @@ export default function EditNutritionistProfile() {
   const [activeTab, setActiveTab] = useState<'personal' | 'professional' | 'services' | 'availability' | 'documents'>('personal')
   const [isLoading, setIsLoading] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [photoUploading, setPhotoUploading] = useState(false)
+  const [errorFields, setErrorFields] = useState<Record<string, string>>({})
+  const [toasts, setToasts] = useState<{ id: number; message: string; type: 'error' | 'success' }[]>([])
 
   const [nutritionistData, setNutritionistData] = useState<NutritionistData>({
     email: '',
@@ -56,6 +57,42 @@ export default function EditNutritionistProfile() {
     verification_status: 'pending'
   })
 
+  // Toast management
+  const addToast = useCallback((message: string, type: 'error' | 'success') => {
+    const id = Date.now()
+    setToasts((prev) => [...prev, { id, message, type }])
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id))
+    }, 5000)
+  }, [])
+
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id))
+  }
+
+  // Field to tab mapping for error navigation
+  const fieldToTabMap: Record<string, 'personal' | 'professional' | 'services' | 'availability' | 'documents'> = {
+    full_name: 'personal',
+    email: 'personal',
+    phone: 'personal',
+    birth_date: 'personal',
+    gender: 'personal',
+    location: 'personal',
+    bio: 'personal',
+    license_number: 'professional',
+    years_experience: 'professional',
+    specializations: 'professional',
+    education: 'professional',
+    consultation_types: 'services',
+    services: 'services',
+    work_days: 'availability',
+    work_hours: 'availability',
+    consultation_duration: 'availability',
+    documents_uploaded: 'documents'
+  }
+
   // Actualizează state-ul local când hook-ul încarcă datele
   useEffect(() => {
     if (nutritionist) {
@@ -63,12 +100,13 @@ export default function EditNutritionistProfile() {
     }
   }, [nutritionist])
 
-  // Actualizează eroarea dacă există eroare în hook
+  // Handle hook errors as toasts
   useEffect(() => {
     if (hookError) {
-      setError(hookError)
+      addToast(hookError, 'error')
+      setHookError(null)
     }
-  }, [hookError])
+  }, [hookError, addToast, setHookError])
 
   // Check authentication and authorization
   useEffect(() => {
@@ -112,11 +150,18 @@ export default function EditNutritionistProfile() {
     checkAuth()
   }, [id, router.isReady]) // Simplified dependencies
 
-  // Remove the old loadNutritionistData function since we're using the hook now
-
   const updateData = (field: keyof NutritionistData, value: any) => {
     setNutritionistData(prev => ({ ...prev, [field]: value }))
     setHasUnsavedChanges(true)
+    
+    // Clear error for this field when updated
+    if (errorFields[field]) {
+      setErrorFields(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
   }
 
   const addEducation = () => {
@@ -171,6 +216,7 @@ export default function EditNutritionistProfile() {
   }
 
   const validateData = () => {
+    const errors: Record<string, string> = {}
     const requiredFields = {
       full_name: 'Numele complet',
       email: 'Email',
@@ -185,46 +231,57 @@ export default function EditNutritionistProfile() {
 
     for (const [field, label] of Object.entries(requiredFields)) {
       if (!nutritionistData[field as keyof NutritionistData]) {
-        setError(`${label} este obligatoriu.`)
-        return false
+        errors[field] = `${label} este obligatoriu.`
       }
     }
 
     if (nutritionistData.specializations.length === 0) {
-      setError('Selectează cel puțin o specializare.')
-      return false
+      errors['specializations'] = 'Selectează cel puțin o specializare.'
     }
 
     if (nutritionistData.education.length === 0) {
-      setError('Adaugă cel puțin o educație.')
-      return false
+      errors['education'] = 'Adaugă cel puțin o educație.'
     }
 
     if (nutritionistData.consultation_types.length === 0) {
-      setError('Selectează cel puțin un tip de consultație.')
-      return false
+      errors['consultation_types'] = 'Selectează cel puțin un tip de consultație.'
     }
 
     if (nutritionistData.services.length === 0) {
-      setError('Adaugă cel puțin un serviciu.')
-      return false
+      errors['services'] = 'Adaugă cel puțin un serviciu.'
     }
 
     if (nutritionistData.work_days.length === 0) {
-      setError('Selectează cel puțin o zi de lucru.')
-      return false
+      errors['work_days'] = 'Selectează cel puțin o zi de lucru.'
     }
 
-    return true
+    return {
+      valid: Object.keys(errors).length === 0,
+      errors
+    }
   }
 
   const handleSave = async () => {
-    if (!validateData()) {
+    const validation = validateData()
+    if (!validation.valid) {
+      setErrorFields(validation.errors)
+      
+      // Find the first error and switch to its tab
+      const firstErrorField = Object.keys(validation.errors)[0]
+      if (firstErrorField && fieldToTabMap[firstErrorField]) {
+        setActiveTab(fieldToTabMap[firstErrorField])
+      }
+      
+      // Show first error as toast
+      const firstErrorMessage = validation.errors[firstErrorField]
+      if (firstErrorMessage) {
+        addToast(firstErrorMessage, 'error')
+      }
+      
       return
     }
 
     setIsLoading(true)
-    setError(null)
 
     try {
       if (id === 'new') {
@@ -238,6 +295,7 @@ export default function EditNutritionistProfile() {
 
         // Redirect to edit page with new ID
         router.push(`/nutritionisti/${data!.id}/edit`)
+        addToast('Profilul a fost creat cu succes!', 'success')
       } else {
         // Update existing profile using service
         const { data, error } = await NutritionistService.updateNutritionist({
@@ -251,14 +309,15 @@ export default function EditNutritionistProfile() {
         if (data) {
           setNutritionistData(data)
         }
+        
+        addToast('Profilul a fost salvat cu succes!', 'success')
       }
 
       setHasUnsavedChanges(false)
-      setShowSaveConfirm(true)
-      setTimeout(() => setShowSaveConfirm(false), 3000)
+      setErrorFields({})
     } catch (error: any) {
       console.error('Error saving nutritionist data:', error)
-      setError(error.message || 'A apărut o eroare la salvare.')
+      addToast(error.message || 'A apărut o eroare la salvare.', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -275,7 +334,7 @@ export default function EditNutritionistProfile() {
     }
 
     if (!user?.id || !nutritionistData.id) {
-      setError('Profilul trebuie salvat înainte de a încărca documente.')
+      addToast('Profilul trebuie salvat înainte de a încărca documente.', 'error')
       return
     }
 
@@ -299,7 +358,7 @@ export default function EditNutritionistProfile() {
 
     } catch (error: any) {
       console.error('Error uploading file:', error)
-      setError(`Eroare la încărcarea fișierului: ${error.message}`)
+      addToast(`Eroare la încărcarea fișierului: ${error.message}`, 'error')
     }
   }
 
@@ -311,7 +370,7 @@ export default function EditNutritionistProfile() {
       file
     )
     if (error || !url) {
-      setError('Eroare la încărcarea fotografiei.')
+      addToast('Eroare la încărcarea fotografiei.', 'error')
     } else {
       // update DB row
       await NutritionistService.updateNutritionist({
@@ -351,6 +410,30 @@ export default function EditNutritionistProfile() {
         <meta name="description" content="Editează profilul tău de nutriționist" />
       </Head>
 
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end space-y-2">
+        {toasts.map(toast => (
+          <div 
+            key={toast.id}
+            className={`p-4 rounded-lg shadow-lg text-white transition-all duration-300 ${
+              toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
+            }`}
+          >
+            <div className="flex items-center">
+              <span>{toast.message}</span>
+              <button 
+                onClick={() => removeToast(toast.id)}
+                className="ml-4"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pb-12">
         {/* Header */}
         <div className="bg-white shadow-sm sticky top-0 z-40">
@@ -379,44 +462,10 @@ export default function EditNutritionistProfile() {
           </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-              <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <div>
-                <h3 className="font-semibold text-red-800">Eroare</h3>
-                <p className="text-red-700 text-sm">{error}</p>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="ml-auto text-red-600 hover:text-red-800"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {showSaveConfirm && (
-          <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Profilul a fost salvat cu succes!
-          </div>
-        )}
-
         {/* Profile Header */}
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row gap-6 items-start">
-              {/*  */}
               <div className="relative">
                 {nutritionistData.profile_photo_url ? (
                   <img
@@ -433,7 +482,6 @@ export default function EditNutritionistProfile() {
                   </div>
                 )}
 
-                {/* transparent file input over the edit button */}
                 <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full
                     flex items-center justify-center hover:bg-green-700 cursor-pointer">
                   {photoUploading ? (
@@ -557,9 +605,10 @@ export default function EditNutritionistProfile() {
                       type="text"
                       value={nutritionistData.full_name}
                       onChange={(e) => updateData('full_name', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.full_name ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="ex: Dr. Maria Popescu"
                     />
+                    {errorFields.full_name && <p className="text-red-500 text-sm mt-1">{errorFields.full_name}</p>}
                   </div>
 
                   <div>
@@ -568,9 +617,10 @@ export default function EditNutritionistProfile() {
                       type="email"
                       value={nutritionistData.email}
                       onChange={(e) => updateData('email', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.email ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="email@exemplu.com"
                     />
+                    {errorFields.email && <p className="text-red-500 text-sm mt-1">{errorFields.email}</p>}
                   </div>
 
                   <div>
@@ -579,9 +629,10 @@ export default function EditNutritionistProfile() {
                       type="tel"
                       value={nutritionistData.phone}
                       onChange={(e) => updateData('phone', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.phone ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="07XX XXX XXX"
                     />
+                    {errorFields.phone && <p className="text-red-500 text-sm mt-1">{errorFields.phone}</p>}
                   </div>
 
                   <div>
@@ -590,8 +641,9 @@ export default function EditNutritionistProfile() {
                       type="date"
                       value={nutritionistData.birth_date}
                       onChange={(e) => updateData('birth_date', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.birth_date ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     />
+                    {errorFields.birth_date && <p className="text-red-500 text-sm mt-1">{errorFields.birth_date}</p>}
                   </div>
 
                   <div>
@@ -599,13 +651,14 @@ export default function EditNutritionistProfile() {
                     <select
                       value={nutritionistData.gender}
                       onChange={(e) => updateData('gender', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.gender ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     >
                       <option value="">Selectează...</option>
                       <option value="Masculin">Masculin</option>
                       <option value="Feminin">Feminin</option>
                       <option value="Altul">Altul</option>
                     </select>
+                    {errorFields.gender && <p className="text-red-500 text-sm mt-1">{errorFields.gender}</p>}
                   </div>
 
                   <div>
@@ -614,9 +667,10 @@ export default function EditNutritionistProfile() {
                       type="text"
                       value={nutritionistData.location}
                       onChange={(e) => updateData('location', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.location ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="ex: București, Sector 1"
                     />
+                    {errorFields.location && <p className="text-red-500 text-sm mt-1">{errorFields.location}</p>}
                   </div>
                 </div>
 
@@ -668,9 +722,10 @@ export default function EditNutritionistProfile() {
                     value={nutritionistData.bio}
                     onChange={(e) => updateData('bio', e.target.value)}
                     rows={6}
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                    className={`w-full p-3 border-2 ${errorFields.bio ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     placeholder="Scrie o descriere detaliată despre tine, experiența ta și abordarea ta în nutriție. Aceasta va fi prima impresie pe care o vor avea clienții despre tine."
                   />
+                  {errorFields.bio && <p className="text-red-500 text-sm mt-1">{errorFields.bio}</p>}
                   <p className="text-sm text-gray-500 mt-2">{nutritionistData.bio.length}/1000 caractere</p>
                 </div>
               </div>
@@ -688,9 +743,10 @@ export default function EditNutritionistProfile() {
                       type="text"
                       value={nutritionistData.license_number}
                       onChange={(e) => updateData('license_number', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.license_number ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="ex: CDR12345"
                     />
+                    {errorFields.license_number && <p className="text-red-500 text-sm mt-1">{errorFields.license_number}</p>}
                   </div>
 
                   <div>
@@ -698,7 +754,7 @@ export default function EditNutritionistProfile() {
                     <select
                       value={nutritionistData.years_experience}
                       onChange={(e) => updateData('years_experience', e.target.value)}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                      className={`w-full p-3 border-2 ${errorFields.years_experience ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     >
                       <option value="">Selectează...</option>
                       {[...Array(20)].map((_, i) => (
@@ -706,23 +762,15 @@ export default function EditNutritionistProfile() {
                       ))}
                       <option value="20+">20+ ani</option>
                     </select>
+                    {errorFields.years_experience && <p className="text-red-500 text-sm mt-1">{errorFields.years_experience}</p>}
                   </div>
                 </div>
 
                 <div className="mb-8">
                   <label className="block text-sm font-medium text-gray-700 mb-3">Specializări *</label>
+                  {errorFields.specializations && <p className="text-red-500 text-sm mb-2">{errorFields.specializations}</p>}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {[
-                      { value: 'weight-loss', label: 'Slăbire sănătoasă' },
-                      { value: 'muscle-gain', label: 'Creștere masă musculară' },
-                      { value: 'health-condition', label: 'Condiții medicale' },
-                      { value: 'sports-nutrition', label: 'Nutriție sportivă' },
-                      { value: 'general-health', label: 'Sănătate generală' },
-                      { value: 'pediatric', label: 'Nutriție pediatrică' },
-                      { value: 'elderly', label: 'Nutriție vârstnici' },
-                      { value: 'eating-disorders', label: 'Tulburări alimentare' },
-                      { value: 'diabetes', label: 'Diabet' }
-                    ].map((spec) => (
+                    {specializations.map((spec) => (
                       <label key={spec.value} className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
                         <input
                           type="checkbox"
@@ -756,6 +804,7 @@ export default function EditNutritionistProfile() {
                 <div className="mb-8">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">Educație *</h3>
+                    {errorFields.education && <p className="text-red-500 text-sm">{errorFields.education}</p>}
                     <button
                       onClick={addEducation}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
@@ -871,12 +920,9 @@ export default function EditNutritionistProfile() {
 
                 <div className="mb-8">
                   <label className="block text-sm font-medium text-gray-700 mb-3">Tipuri de consultații oferite *</label>
+                  {errorFields.consultation_types && <p className="text-red-500 text-sm mb-2">{errorFields.consultation_types}</p>}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                      { value: 'online', label: 'Online (Video call)', icon: '💻' },
-                      { value: 'in-person', label: 'La cabinet', icon: '🏢' },
-                      { value: 'hybrid', label: 'Hibrid', icon: '🔄' }
-                    ].map((type) => (
+                    {consultationTypes.map((type) => (
                       <label key={type.value} className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
                         <input
                           type="checkbox"
@@ -912,6 +958,7 @@ export default function EditNutritionistProfile() {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-semibold text-gray-800">Serviciile tale *</h3>
+                    {errorFields.services && <p className="text-red-500 text-sm">{errorFields.services}</p>}
                     <button
                       onClick={addService}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
@@ -1006,6 +1053,7 @@ export default function EditNutritionistProfile() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Zilele în care lucrezi *</h3>
+                    {errorFields.work_days && <p className="text-red-500 text-sm mb-2">{errorFields.work_days}</p>}
                     <div className="space-y-3">
                       {['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă', 'Duminică'].map((day) => (
                         <label key={day} className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
