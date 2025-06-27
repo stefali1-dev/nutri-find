@@ -1188,7 +1188,7 @@ export default function EditNutritionistProfile() {
                               </svg>
                               <div>
                                 <p className="font-medium text-green-800">Diplomă încărcată</p>
-                                <p className="text-sm text-green-600">Document verificat cu succes</p>
+                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
                               </div>
                             </div>
                             <button
@@ -1251,7 +1251,7 @@ export default function EditNutritionistProfile() {
                               </svg>
                               <div>
                                 <p className="font-medium text-green-800">Certificat CDR încărcat</p>
-                                <p className="text-sm text-green-600">Document verificat cu succes</p>
+                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
                               </div>
                             </div>
                             <button
@@ -1293,7 +1293,7 @@ export default function EditNutritionistProfile() {
                 <div className="mt-8 p-4 bg-blue-50 rounded-xl">
                   <h4 className="font-semibold text-blue-800 mb-2">🔒 Securitatea documentelor</h4>
                   <p className="text-blue-700 text-sm">
-                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 48 de ore.
+                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 24 de ore.
                     După verificare, vei primi o confirmare prin email și profilul tău va fi activat.
                   </p>
                 </div>

@@ -900,7 +900,7 @@ export default function NutritionistOnboarding() {
                 </div>
             </div>
 
-            <Footer />
+            {/* <Footer /> */}
         </>
     )
 }
