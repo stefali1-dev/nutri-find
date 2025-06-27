@@ -61,7 +61,7 @@ export default function EditNutritionistProfile() {
   const addToast = useCallback((message: string, type: 'error' | 'success') => {
     const id = Date.now()
     setToasts((prev) => [...prev, { id, message, type }])
-    
+
     // Auto remove after 5 seconds
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id))
@@ -153,7 +153,7 @@ export default function EditNutritionistProfile() {
   const updateData = (field: keyof NutritionistData, value: any) => {
     setNutritionistData(prev => ({ ...prev, [field]: value }))
     setHasUnsavedChanges(true)
-    
+
     // Clear error for this field when updated
     if (errorFields[field]) {
       setErrorFields(prev => {
@@ -265,19 +265,19 @@ export default function EditNutritionistProfile() {
     const validation = validateData()
     if (!validation.valid) {
       setErrorFields(validation.errors)
-      
+
       // Find the first error and switch to its tab
       const firstErrorField = Object.keys(validation.errors)[0]
       if (firstErrorField && fieldToTabMap[firstErrorField]) {
         setActiveTab(fieldToTabMap[firstErrorField])
       }
-      
+
       // Show first error as toast
       const firstErrorMessage = validation.errors[firstErrorField]
       if (firstErrorMessage) {
         addToast(firstErrorMessage, 'error')
       }
-      
+
       return
     }
 
@@ -309,7 +309,7 @@ export default function EditNutritionistProfile() {
         if (data) {
           setNutritionistData(data)
         }
-        
+
         addToast('Profilul a fost salvat cu succes!', 'success')
       }
 
@@ -413,15 +413,14 @@ export default function EditNutritionistProfile() {
       {/* Toast Notifications */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end space-y-2">
         {toasts.map(toast => (
-          <div 
+          <div
             key={toast.id}
-            className={`p-4 rounded-lg shadow-lg text-white transition-all duration-300 ${
-              toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
-            }`}
+            className={`p-4 rounded-lg shadow-lg text-white transition-all duration-300 ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
+              }`}
           >
             <div className="flex items-center">
               <span>{toast.message}</span>
-              <button 
+              <button
                 onClick={() => removeToast(toast.id)}
                 className="ml-4"
               >
@@ -447,13 +446,13 @@ export default function EditNutritionistProfile() {
                 <span className="text-gray-600">{id === 'new' ? 'Profil nou' : 'Editare profil'}</span>
               </div>
               <div className="flex items-center gap-4">
-                {nutritionistData.id && (
+                {/* {nutritionistData.id && (
                   <Link href={`/nutritionisti/${nutritionistData.id}`}>
                     <button className="text-gray-600 hover:text-green-600 transition-colors">
                       Previzualizare profil
                     </button>
                   </Link>
-                )}
+                )} */}
                 {hasUnsavedChanges && (
                   <span className="text-orange-600 text-sm">Modificări nesalvate</span>
                 )}
@@ -542,17 +541,35 @@ export default function EditNutritionistProfile() {
 
                 <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${documentsValid ? 'bg-green-500' : 'bg-orange-500'}`}></div>
-                    <span>Status profil: {documentsValid ? 'Activ' : 'În așteptare documente'}</span>
+                    <div
+                      className={`w-2 h-2 rounded-full ${nutritionistData.verification_status === 'verified'
+                          ? 'bg-green-500'
+                          : 'bg-orange-500'
+                        }`}
+                    ></div>
+                    <span>
+                      Status profil:{' '}
+                      {nutritionistData.verification_status === 'verified'
+                        ? 'Activ'
+                        : 'În așteptare verificare'}
+                    </span>
                   </div>
-                  {nutritionistData.average_rating && (
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span>{nutritionistData.average_rating} ({nutritionistData.total_consultations} consultații)</span>
-                    </div>
-                  )}
+                  {nutritionistData.average_rating !== undefined &&
+                    nutritionistData.average_rating !== null &&
+                    nutritionistData.average_rating !== 0 && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span>
+                          {nutritionistData.average_rating}
+                          {nutritionistData.total_consultations !== undefined &&
+                            nutritionistData.total_consultations !== 0
+                            ? ` (${nutritionistData.total_consultations} consultații)`
+                            : ''}
+                        </span>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -567,7 +584,7 @@ export default function EditNutritionistProfile() {
                 { id: 'personal', label: 'Date personale', icon: '👤' },
                 { id: 'professional', label: 'Date profesionale', icon: '🎓' },
                 { id: 'services', label: 'Servicii și prețuri', icon: '💼' },
-                { id: 'availability', label: 'Disponibilitate', icon: '📅' },
+                // TODO: { id: 'availability', label: 'Disponibilitate', icon: '📅' },
                 { id: 'documents', label: 'Documente', icon: '📄' }
               ].map((tab) => (
                 <button

@@ -337,7 +337,7 @@ export default function NutritionistOnboarding() {
                         <Link href="/">
                             <span className="text-xl sm:text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
                         </Link>
-                        <Link href="/nutritionist/login">
+                        <Link href="/nutritionisti/login">
                             <span className="text-green-600 hover:text-green-700 cursor-pointer text-sm sm:text-base">
                                 <span className="hidden sm:inline">Ai deja cont? </span>Conectează-te
                             </span>
@@ -440,19 +440,6 @@ export default function NutritionistOnboarding() {
                                         <strong>💡 Sfat:</strong> Folosește email-ul profesional pe care îl verifici zilnic. Aici vei primi notificări despre clienți noi.
                                     </p>
                                 </div>
-
-                                {/* Benefits box */}
-                                <div className="bg-green-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-green-200">
-                                    <h3 className="font-semibold text-green-800 mb-3 text-sm sm:text-base">
-                                        Ce primești în perioada de lansare:
-                                    </h3>
-                                    <ul className="space-y-2 text-xs sm:text-sm text-green-700">
-                                        <li>✓ Listare 100% gratuită pe platformă</li>
-                                        <li>✓ Acces la mii de clienți potențiali</li>
-                                        <li>✓ Dashboard profesional complet</li>
-                                        <li>✓ Suport dedicat pentru succes</li>
-                                    </ul>
-                                </div>
                             </div>
                         </div>
                     )}
@@ -499,9 +486,6 @@ export default function NutritionistOnboarding() {
                                     )}
                                 </div>
 
-                                <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-blue-800">
-                                    💡 <strong>Sfat:</strong> Clienții apreciază răspunsurile rapide. Asigură-te că numărul de telefon este activ și disponibil în timpul programului de lucru.
-                                </div>
                             </div>
                         </div>
                     )}
@@ -547,11 +531,6 @@ export default function NutritionistOnboarding() {
                                     {errors.specializations && (
                                         <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.specializations}</p>
                                     )}
-                                </div>
-
-                                {/* Sfat specializari */}
-                                <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-blue-800">
-                                    💡 <strong>Sfat:</strong> Selectează 2-4 specializări principale. Prea multe specializări pot confuza clienții despre expertiza ta principală.
                                 </div>
 
                                 {/* Experience */}
@@ -629,7 +608,7 @@ export default function NutritionistOnboarding() {
                                         className={`w-full px-3 sm:px-4 py-3 rounded-lg sm:rounded-xl border ${errors.bio ? 'border-red-500' : 'border-gray-300'
                                             } focus:outline-none focus:ring-2 focus:ring-green-500`}
                                         rows={5}
-                                        placeholder="Spune clienților despre experiența ta, abordarea ta și ce te face special..."
+                                        placeholder="Spune clienților despre tine..."
                                     />
                                     <div className="mt-1 text-xs sm:text-sm text-gray-500">
                                         {formData.bio.length}/50 caractere minime
@@ -819,7 +798,7 @@ export default function NutritionistOnboarding() {
                                     <h3 className="font-semibold text-green-800 mb-3 text-sm sm:text-base">Ce urmează după înregistrare:</h3>
                                     <ul className="space-y-2 text-xs sm:text-sm text-green-700">
                                         <li>✓ Vei primi un email de confirmare imediat</li>
-                                        <li>✓ Profilul tău va fi revizuit în 24-48 ore</li>
+                                        <li>✓ Profilul tău va fi revizuit în 24 ore</li>
                                         <li>✓ Între timp, poți completa profilul cu poze și documente</li>
                                         <li>✓ Primii clienți pot apărea chiar din prima săptămână!</li>
                                     </ul>

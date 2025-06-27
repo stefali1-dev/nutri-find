@@ -64,8 +64,8 @@ export default function NutritionistLogin() {
   return (
     <>
       <Head>
-        <title>Login Nutriționist - NutriConnect</title>
-        <meta name="description" content="Conectează-te la contul tău de nutriționist NutriConnect." />
+        <title>Login Nutriționist - NutriFind</title>
+        <meta name="description" content="Conectează-te la contul tău de nutriționist NutriFind." />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col">
@@ -74,7 +74,7 @@ export default function NutritionistLogin() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <Link href="/">
-                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriConnect</span>
+                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
               </Link>
               <div className="flex items-center">
                 <span className="text-sm text-gray-600 mr-2">Nu ai cont?</span>
@@ -190,9 +190,9 @@ export default function NutritionistLogin() {
                   </div>
 
                   <div className="text-sm">
-                    <a href="#" className="font-medium text-green-600 hover:text-green-500 transition-colors">
+                    <Link href="/reset-password" className="font-medium text-green-600 hover:text-green-500 transition-colors">
                       Ai uitat parola?
-                    </a>
+                    </Link>
                   </div>
                 </div>
 
@@ -219,7 +219,7 @@ export default function NutritionistLogin() {
                 </div>
               </form>
 
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300" />
@@ -230,8 +230,7 @@ export default function NutritionistLogin() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 gap-3">
-                  {/* Aici poți adăuga butoane de login cu Google, Facebook etc. dacă vei implementa */}
-                  {/* Exemplu (fără funcționalitate reală aici): */}
+
                   <button
                     type="button"
                     disabled // Scoate disabled când implementezi
@@ -243,7 +242,7 @@ export default function NutritionistLogin() {
                     <span>Google (curând)</span>
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
             <p className="mt-8 text-center text-sm text-gray-600">
               Ești client și cauți un nutriționist?{' '}
@@ -258,7 +257,7 @@ export default function NutritionistLogin() {
         <footer className="bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} NutriConnect. Toate drepturile rezervate.
+              &copy; {new Date().getFullYear()} NutriFind. Toate drepturile rezervate.
             </p>
           </div>
         </footer>
