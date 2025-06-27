@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -11,34 +11,66 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRequest, setIsLoadingRequest] = useState(false); // For initial request
+  const [isLoadingSetPassword, setIsLoadingSetPassword] = useState(false); // For setting new password
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Timer state
+  const [countdown, setCountdown] = useState(0);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    // Check for a `type` query parameter to determine if it's a password reset confirmation
     const { type } = router.query;
     if (type === 'recovery') {
       setShowPasswordFields(true);
       setMessage('Setează o nouă parolă pentru contul tău.');
+      // Clear any previous error/message related to the request form
+      setError('');
+    } else {
+      setShowPasswordFields(false); // Ensure it's false when not in recovery mode
     }
+
+    // Clean up interval on component unmount
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
   }, [router.query]);
+
+  // Handle countdown logic
+  useEffect(() => {
+    if (countdown > 0) {
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (countdown === 0 && countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, [countdown]);
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoadingRequest(true);
     setError('');
     setMessage('');
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setError('Te rugăm să introduci o adresă de email validă.');
-      setIsLoading(false);
+      setIsLoadingRequest(false);
       return;
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://nutrifind.ro/reset-password?type=recovery', // Ensure this matches your Supabase redirect URL
+      redirectTo: 'https://nutrifind.ro/reset-password?type=recovery',
     });
 
     if (error) {
@@ -46,31 +78,32 @@ export default function ResetPassword() {
     } else {
       setMessage('Am trimis un link de resetare a parolei la adresa ta de email. Verifică și folderul de spam.');
       setEmail(''); // Clear email field after sending
+      setCountdown(60); // Start 60-second countdown
     }
-    setIsLoading(false);
+    setIsLoadingRequest(false);
   };
 
   const handleSetNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoadingSetPassword(true);
     setError('');
     setMessage('');
 
     if (!password || !confirmPassword) {
       setError('Parola și confirmarea parolei sunt obligatorii.');
-      setIsLoading(false);
+      setIsLoadingSetPassword(false);
       return;
     }
 
     if (password.length < 6) {
       setError('Parola trebuie să aibă minim 6 caractere.');
-      setIsLoading(false);
+      setIsLoadingSetPassword(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Parolele nu se potrivesc.');
-      setIsLoading(false);
+      setIsLoadingSetPassword(false);
       return;
     }
 
@@ -82,13 +115,16 @@ export default function ResetPassword() {
       setMessage('Parola a fost resetată cu succes! Te poți autentifica acum.');
       setPassword('');
       setConfirmPassword('');
-      // Optionally redirect to login after a short delay
+      // Redirect to login after a short delay
       setTimeout(() => {
         router.push('/nutritionisti/login');
       }, 3000);
     }
-    setIsLoading(false);
+    setIsLoadingSetPassword(false);
   };
+
+  const isRequestButtonDisabled = isLoadingRequest || countdown > 0;
+  const setPasswordButtonDisabled = isLoadingSetPassword;
 
   return (
     <>
@@ -107,8 +143,8 @@ export default function ResetPassword() {
               </Link>
               <div className="flex items-center">
                 <span className="text-sm text-gray-600 mr-2">Înapoi la login?</span>
-                <Link href="/nutritionisti/login">
-                  <button className="text-green-600 hover:text-green-700 font-medium transition-colors">
+                <Link href="/nutritionisti/login" legacyBehavior>
+                  <button className="text-green-600 hover:text-green-700 font-medium transition-colors py-2 px-3 rounded-md">
                     Login
                   </button>
                 </Link>
@@ -130,37 +166,28 @@ export default function ResetPassword() {
                 </h2>
                 <p className="mt-2 text-sm text-gray-600">
                   {showPasswordFields
-                    ? 'Introdu și confirmă noua ta parolă.'
-                    : 'Introdu adresa de email asociată contului tău și îți vom trimite un link pentru resetarea parolei.'}
+                    ? 'Introdu și confirmă noua ta parolă. Asigură-te că este una sigură.'
+                    : 'Introdu adresa de email asociată contului tău și îți vom trimite un link securizat pentru resetarea parolei.'}
                 </p>
               </div>
 
               <form className="mt-8 space-y-6" onSubmit={showPasswordFields ? handleSetNewPassword : handleRequestReset}>
-                {error && (
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                {(error || message) && (
+                  <div className={`rounded-md p-4 ${error ? 'bg-red-50 border-l-4 border-red-400' : 'bg-green-50 border-l-4 border-green-400'}`}>
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.293-3.293a1 1 0 001.414 0L13 12.414l1.879 1.879a1 1 0 101.414-1.414L14.414 11l1.879-1.879a1 1 0 10-1.414-1.414L13 9.586l-1.879-1.879a1 1 0 00-1.414 1.414L11.586 11l-1.879 1.879a1 1 0 000 1.414z" clipRule="evenodd" />
-                        </svg>
+                        {error ? (
+                          <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.293-3.293a1 1 0 001.414 0L13 12.414l1.879 1.879a1 1 0 101.414-1.414L14.414 11l1.879-1.879a1 1 0 10-1.414-1.414L13 9.586l-1.879-1.879a1 1 0 00-1.414 1.414L11.586 11l-1.879 1.879a1 1 0 000 1.414z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm text-red-700">{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {message && (
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm text-green-700">{message}</p>
+                        <p className={`text-sm ${error ? 'text-red-700' : 'text-green-700'}`}>{error || message}</p>
                       </div>
                     </div>
                   </div>
@@ -181,6 +208,7 @@ export default function ResetPassword() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition-colors"
                       placeholder="exemplu@domeniu.ro"
+                      disabled={isLoadingRequest || countdown > 0} // Disable during loading or countdown
                     />
                   </div>
                 ) : (
@@ -199,17 +227,19 @@ export default function ResetPassword() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition-colors"
-                          placeholder="Parola nouă"
+                          placeholder="Introduceți parola nouă"
+                          disabled={isLoadingSetPassword}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none"
                           aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
+                          disabled={isLoadingSetPassword}
                         >
                           {showPassword ? (
                             <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395m-4.004-3.568L15.75 21m-3.65-3.65a2.25 2.25 0 01-3.182 0M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21" />
                             </svg>
                           ) : (
                             <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -234,17 +264,19 @@ export default function ResetPassword() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition-colors"
-                          placeholder="Confirmă parola nouă"
+                          placeholder="Confirmați parola nouă"
+                          disabled={isLoadingSetPassword}
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none"
                           aria-label={showConfirmPassword ? "Ascunde parola" : "Arată parola"}
+                          disabled={isLoadingSetPassword}
                         >
                           {showConfirmPassword ? (
                             <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395m-4.004-3.568L15.75 21m-3.65-3.65a2.25 2.25 0 01-3.182 0M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21" />
                             </svg>
                           ) : (
                             <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -261,22 +293,39 @@ export default function ResetPassword() {
                 <div>
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={showPasswordFields ? setPasswordButtonDisabled : isRequestButtonDisabled}
                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-150 ease-in-out disabled:opacity-75 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? (
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg className="h-5 w-5 text-green-500 group-hover:text-green-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                    {showPasswordFields ? (
+                      // Loader for setting new password
+                      isLoadingSetPassword ? (
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                      </span>
+                      ) : (
+                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                          <svg className="h-5 w-5 text-green-500 group-hover:text-green-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                      )
+                    ) : (
+                      // Loader for request reset email
+                      isLoadingRequest ? (
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                          <svg className="h-5 w-5 text-green-500 group-hover:text-green-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                      )
                     )}
-                    {isLoading ? (showPasswordFields ? 'Setează...' : 'Se trimite...') : (showPasswordFields ? 'Setează Parola' : 'Trimite Link de Resetare')}
+                    {showPasswordFields ? (isLoadingSetPassword ? 'Setează...' : 'Setează Parola') : (countdown > 0 ? `Re-trimite în ${countdown}s` : (isLoadingRequest ? 'Se trimite...' : 'Trimite Link de Resetare'))}
                   </button>
                 </div>
               </form>
