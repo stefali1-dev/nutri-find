@@ -384,9 +384,9 @@ export default function NutritionistsPage() {
                                                 Înscrie-te gratuit acum
                                             </button>
                                         </Link>
-                                        <Link href="#how-it-works">
+                                        <Link href="/nutritionisti/login">
                                             <button className="w-full sm:w-auto cursor-pointer bg-white text-green-600 border-2 border-green-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-50 transition-all">
-                                                Vezi cum funcționează
+                                                Accesează contul
                                             </button>
                                         </Link>
                                     </div>

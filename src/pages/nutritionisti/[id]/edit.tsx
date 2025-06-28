@@ -8,6 +8,7 @@ import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { User } from '@supabase/supabase-js'
 import type { NutritionistData } from '@/lib/types/nutritionist'
 import Footer from '@/components/Footer'
+import LocationSearch from '@/components/LocationSearch'
 import { consultationTypes, specializations } from '@/lib/utils'
 
 export default function EditNutritionistProfile() {
@@ -31,6 +32,7 @@ export default function EditNutritionistProfile() {
   const [photoUploading, setPhotoUploading] = useState(false)
   const [errorFields, setErrorFields] = useState<Record<string, string>>({})
   const [toasts, setToasts] = useState<{ id: number; message: string; type: 'error' | 'success' }[]>([])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [nutritionistData, setNutritionistData] = useState<NutritionistData>({
     email: '',
@@ -93,7 +95,15 @@ export default function EditNutritionistProfile() {
     documents_uploaded: 'documents'
   }
 
-  // Actualizează state-ul local când hook-ul încarcă datele
+  // Mobile tab navigation
+  const tabs = [
+    { id: 'personal', label: 'Date personale', icon: '👤' },
+    { id: 'professional', label: 'Date profesionale', icon: '🎓' },
+    { id: 'services', label: 'Servicii și prețuri', icon: '💼' },
+    { id: 'documents', label: 'Documente', icon: '📄' }
+  ]
+
+  // Update local state when hook loads data
   useEffect(() => {
     if (nutritionist) {
       setNutritionistData(nutritionist)
@@ -111,7 +121,6 @@ export default function EditNutritionistProfile() {
   // Check authentication and authorization
   useEffect(() => {
     const checkAuth = async () => {
-      // Wait for router to be ready
       if (!router.isReady) return
 
       const { data: { user } } = await supabase.auth.getUser()
@@ -123,7 +132,6 @@ export default function EditNutritionistProfile() {
 
       setUser(user)
 
-      // Check if user is authorized to edit this profile
       if (id && id !== 'new') {
         const { data: nutritionist, error } = await NutritionistService.getNutritionistById(id as string)
 
@@ -132,10 +140,8 @@ export default function EditNutritionistProfile() {
           return
         }
 
-        // Load existing nutritionist data
         setNutritionistData(nutritionist)
       } else {
-        // Set default data for new profile
         setNutritionistData(prev => ({
           ...prev,
           email: user.email!,
@@ -148,13 +154,12 @@ export default function EditNutritionistProfile() {
     }
 
     checkAuth()
-  }, [id, router.isReady]) // Simplified dependencies
+  }, [id, router.isReady])
 
   const updateData = (field: keyof NutritionistData, value: any) => {
     setNutritionistData(prev => ({ ...prev, [field]: value }))
     setHasUnsavedChanges(true)
 
-    // Clear error for this field when updated
     if (errorFields[field]) {
       setErrorFields(prev => {
         const newErrors = { ...prev }
@@ -266,13 +271,11 @@ export default function EditNutritionistProfile() {
     if (!validation.valid) {
       setErrorFields(validation.errors)
 
-      // Find the first error and switch to its tab
       const firstErrorField = Object.keys(validation.errors)[0]
       if (firstErrorField && fieldToTabMap[firstErrorField]) {
         setActiveTab(fieldToTabMap[firstErrorField])
       }
 
-      // Show first error as toast
       const firstErrorMessage = validation.errors[firstErrorField]
       if (firstErrorMessage) {
         addToast(firstErrorMessage, 'error')
@@ -285,7 +288,6 @@ export default function EditNutritionistProfile() {
 
     try {
       if (id === 'new') {
-        // Create new profile using service
         const { data, error } = await NutritionistService.createNutritionist({
           ...nutritionistData,
           user_id: user?.id!
@@ -293,11 +295,9 @@ export default function EditNutritionistProfile() {
 
         if (error) throw error
 
-        // Redirect to edit page with new ID
         router.push(`/nutritionisti/${data!.id}/edit`)
         addToast('Profilul a fost creat cu succes!', 'success')
       } else {
-        // Update existing profile using service
         const { data, error } = await NutritionistService.updateNutritionist({
           ...nutritionistData,
           id: nutritionistData.id!
@@ -305,7 +305,6 @@ export default function EditNutritionistProfile() {
 
         if (error) throw error
 
-        // Update local state with returned data but preserve user edits
         if (data) {
           setNutritionistData(data)
         }
@@ -325,7 +324,6 @@ export default function EditNutritionistProfile() {
 
   const handleFileUpload = async (field: 'diploma' | 'certificate', file: File | null) => {
     if (!file) {
-      // Remove file logic
       updateData('documents_uploaded', {
         ...nutritionistData.documents_uploaded,
         [field]: false
@@ -350,11 +348,12 @@ export default function EditNutritionistProfile() {
         throw error
       }
 
-      // Update documents status
       updateData('documents_uploaded', {
         ...nutritionistData.documents_uploaded,
         [field]: true
       })
+
+      addToast('Document încărcat cu succes!', 'success')
 
     } catch (error: any) {
       console.error('Error uploading file:', error)
@@ -372,13 +371,12 @@ export default function EditNutritionistProfile() {
     if (error || !url) {
       addToast('Eroare la încărcarea fotografiei.', 'error')
     } else {
-      // update DB row
       await NutritionistService.updateNutritionist({
         id: nutritionistData.id!,
         profile_photo_url: url
       })
-      // update local state
       setNutritionistData(prev => ({ ...prev, profile_photo_url: url }))
+      addToast('Fotografia a fost actualizată!', 'success')
     }
     setPhotoUploading(false)
   }
@@ -389,7 +387,8 @@ export default function EditNutritionistProfile() {
     }
   }
 
-  // Show loading while checking authentication
+  const documentsValid = nutritionistData.documents_uploaded.diploma && nutritionistData.documents_uploaded.certificate
+
   if (loading || !authorized) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
@@ -401,30 +400,45 @@ export default function EditNutritionistProfile() {
     )
   }
 
-  const documentsValid = nutritionistData.documents_uploaded.diploma && nutritionistData.documents_uploaded.certificate
-
   return (
     <>
       <Head>
         <title>{id === 'new' ? 'Profil nou' : 'Editare profil'} - {nutritionistData.full_name || 'Nutriționist'} | NutriFind</title>
         <meta name="description" content="Editează profilul tău de nutriționist" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
+      <style jsx global>{`
+        @media (max-width: 640px) {
+          input[type="text"],
+          input[type="email"],
+          input[type="tel"],
+          input[type="number"],
+          input[type="password"],
+          input[type="date"],
+          input[type="time"],
+          textarea,
+          select {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
+
       {/* Toast Notifications */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col-reverse items-end space-y-2">
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 space-y-2 sm:bottom-4 sm:right-4 sm:left-auto sm:p-0 sm:max-w-sm">
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className={`p-4 rounded-lg shadow-lg text-white transition-all duration-300 ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
+            className={`w-full p-4 rounded-lg shadow-lg text-white transition-all duration-300 transform ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
               }`}
           >
-            <div className="flex items-center">
-              <span>{toast.message}</span>
+            <div className="flex items-center justify-between">
+              <span className="flex-1 pr-2">{toast.message}</span>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="ml-4"
+                className="flex-shrink-0 ml-2"
               >
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -438,24 +452,32 @@ export default function EditNutritionistProfile() {
         <div className="bg-white shadow-sm sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <Link href="/">
-                  <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
+                  <span className="text-xl sm:text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
                 </Link>
-                <span className="text-gray-400">/</span>
-                <span className="text-gray-600">{id === 'new' ? 'Profil nou' : 'Editare profil'}</span>
+                <span className="text-gray-400 hidden sm:inline">/</span>
+                <span className="text-gray-600 text-sm sm:text-base hidden sm:inline">
+                  {id === 'new' ? 'Profil nou' : 'Editare profil'}
+                </span>
               </div>
               <div className="flex items-center gap-4">
-                {/* {nutritionistData.id && (
-                  <Link href={`/nutritionisti/${nutritionistData.id}`}>
-                    <button className="text-gray-600 hover:text-green-600 transition-colors">
-                      Previzualizare profil
-                    </button>
-                  </Link>
-                )} */}
                 {hasUnsavedChanges && (
-                  <span className="text-orange-600 text-sm">Modificări nesalvate</span>
+                  <span className="text-orange-600 text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Modificări nesalvate</span>
+                    <span className="sm:hidden">•</span>
+                  </span>
                 )}
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className={`px-4 sm:px-6 py-2 rounded-lg font-medium transition-all text-sm sm:text-base ${isLoading
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
+                >
+                  {isLoading ? 'Se salvează...' : 'Salvează'}
+                </button>
               </div>
             </div>
           </div>
@@ -463,47 +485,33 @@ export default function EditNutritionistProfile() {
 
         {/* Profile Header */}
         <div className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="relative">
+          <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-center justify-center sm:justify-start">
+              <div className="relative mx-auto sm:mx-0">
                 {nutritionistData.profile_photo_url ? (
                   <img
                     src={nutritionistData.profile_photo_url}
                     alt="Avatar"
-                    className="w-24 h-24 rounded-2xl object-cover"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover"
                   />
                 ) : (
-                  <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex
-        items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
                     {nutritionistData.full_name
                       ? nutritionistData.full_name.split(' ').map(n => n[0]).join('')
                       : 'NN'}
                   </div>
                 )}
 
-                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full
-                    flex items-center justify-center hover:bg-green-700 cursor-pointer">
+                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 cursor-pointer shadow-lg">
                   {photoUploading ? (
                     <svg className="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      />
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                     </svg>
-
                   )}
                   <input
                     type="file"
@@ -514,37 +522,39 @@ export default function EditNutritionistProfile() {
                 </label>
               </div>
 
-              <div className="flex-1">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                  {id === 'new' ? 'Creează profil nou' : `Editare profil - ${nutritionistData.full_name || 'Nutriționist'}`}
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                  {id === 'new' ? 'Creează profil nou' : nutritionistData.full_name || 'Editare profil'}
                 </h1>
-                <p className="text-gray-600 mb-4">
+                <p className="text-sm sm:text-base text-gray-600 mb-4">
                   {id === 'new'
-                    ? 'Completează informațiile pentru a-ți crea profilul de nutriționist pe platformă.'
-                    : 'Menține-ți profilul actualizat pentru a atrage mai mulți clienți și a oferi informații corecte.'
+                    ? 'Completează informațiile pentru a-ți crea profilul.'
+                    : 'Menține-ți profilul actualizat pentru mai mulți clienți.'
                   }
                 </p>
 
                 {!documentsValid && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-start gap-3">
-                    <svg className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <div>
-                      <h3 className="font-semibold text-orange-800 mb-1">Documente obligatorii lipsă</h3>
-                      <p className="text-orange-700 text-sm">
-                        Pentru a-ți activa profilul pe platformă, trebuie să încarci diploma de licență și certificatul CDR obligatorii.
-                      </p>
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 sm:p-4 text-sm">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <div>
+                        <h3 className="font-semibold text-orange-800">Documente lipsă</h3>
+                        <p className="text-orange-700 text-xs sm:text-sm">
+                          Încarcă diploma și certificatul CDR pentru activare.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mx-auto sm:mx-0">
                     <div
                       className={`w-2 h-2 rounded-full ${nutritionistData.verification_status === 'verified'
-                          ? 'bg-green-500'
-                          : 'bg-orange-500'
+                        ? 'bg-green-500'
+                        : 'bg-orange-500'
                         }`}
                     ></div>
                     <span>
@@ -576,17 +586,29 @@ export default function EditNutritionistProfile() {
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="bg-white border-b sticky top-16 z-30">
+        {/* Mobile Tab Navigation */}
+        <div className="sm:hidden bg-white border-b sticky top-16 z-30">
+          <div className="px-4 py-2">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.icon} {tab.label}
+                  {tab.id === 'documents' && !documentsValid ? ' ⚠️' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Desktop Tabs Navigation */}
+        <div className="hidden sm:block bg-white border-b sticky top-16 z-30">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex space-x-8 overflow-x-auto">
-              {[
-                { id: 'personal', label: 'Date personale', icon: '👤' },
-                { id: 'professional', label: 'Date profesionale', icon: '🎓' },
-                { id: 'services', label: 'Servicii și prețuri', icon: '💼' },
-                // TODO: { id: 'availability', label: 'Disponibilitate', icon: '📅' },
-                { id: 'documents', label: 'Documente', icon: '📄' }
-              ].map((tab) => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
@@ -607,25 +629,30 @@ export default function EditNutritionistProfile() {
         </div>
 
         {/* Tab Content */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
 
             {/* Personal Data Tab */}
             {activeTab === 'personal' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Date personale și de contact</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Date personale și de contact</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nume complet *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nume complet *
+                    </label>
                     <input
                       type="text"
                       value={nutritionistData.full_name}
                       onChange={(e) => updateData('full_name', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.full_name ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.full_name ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="ex: Dr. Maria Popescu"
                     />
-                    {errorFields.full_name && <p className="text-red-500 text-sm mt-1">{errorFields.full_name}</p>}
+                    {errorFields.full_name && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.full_name}</p>
+                    )}
                   </div>
 
                   <div>
@@ -634,10 +661,13 @@ export default function EditNutritionistProfile() {
                       type="email"
                       value={nutritionistData.email}
                       onChange={(e) => updateData('email', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.email ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.email ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="email@exemplu.com"
                     />
-                    {errorFields.email && <p className="text-red-500 text-sm mt-1">{errorFields.email}</p>}
+                    {errorFields.email && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.email}</p>
+                    )}
                   </div>
 
                   <div>
@@ -646,21 +676,29 @@ export default function EditNutritionistProfile() {
                       type="tel"
                       value={nutritionistData.phone}
                       onChange={(e) => updateData('phone', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.phone ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.phone ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="07XX XXX XXX"
                     />
-                    {errorFields.phone && <p className="text-red-500 text-sm mt-1">{errorFields.phone}</p>}
+                    {errorFields.phone && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.phone}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Data nașterii *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Data nașterii *
+                    </label>
                     <input
                       type="date"
                       value={nutritionistData.birth_date}
                       onChange={(e) => updateData('birth_date', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.birth_date ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.birth_date ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     />
-                    {errorFields.birth_date && <p className="text-red-500 text-sm mt-1">{errorFields.birth_date}</p>}
+                    {errorFields.birth_date && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.birth_date}</p>
+                    )}
                   </div>
 
                   <div>
@@ -668,37 +706,53 @@ export default function EditNutritionistProfile() {
                     <select
                       value={nutritionistData.gender}
                       onChange={(e) => updateData('gender', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.gender ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.gender ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     >
                       <option value="">Selectează...</option>
                       <option value="Masculin">Masculin</option>
                       <option value="Feminin">Feminin</option>
                       <option value="Altul">Altul</option>
                     </select>
-                    {errorFields.gender && <p className="text-red-500 text-sm mt-1">{errorFields.gender}</p>}
+                    {errorFields.gender && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.gender}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Locația cabinetului *</label>
-                    <input
-                      type="text"
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Locația cabinetului *
+                    </label>
+                    <LocationSearch
                       value={nutritionistData.location}
-                      onChange={(e) => updateData('location', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.location ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
-                      placeholder="ex: București, Sector 1"
+                      onChange={(value) => updateData('location', value)}
+                      error={!!errorFields.location}
+                      placeholder="Caută localitatea..."
                     />
-                    {errorFields.location && <p className="text-red-500 text-sm mt-1">{errorFields.location}</p>}
+                    {errorFields.location && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.location}</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Limbi vorbite *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Limbi vorbite *
+                  </label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {nutritionistData.languages.map((lang, index) => (
-                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                      <span
+                        key={index}
+                        className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                      >
                         {lang}
                         <button
-                          onClick={() => updateData('languages', nutritionistData.languages.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            updateData(
+                              'languages',
+                              nutritionistData.languages.filter((_, i) => i !== index)
+                            )
+                          }
                           className="text-green-600 hover:text-green-800"
                         >
                           ×
@@ -728,22 +782,30 @@ export default function EditNutritionistProfile() {
                       }}
                       className="px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
                     >
-                      Adaugă
+                      <span className="hidden sm:inline">Adaugă</span>
+                      <span className="sm:hidden">+</span>
                     </button>
                   </div>
                 </div>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Descriere profil (Bio) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descriere profil (Bio) *
+                  </label>
                   <textarea
                     value={nutritionistData.bio}
                     onChange={(e) => updateData('bio', e.target.value)}
                     rows={6}
-                    className={`w-full p-3 border-2 ${errorFields.bio ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
-                    placeholder="Scrie o descriere detaliată despre tine, experiența ta și abordarea ta în nutriție. Aceasta va fi prima impresie pe care o vor avea clienții despre tine."
+                    className={`w-full p-3 border-2 ${errorFields.bio ? 'border-red-500' : 'border-gray-200'
+                      } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                    placeholder="Scrie o descriere detaliată despre tine, experiența ta și abordarea ta în nutriție..."
                   />
-                  {errorFields.bio && <p className="text-red-500 text-sm mt-1">{errorFields.bio}</p>}
-                  <p className="text-sm text-gray-500 mt-2">{nutritionistData.bio.length}/1000 caractere</p>
+                  {errorFields.bio && (
+                    <p className="text-red-500 text-sm mt-1">{errorFields.bio}</p>
+                  )}
+                  <p className="text-sm text-gray-500 mt-2">
+                    {nutritionistData.bio.length}/1000 caractere
+                  </p>
                 </div>
               </div>
             )}
@@ -751,63 +813,105 @@ export default function EditNutritionistProfile() {
             {/* Professional Data Tab */}
             {activeTab === 'professional' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Date profesionale</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+                  Date profesionale
+                </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Numărul de licență CDR *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Numărul de licență CDR *
+                    </label>
                     <input
                       type="text"
                       value={nutritionistData.license_number}
                       onChange={(e) => updateData('license_number', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.license_number ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.license_number ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                       placeholder="ex: CDR12345"
                     />
-                    {errorFields.license_number && <p className="text-red-500 text-sm mt-1">{errorFields.license_number}</p>}
+                    {errorFields.license_number && (
+                      <p className="text-red-500 text-sm mt-1">{errorFields.license_number}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ani de experiență *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ani de experiență *
+                    </label>
                     <select
                       value={nutritionistData.years_experience}
                       onChange={(e) => updateData('years_experience', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.years_experience ? 'border-red-500' : 'border-gray-200'} rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
+                      className={`w-full p-3 border-2 ${errorFields.years_experience ? 'border-red-500' : 'border-gray-200'
+                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
                     >
                       <option value="">Selectează...</option>
                       {[...Array(20)].map((_, i) => (
-                        <option key={i} value={i + 1}>{i + 1} {i === 0 ? 'an' : 'ani'}</option>
+                        <option key={i} value={i + 1}>
+                          {i + 1} {i === 0 ? 'an' : 'ani'}
+                        </option>
                       ))}
                       <option value="20+">20+ ani</option>
                     </select>
-                    {errorFields.years_experience && <p className="text-red-500 text-sm mt-1">{errorFields.years_experience}</p>}
+                    {errorFields.years_experience && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errorFields.years_experience}
+                      </p>
+                    )}
                   </div>
                 </div>
 
+                {/* Specializări Section */}
                 <div className="mb-8">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Specializări *</label>
-                  {errorFields.specializations && <p className="text-red-500 text-sm mb-2">{errorFields.specializations}</p>}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Specializări *
+                  </label>
+                  {errorFields.specializations && (
+                    <p className="text-red-500 text-sm mb-2">{errorFields.specializations}</p>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {specializations.map((spec) => (
-                      <label key={spec.value} className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
+                      <label
+                        key={spec.value}
+                        className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors"
+                      >
                         <input
                           type="checkbox"
                           checked={nutritionistData.specializations.includes(spec.value)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              updateData('specializations', [...nutritionistData.specializations, spec.value])
+                              updateData('specializations', [
+                                ...nutritionistData.specializations,
+                                spec.value
+                              ])
                             } else {
-                              updateData('specializations', nutritionistData.specializations.filter(s => s !== spec.value))
+                              updateData(
+                                'specializations',
+                                nutritionistData.specializations.filter((s) => s !== spec.value)
+                              )
                             }
                           }}
                           className="sr-only"
                         />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.specializations.includes(spec.value)
-                          ? 'bg-green-600 border-green-600'
-                          : 'border-gray-300'
-                          }`}>
+                        <div
+                          className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center flex-shrink-0 ${nutritionistData.specializations.includes(spec.value)
+                            ? 'bg-green-600 border-green-600'
+                            : 'border-gray-300'
+                            }`}
+                        >
                           {nutritionistData.specializations.includes(spec.value) && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                           )}
                         </div>
@@ -821,18 +925,24 @@ export default function EditNutritionistProfile() {
                 <div className="mb-8">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">Educație *</h3>
-                    {errorFields.education && <p className="text-red-500 text-sm">{errorFields.education}</p>}
-                    <button
-                      onClick={addEducation}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Adaugă educație
-                    </button>
+                    {errorFields.education && (
+                      <p className="text-red-500 text-sm">{errorFields.education}</p>
+                    )}
                   </div>
-
+                  <button
+                    onClick={addEducation}
+                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Adaugă educație
+                  </button>
                   <div className="space-y-4">
                     {nutritionistData.education.map((edu, index) => (
                       <div key={index} className="p-4 border-2 border-gray-200 rounded-xl">
@@ -847,15 +957,19 @@ export default function EditNutritionistProfile() {
                           <input
                             type="text"
                             value={edu.university}
-                            onChange={(e) => updateEducation(index, 'university', e.target.value)}
+                            onChange={(e) =>
+                              updateEducation(index, 'university', e.target.value)
+                            }
                             placeholder="Universitate"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
                           <input
                             type="text"
                             value={edu.graduation_year}
-                            onChange={(e) => updateEducation(index, 'graduation_year', e.target.value)}
-                            placeholder="Anul absolviri"
+                            onChange={(e) =>
+                              updateEducation(index, 'graduation_year', e.target.value)
+                            }
+                            placeholder="Anul absolvirii"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
                         </div>
@@ -863,8 +977,18 @@ export default function EditNutritionistProfile() {
                           onClick={() => removeEducation(index)}
                           className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                           Șterge
                         </button>
@@ -876,18 +1000,24 @@ export default function EditNutritionistProfile() {
                 {/* Certifications Section */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Certificări suplimentare</h3>
-                    <button
-                      onClick={addCertification}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Adaugă certificare
-                    </button>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Certificări suplimentare
+                    </h3>
                   </div>
-
+                  <button
+                    onClick={addCertification}
+                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Adaugă certificare
+                  </button>
                   <div className="space-y-4">
                     {nutritionistData.certifications.map((cert, index) => (
                       <div key={index} className="p-4 border-2 border-gray-200 rounded-xl">
@@ -895,21 +1025,27 @@ export default function EditNutritionistProfile() {
                           <input
                             type="text"
                             value={cert.name}
-                            onChange={(e) => updateCertification(index, 'name', e.target.value)}
+                            onChange={(e) =>
+                              updateCertification(index, 'name', e.target.value)
+                            }
                             placeholder="Numele certificării"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
                           <input
                             type="text"
                             value={cert.issuer}
-                            onChange={(e) => updateCertification(index, 'issuer', e.target.value)}
+                            onChange={(e) =>
+                              updateCertification(index, 'issuer', e.target.value)
+                            }
                             placeholder="Emitent"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
                           <input
                             type="text"
                             value={cert.year}
-                            onChange={(e) => updateCertification(index, 'year', e.target.value)}
+                            onChange={(e) =>
+                              updateCertification(index, 'year', e.target.value)
+                            }
                             placeholder="Anul obținerii"
                             className="p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
                           />
@@ -918,8 +1054,18 @@ export default function EditNutritionistProfile() {
                           onClick={() => removeCertification(index)}
                           className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                           Șterge
                         </button>
@@ -927,39 +1073,183 @@ export default function EditNutritionistProfile() {
                     ))}
                   </div>
                 </div>
+
+                {/* Work Schedule Section */}
+                {/* <div className="mt-8 pt-8 border-t">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Program de lucru
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Zilele în care lucrezi *
+                      </label>
+                      {errorFields.work_days && (
+                        <p className="text-red-500 text-sm mb-2">{errorFields.work_days}</p>
+                      )}
+                      <div className="space-y-2">
+                        {['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă', 'Duminică'].map(
+                          (day) => (
+                            <label
+                              key={day}
+                              className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={nutritionistData.work_days.includes(day)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    updateData('work_days', [...nutritionistData.work_days, day])
+                                  } else {
+                                    updateData(
+                                      'work_days',
+                                      nutritionistData.work_days.filter((d) => d !== day)
+                                    )
+                                  }
+                                }}
+                                className="sr-only"
+                              />
+                              <div
+                                className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
+                                  nutritionistData.work_days.includes(day)
+                                    ? 'bg-green-600 border-green-600'
+                                    : 'border-gray-300'
+                                }`}
+                              >
+                                {nutritionistData.work_days.includes(day) && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={3}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                )}
+                              </div>
+                              <span className="font-medium">{day}</span>
+                            </label>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">
+                        Intervalul orar *
+                      </h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm text-gray-600 mb-2">
+                            Ora de început
+                          </label>
+                          <input
+                            type="time"
+                            value={nutritionistData.work_hours.start}
+                            onChange={(e) =>
+                              updateData('work_hours', {
+                                ...nutritionistData.work_hours,
+                                start: e.target.value
+                              })
+                            }
+                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-600 mb-2">
+                            Ora de sfârșit
+                          </label>
+                          <input
+                            type="time"
+                            value={nutritionistData.work_hours.end}
+                            onChange={(e) =>
+                              updateData('work_hours', {
+                                ...nutritionistData.work_hours,
+                                end: e.target.value
+                              })
+                            }
+                            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                        <h4 className="font-semibold text-blue-800 mb-2">💡 Sfat</h4>
+                        <p className="text-blue-700 text-sm">
+                          Nutriționiștii cu disponibilitate flexibilă primesc cu 40% mai multe
+                          programări.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div> */}
               </div>
             )}
 
             {/* Services Tab */}
             {activeTab === 'services' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Servicii și prețuri</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+                  Servicii și prețuri
+                </h2>
 
                 <div className="mb-8">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Tipuri de consultații oferite *</label>
-                  {errorFields.consultation_types && <p className="text-red-500 text-sm mb-2">{errorFields.consultation_types}</p>}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Tipuri de consultații oferite *
+                  </label>
+                  {errorFields.specializations && (
+                    <p className="text-red-500 text-sm mb-2">{errorFields.specializations}</p>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {consultationTypes.map((type) => (
-                      <label key={type.value} className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
+                      <label
+                        key={type.value}
+                        className="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors"
+                      >
                         <input
                           type="checkbox"
                           checked={nutritionistData.consultation_types.includes(type.value)}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              updateData('consultation_types', [...nutritionistData.consultation_types, type.value])
+                              updateData('consultation_types', [
+                                ...nutritionistData.consultation_types,
+                                type.value
+                              ])
                             } else {
-                              updateData('consultation_types', nutritionistData.consultation_types.filter(t => t !== type.value))
+                              updateData(
+                                'consultation_types',
+                                nutritionistData.consultation_types.filter((t) => t !== type.value)
+                              )
                             }
                           }}
                           className="sr-only"
                         />
-                        <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.consultation_types.includes(type.value)
-                          ? 'bg-green-600 border-green-600'
-                          : 'border-gray-300'
-                          }`}>
+                        <div
+                          className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center flex-shrink-0 ${nutritionistData.consultation_types.includes(type.value)
+                            ? 'bg-green-600 border-green-600'
+                            : 'border-gray-300'
+                            }`}
+                        >
                           {nutritionistData.consultation_types.includes(type.value) && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                           )}
                         </div>
@@ -975,24 +1265,36 @@ export default function EditNutritionistProfile() {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-semibold text-gray-800">Serviciile tale *</h3>
-                    {errorFields.services && <p className="text-red-500 text-sm">{errorFields.services}</p>}
-                    <button
-                      onClick={addService}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Adaugă serviciu
-                    </button>
+                    {errorFields.services && (
+                      <p className="text-red-500 text-sm">{errorFields.services}</p>
+                    )}
                   </div>
+                  <button
+                    onClick={addService}
+                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-6"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                    Adaugă serviciu
+                  </button>
 
                   <div className="space-y-6">
                     {nutritionistData.services.map((service, index) => (
-                      <div key={index} className="p-6 border-2 border-gray-200 rounded-xl bg-gray-50">
+                      <div
+                        key={index}
+                        className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl bg-gray-50"
+                      >
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Numele serviciului *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Numele serviciului *
+                            </label>
                             <input
                               type="text"
                               value={service.name}
@@ -1002,7 +1304,9 @@ export default function EditNutritionistProfile() {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Durata (minute) *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Durata (minute) *
+                            </label>
                             <select
                               value={service.duration}
                               onChange={(e) => updateService(index, 'duration', e.target.value)}
@@ -1016,7 +1320,9 @@ export default function EditNutritionistProfile() {
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Preț (RON) *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Preț (RON) *
+                            </label>
                             <input
                               type="number"
                               value={service.price}
@@ -1027,10 +1333,14 @@ export default function EditNutritionistProfile() {
                           </div>
                         </div>
                         <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Descrierea serviciului *</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Descrierea serviciului *
+                          </label>
                           <textarea
                             value={service.description}
-                            onChange={(e) => updateService(index, 'description', e.target.value)}
+                            onChange={(e) =>
+                              updateService(index, 'description', e.target.value)
+                            }
                             rows={3}
                             placeholder="Descrie ce include acest serviciu..."
                             className="w-full p-3 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
@@ -1040,8 +1350,18 @@ export default function EditNutritionistProfile() {
                           onClick={() => removeService(index)}
                           className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                           Șterge serviciu
                         </button>
@@ -1051,101 +1371,25 @@ export default function EditNutritionistProfile() {
 
                   {nutritionistData.services.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
-                      <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <svg
+                        className="w-12 h-12 mx-auto mb-4 text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
                       </svg>
                       <p>Nu ai adăugat încă niciun serviciu</p>
-                      <p className="text-sm">Adaugă primul tău serviciu pentru a începe să primești clienți</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Availability Tab */}
-            {activeTab === 'availability' && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Disponibilitate</h2>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Zilele în care lucrezi *</h3>
-                    {errorFields.work_days && <p className="text-red-500 text-sm mb-2">{errorFields.work_days}</p>}
-                    <div className="space-y-3">
-                      {['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă', 'Duminică'].map((day) => (
-                        <label key={day} className="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={nutritionistData.work_days.includes(day)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                updateData('work_days', [...nutritionistData.work_days, day])
-                              } else {
-                                updateData('work_days', nutritionistData.work_days.filter(d => d !== day))
-                              }
-                            }}
-                            className="sr-only"
-                          />
-                          <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${nutritionistData.work_days.includes(day)
-                            ? 'bg-green-600 border-green-600'
-                            : 'border-gray-300'
-                            }`}>
-                            {nutritionistData.work_days.includes(day) && (
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className="font-medium">{day}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Intervalul orar *</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Ora de început</label>
-                        <input
-                          type="time"
-                          value={nutritionistData.work_hours.start}
-                          onChange={(e) => updateData('work_hours', { ...nutritionistData.work_hours, start: e.target.value })}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Ora de sfârșit</label>
-                        <input
-                          type="time"
-                          value={nutritionistData.work_hours.end}
-                          onChange={(e) => updateData('work_hours', { ...nutritionistData.work_hours, end: e.target.value })}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Durata standard consultație</label>
-                        <select
-                          value={nutritionistData.consultation_duration}
-                          onChange={(e) => updateData('consultation_duration', parseInt(e.target.value))}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors"
-                        >
-                          <option value={30}>30 minute</option>
-                          <option value={45}>45 minute</option>
-                          <option value={60}>60 minute</option>
-                          <option value={90}>90 minute</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-                      <h4 className="font-semibold text-blue-800 mb-2">💡 Sfat pentru disponibilitate</h4>
-                      <p className="text-blue-700 text-sm">
-                        Nutriționiștii cu disponibilitate flexibilă primesc cu 40% mai multe programări.
-                        Încearcă să incluzi weekend-uri sau seara pentru mai mulți clienți.
+                      <p className="text-sm">
+                        Adaugă primul tău serviciu pentru a începe să primești clienți
                       </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1153,63 +1397,109 @@ export default function EditNutritionistProfile() {
             {/* Documents Tab */}
             {activeTab === 'documents' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Documente obligatorii</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+                  Documente obligatorii
+                </h2>
 
                 <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                  <h3 className="font-semibold text-orange-800 mb-2">📋 Documente necesare pentru activare</h3>
+                  <h3 className="font-semibold text-orange-800 mb-2">
+                    📋 Documente necesare pentru activare
+                  </h3>
                   <p className="text-orange-700 text-sm">
-                    Pentru a-ți activa profilul pe platformă și a putea primi clienți, trebuie să încarci obligatoriu următoarele documente verificate:
+                    Pentru a-ți activa profilul pe platformă și a putea primi clienți, trebuie să
+                    încarci obligatoriu următoarele documente verificate.
                   </p>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-6">
                   {/* Diploma */}
-                  <div className="p-6 border-2 border-gray-200 rounded-xl">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                        <svg
+                          className="w-6 h-6 text-red-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                          />
                         </svg>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 text-center sm:text-left">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
                           Diploma de licență în Nutriție și Dietetică *
                         </h3>
                         <p className="text-gray-600 text-sm mb-4">
-                          Încarcă o copie scanată sau fotografiată a diplomei tale de licență în domeniul nutriției.
-                          Documentul trebuie să fie lizibil și să conțină toate informațiile relevante.
+                          Încarcă o copie scanată sau fotografiată a diplomei tale de licență.
+                          Documentul trebuie să fie lizibil.
                         </p>
 
                         {nutritionistData.documents_uploaded.diploma ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="w-8 h-8 text-green-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                               <div>
                                 <p className="font-medium text-green-800">Diplomă încărcată</p>
-                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
                               </div>
                             </div>
                             <button
                               onClick={() => handleFileUpload('diploma', null)}
                               className="text-red-600 hover:text-red-700"
                             >
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
                               </svg>
                             </button>
                           </div>
                         ) : (
                           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-                            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            <svg
+                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                              />
                             </svg>
                             <p className="text-gray-600 mb-2">Încarcă diploma de licență</p>
                             <input
                               type="file"
                               accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) => e.target.files && handleFileUpload('diploma', e.target.files[0])}
+                              onChange={(e) =>
+                                e.target.files && handleFileUpload('diploma', e.target.files[0])
+                              }
                               className="hidden"
                               id="diploma-upload"
                             />
@@ -1227,52 +1517,96 @@ export default function EditNutritionistProfile() {
                   </div>
 
                   {/* CDR Certificate */}
-                  <div className="p-6 border-2 border-gray-200 rounded-xl">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                        <svg
+                          className="w-6 h-6 text-red-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                          />
                         </svg>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 text-center sm:text-left">
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
                           Certificat de membru CDR *
                         </h3>
                         <p className="text-gray-600 text-sm mb-4">
-                          Certificatul de membru al Colegiului Dieteticienilor din România (CDR) este obligatoriu pentru a demonstra
-                          că ești autorizat să practici ca nutriționist în România.
+                          Certificatul de membru al Colegiului Dieteticienilor din România (CDR)
+                          este obligatoriu pentru a practica legal.
                         </p>
 
                         {nutritionistData.documents_uploaded.certificate ? (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="w-8 h-8 text-green-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                               <div>
-                                <p className="font-medium text-green-800">Certificat CDR încărcat</p>
-                                <p className="text-sm text-green-600">Document încărcat cu succes</p>
+                                <p className="font-medium text-green-800">
+                                  Certificat CDR încărcat
+                                </p>
                               </div>
                             </div>
                             <button
                               onClick={() => handleFileUpload('certificate', null)}
                               className="text-red-600 hover:text-red-700"
                             >
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
                               </svg>
                             </button>
                           </div>
                         ) : (
                           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-                            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            <svg
+                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                              />
                             </svg>
                             <p className="text-gray-600 mb-2">Încarcă certificatul CDR</p>
                             <input
                               type="file"
                               accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) => e.target.files && handleFileUpload('certificate', e.target.files[0])}
+                              onChange={(e) =>
+                                e.target.files &&
+                                handleFileUpload('certificate', e.target.files[0])
+                              }
                               className="hidden"
                               id="certificate-upload"
                             />
@@ -1293,85 +1627,102 @@ export default function EditNutritionistProfile() {
                 <div className="mt-8 p-4 bg-blue-50 rounded-xl">
                   <h4 className="font-semibold text-blue-800 mb-2">🔒 Securitatea documentelor</h4>
                   <p className="text-blue-700 text-sm">
-                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 24 de ore.
-                    După verificare, vei primi o confirmare prin email și profilul tău va fi activat.
+                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa
+                    noastră în maximum 24 de ore. După verificare, vei primi o confirmare prin
+                    email.
                   </p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Save Button */}
-          <div className="mt-8 flex justify-end">
+          {/* Mobile Save Button */}
+          <div className="mt-6 sm:hidden">
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className={`px-8 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${isLoading
+              className={`w-full px-6 py-3 rounded-xl font-medium transition-all ${isLoading
                 ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                : 'bg-green-600 text-white hover:bg-green-700'
                 }`}
             >
-              {isLoading ? (
-                <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Se salvează...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {id === 'new' ? 'Creează profil' : 'Salvează modificările'}
-                </>
-              )}
+              {isLoading ? 'Se salvează...' : id === 'new' ? 'Creează profil' : 'Salvează modificările'}
             </button>
           </div>
         </div>
 
         {/* Bottom Info Panel */}
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-800">Profilul tău</h3>
               </div>
               <p className="text-sm text-gray-600">
-                Un profil complet și actualizat crește șansele de a primi mai multe programări cu până la 75%.
+                Un profil complet crește șansele de a primi mai multe programări cu până la 75%.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    className="w-5 h-5 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-800">Securitate</h3>
               </div>
               <p className="text-sm text-gray-600">
-                Toate datele tale sunt protejate și nu vor fi împărtășite fără acordul tău explicit.
+                Toate datele tale sunt protejate și nu vor fi împărtășite fără acordul tău.
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.5a9.5 9.5 0 010 19 9.5 9.5 0 010-19z" />
+                  <svg
+                    className="w-5 h-5 text-purple-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.5a9.5 9.5 0 010 19 9.5 9.5 0 010-19z"
+                    />
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-800">Suport</h3>
               </div>
               <p className="text-sm text-gray-600">
-                Ai nevoie de ajutor? Echipa noastră este disponibilă 24/7 pentru a te sprijini.
+                Ai nevoie de ajutor? Echipa noastră este disponibilă să te sprijine.
               </p>
             </div>
           </div>
