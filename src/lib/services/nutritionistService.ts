@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient'
 import type { NutritionistData, CreateNutritionistData, UpdateNutritionistData } from '../types/nutritionist'
+import { sendAccountConfirmationEmail } from './emailService'
 
 export class NutritionistService {
   // Încarcă datele unui nutriționist după ID
@@ -87,6 +88,20 @@ export class NutritionistService {
       if (error) {
         return { data: null, error }
       }
+      if (data && data.email) {
+        const emailResult = await sendAccountConfirmationEmail({
+          toEmail: data.email,
+        });
+
+        if (emailResult.success) {
+          console.log(`Email de confirmare trimis cu succes către ${data.email}.`);
+        } else {
+          console.warn(`Cont nutriționist creat, dar emailul de confirmare nu a putut fi trimis către ${data.email}:`, emailResult.message);
+
+        }
+      } else {
+        console.warn('Nu s-au putut trimite emailul de confirmare: datele nutriționistului lipsesc sau sunt incomplete.');
+      }
 
       return { data, error: null }
     } catch (error) {
@@ -132,7 +147,7 @@ export class NutritionistService {
         .eq('account_status', 'active');
 
       console.log('Fetched verified nutritionists:', data)
-        
+
       if (error) {
         return { data: [], error }
       }
