@@ -9,36 +9,50 @@ export async function sendAccountConfirmationEmail({ toEmail }: SendWelcomeEmail
 
     const htmlContent = `
     <!DOCTYPE html>
-    <html lang="ro">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Confirmare Cont NutriFind</title>
-        <style>
-            body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; }
-            .button { background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; }
-            .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-            .header { text-align: center; color: #10B981; font-size: 24px; font-weight: bold; margin-bottom: 20px;}
-            .footer { font-size: 12px; color: #888; text-align: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;}
-            a { color: #10B981; text-decoration: none; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">NutriFind</div>
-            <p>Salut,</p>
-            <p>Contul tău de nutriționist pe platforma NutriFind a fost creat cu succes!</p>
-            <p>Ne bucurăm să te avem alături. Poți acum să te autentifici și să-ți completezi profilul pentru a te pregăti să primești clienți.</p>
-            <p style="text-align: center; margin-top: 30px;">
-                <a href="https://nutrifind.ro/nutritionisti/login" class="button" target="_blank" rel="noopener noreferrer">Autentifică-te Acum</a>
-            </p>
-            <p style="margin-top: 20px;">Cu drag,<br>Echipa NutriFind</p>
-            <div class="footer">
-                Acest email a fost trimis automat. Te rugăm să nu răspunzi la el direct. Pentru suport, ne poți contacta la <a href="mailto:support@nutrifind.ro">support@nutrifind.ro</a>.
-            </div>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Bun Venit pe NutriFind! Contul Tău a fost Creat!</title>
+    <style type="text/css">
+        /* Resetări de bază și font stack */
+        body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; color: #4a5568; background-color: #f4f7f6; }
+        table { border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        table td { border-collapse: collapse; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        a { text-decoration: none; color: #10B981; }
+
+        /* Stiluri specifice emailului */
+        .email-container { max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .header-section { padding: 30px 20px; text-align: center; background-color: #ffffff; }
+        .content-section { padding: 20px 40px; text-align: left; }
+        .button-wrapper { text-align: center; margin-top: 30px; margin-bottom: 20px; }
+        .button { background-color: #10B981; color: #ffffff; padding: 14px 30px; border-radius: 6px; display: inline-block; font-weight: 600; font-size: 16px; transition: background-color 0.2s ease; }
+        .button:hover { background-color: #0d9d6e; } /* Efect hover (s-ar putea să nu funcționeze în toți clienții) */
+        .footer-section { padding: 20px 40px; text-align: center; font-size: 12px; color: #718096; background-color: #f8f8f8; border-top: 1px solid #edf2f7; border-radius: 0 0 8px 8px; }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; border-radius: 0 !important; }
+            .content-section { padding: 15px 25px !important; }
+            .header-section { padding: 20px 15px !important; }
+            .footer-section { padding: 15px 25px !important; }
+            .button { width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; box-sizing: border-box; }
+            .button-wrapper { margin-top: 20px !important; margin-bottom: 15px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; min-width: 100%; background-color: #f4f7f6;">
+    <center style="width: 100%; background-color: #f4f7f6;">
+        <div style="display: none; font-size: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
+            Bun venit pe NutriFind! Contul tău de nutriționist a fost creat cu succes.
         </div>
-    </body>
-    </html>
+
+        <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="email-container">
+            <tr>
+                <td class="header-section">
+                    <h1 style="margin: 0; font-size: 32px; line-height: 1; font-weight: 700; color: #10B981;">NutriFind</h1>
   `;
 
     try {
