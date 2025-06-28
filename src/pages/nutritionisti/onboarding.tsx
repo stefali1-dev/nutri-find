@@ -801,9 +801,8 @@ export default function NutritionistOnboarding() {
                                     <h3 className="font-semibold text-green-800 mb-3 text-sm sm:text-base">Ce urmează după înregistrare:</h3>
                                     <ul className="space-y-2 text-xs sm:text-sm text-green-700">
                                         <li>✓ Vei primi un email de confirmare imediat</li>
-                                        <li>✓ Profilul tău va fi revizuit în 24 ore</li>
-                                        <li>✓ Între timp, poți completa profilul cu poze și documente</li>
-                                        <li>✓ Primii clienți pot apărea chiar din prima săptămână!</li>
+                                        <li>✓ Poți începe să-ți completezi profilul, adăugând poză și documente</li>
+                                        <li>✓ După încărcarea documentelor, îți vom revizui profilul în cel mai scurt timp</li>
                                     </ul>
                                 </div>
 
