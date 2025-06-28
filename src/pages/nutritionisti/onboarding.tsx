@@ -651,9 +651,12 @@ export default function NutritionistOnboarding() {
                                 </div>
 
                                 <div>
+
                                     <LocationSearch
-                                        formData={formData}
-                                        updateFormData={updateField}
+                                        value={formData.location}
+                                        onChange={(value) => updateField('location', value)}
+                                        error={!!errors.location}
+                                        placeholder="Caută localitatea..."
                                     />
                                     {errors.location && (
                                         <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.location}</p>
