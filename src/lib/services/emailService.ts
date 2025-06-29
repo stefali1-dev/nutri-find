@@ -53,6 +53,44 @@ export async function sendAccountConfirmationEmail({ toEmail }: SendWelcomeEmail
             <tr>
                 <td class="header-section">
                     <h1 style="margin: 0; font-size: 32px; line-height: 1; font-weight: 700; color: #10B981;">NutriFind</h1>
+                    </td>
+            </tr>
+
+            <tr>
+                <td class="content-section">
+                    <h2 style="margin-top: 0; margin-bottom: 20px; font-size: 22px; line-height: 1.3; font-weight: 600; color: #333333;">
+                        Salut,
+                    </h2>
+                    <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #4a5568;">
+                        Contul tău de nutriționist pe platforma **NutriFind** a fost creat cu succes! Suntem încântați să te avem alături și să te ajutăm să conectezi cu viitori clienți.
+                    </p>
+                    <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #4a5568;">
+                        Acum poți să te autentifici și să-ți completezi profilul. Un profil complet și detaliat te va ajuta să atragi mai mulți clienți odată ce platforma va fi deschisă publicului.
+                    </p>
+
+                    <div class="button-wrapper">
+                        <a href="https://nutrifind.ro/nutritionisti/login" class="button" target="_blank" rel="noopener noreferrer" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';">
+                            Autentifică-te Acum
+                        </a>
+                    </div>
+
+                    <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #4a5568;">
+                        Cu drag,<br>
+                        <strong style="color: #333333;">Echipa NutriFind</strong>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="footer-section">
+                    <p style="margin: 0 0 8px 0;">Acest email a fost trimis automat. Te rugăm să nu răspunzi la el direct.</p>
+                    <p style="margin: 0;">Pentru suport, ne poți contacta oricând la <a href="mailto:support@nutrifind.ro" style="color: #10B981; text-decoration: none;">support@nutrifind.ro</a>.</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>
   `;
 
     try {
