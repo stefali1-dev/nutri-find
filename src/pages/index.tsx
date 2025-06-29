@@ -482,130 +482,173 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Interviuri Section - Înlocuiește testimonialele */}
-        <section id="insights" className="py-16 sm:py-20 bg-gray-50">
+        {/* Challenges Section - High Impact Design for Clients */}
+        <section id="challenges" className="py-8 sm:py-16 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">Ce ne spun românii</h2>
-              <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                Am discutat cu oameni din întreaga țară despre provocările lor în găsirea unui nutriționist de încredere
+            {/* Header with dramatic styling */}
+            <div className="text-center mb-12 sm:mb-20">
+              <div className="inline-flex items-center justify-center bg-orange-100 text-orange-700 px-4 py-2 rounded-full mb-4 text-sm font-medium">
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Provocări comune în drumul spre sănătate
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-4">
+                Te regăsești în aceste situații?
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                Nu ești singur. Mii de români se confruntă cu aceleași provocări.
+                <span className="font-semibold text-gray-900"> Iată cum te putem ajuta</span> să le depășești
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-                <div className="flex items-center mb-4">
-                  <Image
-                    src="/images/interviews/1.png"
-                    alt="Maria"
-                    width={48}
-                    height={48}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                  />
-                  <div className="ml-3">
-                    <p className="font-semibold text-sm sm:text-base">Maria, 34 ani</p>
-                    <p className="text-xs sm:text-sm text-gray-500">București</p>
+            {/* Main challenges grid with enhanced visual impact */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12">
+              {/* Challenge 1 - Information Overload */}
+              <div className="group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-200 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-start mb-4">
+                    <div className="bg-orange-100 p-3 rounded-xl mr-4 group-hover:bg-orange-200 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                        Prea multă informație contradictorie
+                      </h3>
+                      <p className="text-gray-600">
+                        Google îți oferă mii de rezultate, influencerii spun una, prietenii alta. Nu mai știi ce dietă e cu adevărat potrivită pentru tine și corpul tău.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Solution Box */}
+                  <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-3 flex-shrink-0">
+                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-800 mb-1">Soluția NutriFind:</p>
+                        <p className="text-sm text-green-700">Sfaturi personalizate de la profesioniști certificați care înțeleg exact nevoile tale</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 italic">
-                  "Mi-ar plăcea să existe o platformă unde să pot căuta ușor nutriționiști și să văd transparent prețurile. Acum trebuie să sun la fiecare în parte și să întreb cât costă."
-                </p>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-                <div className="flex items-center mb-4">
-                  <Image
-                    src="/images/interviews/2.png"
-                    alt="Andrei"
-                    width={48}
-                    height={48}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                  />
-                  <div className="ml-3">
-                    <p className="font-semibold text-sm sm:text-base">Andrei, 28 ani</p>
-                    <p className="text-xs sm:text-sm text-gray-500"></p>
+              {/* Challenge 2 - Failed Diets */}
+              <div className="group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-200 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-start mb-4">
+                    <div className="bg-orange-100 p-3 rounded-xl mr-4 group-hover:bg-orange-200 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                        Ai încercat toate dietele, fără rezultate
+                      </h3>
+                      <p className="text-gray-600">
+                        Keto, intermitent fasting, vegan... Le-ai încercat pe toate, dar kilogramele revin mereu. Te simți frustrat și nu mai ai încredere că poți reuși.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Solution Box */}
+                  <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-3 flex-shrink-0">
+                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-800 mb-1">Soluția NutriFind:</p>
+                        <p className="text-sm text-green-700">Plan alimentar sustenabil adaptat stilului tău de viață, nu diete extreme temporare</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 italic">
-                  "Problema mea e că nu știu pe cine să aleg. Sunt atât de mulți nutriționiști, dar nu am cum să știu care sunt cu adevărat buni și care nu."
-                </p>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-                <div className="flex items-center mb-4">
-                  <Image
-                    src="/images/interviews/3.png"
-                    alt="Elena"
-                    width={48}
-                    height={48}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
-                  />
-                  <div className="ml-3">
-                    <p className="font-semibold text-sm sm:text-base">Elena, 42 ani</p>
-                    <p className="text-xs sm:text-sm text-gray-500">Iași</p>
+              {/* Challenge 3 - No Time */}
+              <div className="group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-200 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-start mb-4">
+                    <div className="bg-orange-100 p-3 rounded-xl mr-4 group-hover:bg-orange-200 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                        Nu ai timp să cauți un nutriționist bun
+                      </h3>
+                      <p className="text-gray-600">
+                        Între job, familie și responsabilități, găsirea unui nutriționist potrivit pare imposibilă. Și chiar dacă găsești unul, cum știi că e bun?
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <p className="text-sm sm:text-base text-gray-600 italic">
-                  "Aș vrea să pot vedea recenzii reale de la alți pacienți. Și să știu dinainte cât mă costă, fără să fiu pusă în situația să întreb de preț."
-                </p>
-              </div>
-            </div>
 
-            <div className="mt-8 sm:mt-12 bg-white p-6 sm:p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
-              <div className="text-center">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">
-                  Principalele provocări identificate:
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-left">
-                  <div className="flex items-start">
-                    <div className="bg-red-100 p-2 rounded-full mr-3 mt-0.5 flex-shrink-0">
-                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm sm:text-base">Dificultatea în alegerea specialistului</p>
-                      <p className="text-xs sm:text-sm text-gray-600">65% nu știu cum să aleagă nutriționistul potrivit</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-red-100 p-2 rounded-full mr-3 mt-0.5 flex-shrink-0">
-                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm sm:text-base">Lipsă de recenzii verificate</p>
-                      <p className="text-xs sm:text-sm text-gray-600">82% vor să citească experiențe reale înainte să decidă</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-red-100 p-2 rounded-full mr-3 mt-0.5 flex-shrink-0">
-                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm sm:text-base">Proces complicat de programare</p>
-                      <p className="text-xs sm:text-sm text-gray-600">Telefoane, email-uri, programări întârziate</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="bg-red-100 p-2 rounded-full mr-3 mt-0.5 flex-shrink-0">
-                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 text-sm sm:text-base">Prețuri netransparente</p>
-                      <p className="text-xs sm:text-sm text-gray-600">Trebuie să întrebi de preț, ceea ce poate fi incomod</p>
+                  {/* Solution Box */}
+                  <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-3 flex-shrink-0">
+                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-800 mb-1">Soluția NutriFind:</p>
+                        <p className="text-sm text-green-700">Găsește specialistul perfect în 5 minute - toți verificați, cu recenzii reale</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 rounded-lg">
-                  <p className="text-green-800 font-medium text-sm sm:text-base">
-                    💡 <strong>Soluția NutriFind:</strong> O platformă care rezolvă toate aceste probleme într-un singur loc
-                  </p>
+              </div>
+
+              {/* Challenge 4 - Health Issues */}
+              <div className="group relative bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-200 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-start mb-4">
+                    <div className="bg-orange-100 p-3 rounded-xl mr-4 group-hover:bg-orange-200 transition-colors flex-shrink-0">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                        Probleme de sănătate care necesită atenție specială
+                      </h3>
+                      <p className="text-gray-600">
+                        Diabet, colesterol crescut, intoleranțe alimentare... Ai nevoie de cineva care înțelege situația ta specifică, nu doar rețete generice de pe internet.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Solution Box */}
+                  <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-3 flex-shrink-0">
+                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-800 mb-1">Soluția NutriFind:</p>
+                        <p className="text-sm text-green-700">Nutriționiști specializați exact pe condiția ta medicală, cu experiență dovedită</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -613,7 +656,7 @@ export default function Home() {
         </section>
 
         {/* Secțiunea finală de reducere */}
-        <section id="final-waitlist" className="py-16 sm:py-20 bg-gradient-to-br from-green-600 to-emerald-700">
+        <section id="final-waitlist" className="pb-16 pt-8 sm:py-20 bg-gradient-to-br from-green-600 to-emerald-700">
           <div className="max-w-6xl mx-auto px-4">
             <div className="text-center mb-8 sm:mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-2">
