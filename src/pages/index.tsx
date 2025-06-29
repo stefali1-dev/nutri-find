@@ -74,7 +74,7 @@ function WaitlistForm({ placement, className = "" }: WaitlistFormProps) {
         </div>
         <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-2">Mulțumim!</h3>
         <p className="text-sm sm:text-base text-green-700">
-          Te-ai înscris cu succes! Vei primi 15% reducere la prima consultație când lansăm platforma.
+          Te-ai înscris cu succes! Vei primi în curând un cod de 15% reducere la prima consultație când lansăm platforma.
         </p>
       </div>
     )
