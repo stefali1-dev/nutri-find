@@ -57,7 +57,6 @@ export interface CreateNutritionistData extends Omit<
   | 'total_reviews'
   | 'birth_date'
   | 'gender'
-  | 'license_number'
   | 'education'
   | 'certifications'
   | 'work_types'

@@ -82,7 +82,6 @@ export default function EditNutritionistProfile() {
     gender: 'personal',
     location: 'personal',
     bio: 'personal',
-    license_number: 'professional',
     years_experience: 'professional',
     specializations: 'professional',
     education: 'professional',
@@ -91,6 +90,7 @@ export default function EditNutritionistProfile() {
     work_days: 'availability',
     work_hours: 'availability',
     consultation_duration: 'availability',
+    professional_type: 'documents',
     documents_uploaded: 'documents'
   }
 
@@ -838,23 +838,6 @@ export default function EditNutritionistProfile() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Numărul de licență CDR *
-                    </label>
-                    <input
-                      type="text"
-                      value={nutritionistData.c}
-                      onChange={(e) => updateData('license_number', e.target.value)}
-                      className={`w-full p-3 border-2 ${errorFields.license_number ? 'border-red-500' : 'border-gray-200'
-                        } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
-                      placeholder="ex: CDR12345"
-                    />
-                    {errorFields.license_number && (
-                      <p className="text-red-500 text-sm mt-1">{errorFields.license_number}</p>
-                    )}
-                  </div> */}
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Ani de experiență *
