@@ -40,7 +40,6 @@ export default function EditNutritionistProfile() {
     phone: '',
     birth_date: '',
     gender: '',
-    license_number: '',
     years_experience: '',
     work_types: [],
     specializations: [],
@@ -55,7 +54,7 @@ export default function EditNutritionistProfile() {
     profile_photo_url: '',
     languages: ['Română'],
     location: '',
-    documents_uploaded: { diploma: false, certificate: false },
+    documents_uploaded: { cdr_certificate: false, course_certificate: false, practice_notice: false },
     verification_status: 'pending'
   })
 
@@ -228,7 +227,6 @@ export default function EditNutritionistProfile() {
       phone: 'Telefon',
       birth_date: 'Data nașterii',
       gender: 'Gen',
-      license_number: 'Numărul de licență',
       years_experience: 'Ani de experiență',
       location: 'Locația',
       bio: 'Descrierea profilului'
@@ -256,8 +254,19 @@ export default function EditNutritionistProfile() {
       errors['services'] = 'Adaugă cel puțin un serviciu.'
     }
 
-    if (nutritionistData.work_days.length === 0) {
-      errors['work_days'] = 'Selectează cel puțin o zi de lucru.'
+    if (!nutritionistData.professional_type) {
+      errors['professional_type'] = 'Selectează tipul de calificare profesională.'
+    }
+
+    if (nutritionistData.professional_type === 'dietician') {
+      if (!nutritionistData.documents_uploaded.cdr_certificate) {
+        errors['documents_uploaded'] = 'Certificatul CDR este obligatoriu.'
+      }
+    } else if (nutritionistData.professional_type === 'technician') {
+      if (!nutritionistData.documents_uploaded.course_certificate ||
+        !nutritionistData.documents_uploaded.practice_notice) {
+        errors['documents_uploaded'] = 'Ambele documente sunt obligatorii pentru tehnicieni.'
+      }
     }
 
     return {
@@ -322,7 +331,7 @@ export default function EditNutritionistProfile() {
     }
   }
 
-  const handleFileUpload = async (field: 'diploma' | 'certificate', file: File | null) => {
+  const handleFileUpload = async (field: 'cdr_certificate' | 'course_certificate' | 'practice_notice', file: File | null) => {
     if (!file) {
       updateData('documents_uploaded', {
         ...nutritionistData.documents_uploaded,
@@ -387,7 +396,9 @@ export default function EditNutritionistProfile() {
     }
   }
 
-  const documentsValid = nutritionistData.documents_uploaded.diploma && nutritionistData.documents_uploaded.certificate
+  const documentsValid = nutritionistData.professional_type === 'dietician'
+    ? nutritionistData.documents_uploaded.cdr_certificate
+    : nutritionistData.documents_uploaded.course_certificate && nutritionistData.documents_uploaded.practice_notice
 
   if (loading || !authorized) {
     return (
@@ -818,13 +829,13 @@ export default function EditNutritionistProfile() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Numărul de licență CDR *
                     </label>
                     <input
                       type="text"
-                      value={nutritionistData.license_number}
+                      value={nutritionistData.c}
                       onChange={(e) => updateData('license_number', e.target.value)}
                       className={`w-full p-3 border-2 ${errorFields.license_number ? 'border-red-500' : 'border-gray-200'
                         } rounded-xl focus:border-green-500 focus:outline-none transition-colors`}
@@ -833,7 +844,7 @@ export default function EditNutritionistProfile() {
                     {errorFields.license_number && (
                       <p className="text-red-500 text-sm mt-1">{errorFields.license_number}</p>
                     )}
-                  </div>
+                  </div> */}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1401,237 +1412,320 @@ export default function EditNutritionistProfile() {
                   Documente obligatorii
                 </h2>
 
-                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                  <h3 className="font-semibold text-orange-800 mb-2">
-                    📋 Documente necesare pentru activare
+                {/* Professional Type Selection */}
+                <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Selectează tipul tău de calificare profesională
                   </h3>
-                  <p className="text-orange-700 text-sm">
-                    Pentru a-ți activa profilul pe platformă și a putea primi clienți, trebuie să
-                    încarci obligatoriu următoarele documente verificate.
+                  <p className="text-sm text-gray-600 mb-6">
+                    În România, doar aceste două categorii pot practica legal nutriția:
                   </p>
-                </div>
 
-                <div className="space-y-6">
-                  {/* Diploma */}
-                  <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
-                        <svg
-                          className="w-6 h-6 text-red-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex-1 text-center sm:text-left">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                          Diploma de licență în Nutriție și Dietetică *
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                          Încarcă o copie scanată sau fotografiată a diplomei tale de licență.
-                          Documentul trebuie să fie lizibil.
-                        </p>
-
-                        {nutritionistData.documents_uploaded.diploma ? (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <svg
-                                className="w-8 h-8 text-green-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              <div>
-                                <p className="font-medium text-green-800">Diplomă încărcată</p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleFileUpload('diploma', null)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-                            <svg
-                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                              />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all ${nutritionistData.professional_type === 'dietician'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-green-300'
+                      }`}>
+                      <input
+                        type="radio"
+                        name="professional_type"
+                        value="dietician"
+                        checked={nutritionistData.professional_type === 'dietician'}
+                        onChange={(e) => updateData('professional_type', e.target.value)}
+                        className="sr-only"
+                      />
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${nutritionistData.professional_type === 'dietician'
+                          ? 'border-green-600 bg-green-600'
+                          : 'border-gray-300'
+                          }`}>
+                          {nutritionistData.professional_type === 'dietician' && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <span className="font-semibold text-gray-800">Dietetician licențiat</span>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Absolvent de studii universitare în nutriție și dietetică, membru CDR
+                          </p>
+                          <div className="mt-2 flex items-center text-xs text-green-700">
+                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p className="text-gray-600 mb-2">Încarcă diploma de licență</p>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) =>
-                                e.target.files && handleFileUpload('diploma', e.target.files[0])
-                              }
-                              className="hidden"
-                              id="diploma-upload"
-                            />
-                            <label
-                              htmlFor="diploma-upload"
-                              className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
-                            >
-                              Selectează fișier
-                            </label>
-                            <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
+                            Poate trata și persoane cu afecțiuni medicale
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </div>
+                    </label>
+
+                    <label className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all ${nutritionistData.professional_type === 'technician'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-green-300'
+                      }`}>
+                      <input
+                        type="radio"
+                        name="professional_type"
+                        value="technician"
+                        checked={nutritionistData.professional_type === 'technician'}
+                        onChange={(e) => updateData('professional_type', e.target.value)}
+                        className="sr-only"
+                      />
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${nutritionistData.professional_type === 'technician'
+                          ? 'border-green-600 bg-green-600'
+                          : 'border-gray-300'
+                          }`}>
+                          {nutritionistData.professional_type === 'technician' && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <span className="font-semibold text-gray-800">Tehnician Nutriționist (nivel 5+)</span>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Absolvent de curs acreditat nivel 5+, cu aviz de liberă practică
+                          </p>
+                          <div className="mt-2 flex items-center text-xs text-orange-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-4 h-4 mr-1">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+
+                            Poate lucra doar cu persoane sănătoase
+                          </div>
+                        </div>
+                      </div>
+                    </label>
                   </div>
 
-                  {/* CDR Certificate */}
-                  <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
-                        <svg
-                          className="w-6 h-6 text-red-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex-1 text-center sm:text-left">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                          Certificat de membru CDR *
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4">
-                          Certificatul de membru al Colegiului Dieteticienilor din România (CDR)
-                          este obligatoriu pentru a practica legal.
-                        </p>
+                  {!nutritionistData.professional_type && (
+                    <div className="mt-4 text-center">
+                      <p className="text-sm text-red-600 font-medium">
+                        Te rugăm să selectezi tipul tău de calificare pentru a continua
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                        {nutritionistData.documents_uploaded.certificate ? (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <svg
-                                className="w-8 h-8 text-green-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
+                {/* Documents based on professional type */}
+                {nutritionistData.professional_type && (
+                  <>
+                    <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                      <h3 className="font-semibold text-orange-800 mb-2">
+                        📋 Documente necesare pentru {nutritionistData.professional_type === 'dietician' ? 'Dietetician licențiat' : 'Tehnician Nutriționist'}
+                      </h3>
+                      <p className="text-orange-700 text-sm">
+                        Pentru a-ți activa profilul și a putea primi clienți, trebuie să încarci documentele specifice calificării tale.
+                      </p>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Dietician Documents */}
+                      {nutritionistData.professional_type === 'dietician' && (
+                        <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                              <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                               </svg>
-                              <div>
-                                <p className="font-medium text-green-800">
-                                  Certificat CDR încărcat
+                            </div>
+                            <div className="flex-1 text-center sm:text-left">
+                              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                Certificat de membru activ CDR *
+                              </h3>
+                              <p className="text-gray-600 text-sm mb-4">
+                                Certificatul de membru activ al Colegiului Dieteticienilor din România (CDR) este obligatoriu pentru a practica legal ca dietetician.
+                              </p>
+
+                              {nutritionistData.documents_uploaded.cdr_certificate ? (
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                      <p className="font-medium text-green-800">Certificat CDR încărcat</p>
+                                      <p className="text-sm text-green-600">Document încărcat</p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => handleFileUpload('cdr_certificate', null)}
+                                    className="text-red-600 hover:text-red-700 p-2"
+                                    title="Șterge document"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+                                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                  <p className="text-gray-600 mb-2">Încarcă certificatul CDR</p>
+                                  <input
+                                    type="file"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    onChange={(e) => e.target.files && handleFileUpload('cdr_certificate', e.target.files[0])}
+                                    className="hidden"
+                                    id="cdr-certificate-upload"
+                                  />
+                                  <label
+                                    htmlFor="cdr-certificate-upload"
+                                    className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
+                                  >
+                                    Selectează fișier
+                                  </label>
+                                  <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Technician Documents */}
+                      {nutritionistData.professional_type === 'technician' && (
+                        <>
+                          {/* Course Certificate */}
+                          <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                  Certificat de absolvire curs acreditat nivel 5+ *
+                                </h3>
+                                <p className="text-gray-600 text-sm mb-4">
+                                  Certificatul de absolvire a unui curs de nutriție acreditat ANC/CNFPA nivel 5 sau superior.
                                 </p>
+
+                                {nutritionistData.documents_uploaded.course_certificate ? (
+                                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                      <div>
+                                        <p className="font-medium text-green-800">Certificat curs încărcat</p>
+                                        <p className="text-sm text-green-600">Document încărcat</p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => handleFileUpload('course_certificate', null)}
+                                      className="text-red-600 hover:text-red-700 p-2"
+                                      title="Șterge document"
+                                    >
+                                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p className="text-gray-600 mb-2">Încarcă certificatul de curs</p>
+                                    <input
+                                      type="file"
+                                      accept=".pdf,.jpg,.jpeg,.png"
+                                      onChange={(e) => e.target.files && handleFileUpload('course_certificate', e.target.files[0])}
+                                      className="hidden"
+                                      id="course-certificate-upload"
+                                    />
+                                    <label
+                                      htmlFor="course-certificate-upload"
+                                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                                    >
+                                      Selectează fișier
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            <button
-                              onClick={() => handleFileUpload('certificate', null)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
                           </div>
-                        ) : (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-                            <svg
-                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                              />
-                            </svg>
-                            <p className="text-gray-600 mb-2">Încarcă certificatul CDR</p>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={(e) =>
-                                e.target.files &&
-                                handleFileUpload('certificate', e.target.files[0])
-                              }
-                              className="hidden"
-                              id="certificate-upload"
-                            />
-                            <label
-                              htmlFor="certificate-upload"
-                              className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
-                            >
-                              Selectează fișier
-                            </label>
-                            <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mt-8 p-4 bg-blue-50 rounded-xl">
-                  <h4 className="font-semibold text-blue-800 mb-2">🔒 Securitatea documentelor</h4>
-                  <p className="text-blue-700 text-sm">
-                    Toate documentele sunt stocate în siguranță și vor fi verificate de echipa
-                    noastră în maximum 24 de ore. După verificare, vei primi o confirmare prin
-                    email.
-                  </p>
-                </div>
+                          {/* Practice Notice */}
+                          <div className="p-4 sm:p-6 border-2 border-gray-200 rounded-xl">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                                <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 text-center sm:text-left">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                  Aviz de liberă practică *
+                                </h3>
+                                <p className="text-gray-600 text-sm mb-4">
+                                  Avizul de liberă practică emis de o asociație profesională recunoscută (ex: UPMCA).
+                                </p>
+
+                                {nutritionistData.documents_uploaded.practice_notice ? (
+                                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                      <div>
+                                        <p className="font-medium text-green-800">Aviz de practică încărcat</p>
+                                        <p className="text-sm text-green-600">Document încărcat</p>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => handleFileUpload('practice_notice', null)}
+                                      className="text-red-600 hover:text-red-700 p-2"
+                                      title="Șterge document"
+                                    >
+                                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+                                    <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p className="text-gray-600 mb-2">Încarcă avizul de practică</p>
+                                    <input
+                                      type="file"
+                                      accept=".pdf,.jpg,.jpeg,.png"
+                                      onChange={(e) => e.target.files && handleFileUpload('practice_notice', e.target.files[0])}
+                                      className="hidden"
+                                      id="practice-notice-upload"
+                                    />
+                                    <label
+                                      htmlFor="practice-notice-upload"
+                                      className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 cursor-pointer transition-colors"
+                                    >
+                                      Selectează fișier
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="mt-8 p-4 bg-blue-50 rounded-xl">
+                      <h4 className="font-semibold text-blue-800 mb-2">🔒 Securitatea documentelor</h4>
+                      <p className="text-blue-700 text-sm">
+                        Toate documentele sunt stocate în siguranță și vor fi verificate de echipa noastră în maximum 24 de ore.
+                        După verificare, vei primi o confirmare prin email și profilul tău va fi activat.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

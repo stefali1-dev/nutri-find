@@ -6,7 +6,6 @@ export interface NutritionistData {
   phone: string
   birth_date: string
   gender: string
-  license_number: string
   years_experience: string
   work_types: string[]
   specializations: string[]
@@ -37,9 +36,11 @@ export interface NutritionistData {
   profile_photo_url: string
   languages: string[]
   location: string
+  professional_type?: 'dietician' | 'technician'
   documents_uploaded: {
-    diploma: boolean
-    certificate: boolean
+    cdr_certificate: boolean,
+    course_certificate: boolean,
+    practice_notice: boolean
   }
   verification_status: string
   average_rating?: number

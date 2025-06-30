@@ -176,7 +176,7 @@ export class NutritionistService {
   static async uploadDocument(
     userId: string,
     nutritionistId: string,
-    documentType: 'diploma' | 'certificate',
+    documentType: 'cdr_certificate' | 'course_certificate' | 'practice_notice',
     file: File
   ): Promise<{ success: boolean, error: any }> {
     try {
