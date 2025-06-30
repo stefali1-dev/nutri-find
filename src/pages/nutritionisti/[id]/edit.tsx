@@ -396,9 +396,12 @@ export default function EditNutritionistProfile() {
     }
   }
 
-  const documentsValid = nutritionistData.professional_type === 'dietician'
-    ? nutritionistData.documents_uploaded.cdr_certificate
-    : nutritionistData.documents_uploaded.course_certificate && nutritionistData.documents_uploaded.practice_notice
+  const documentsValid = nutritionistData.professional_type && (
+    nutritionistData.professional_type === 'dietician'
+      ? nutritionistData.documents_uploaded.cdr_certificate
+      : (nutritionistData.documents_uploaded.course_certificate &&
+        nutritionistData.documents_uploaded.practice_notice)
+  );
 
   if (loading || !authorized) {
     return (
@@ -553,7 +556,13 @@ export default function EditNutritionistProfile() {
                       <div>
                         <h3 className="font-semibold text-orange-800">Documente lipsă</h3>
                         <p className="text-orange-700 text-xs sm:text-sm">
-                          Încarcă diploma și certificatul CDR pentru activare.
+                          {!nutritionistData.professional_type ? (
+                            'Selectează tipul tău de calificare și încarcă documentele necesare pentru activare.'
+                          ) : nutritionistData.professional_type === 'dietician' ? (
+                            'Încarcă certificatul de membru activ CDR pentru activare.'
+                          ) : (
+                            'Încarcă certificatul de curs și avizul de liberă practică pentru activare.'
+                          )}
                         </p>
                       </div>
                     </div>
@@ -732,7 +741,7 @@ export default function EditNutritionistProfile() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Locația cabinetului *
+                      Locație *
                     </label>
                     <LocationSearch
                       value={nutritionistData.location}
