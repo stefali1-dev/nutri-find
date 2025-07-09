@@ -580,7 +580,7 @@ export default function EditNutritionistProfile() {
                     <span>
                       Status profil:{' '}
                       {nutritionistData.verification_status === 'verified'
-                        ? 'Activ'
+                        ? 'Verificat'
                         : 'În așteptare verificare'}
                     </span>
                   </div>

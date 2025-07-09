@@ -28,7 +28,7 @@ export class NutritionistService {
         consultation_types: data.consultation_types || [],
         work_days: data.work_days || [],
         languages: data.languages || ['Română'],
-        documents_uploaded: data.documents_uploaded || { diploma: false, certificate: false }
+        documents_uploaded: data.documents_uploaded || { cdr_certificate: false, course_certificate: false, practice_notice: false }
       }
 
       return { data: transformedData, error: null }
@@ -61,7 +61,7 @@ export class NutritionistService {
         consultation_types: data.consultation_types || [],
         work_days: data.work_days || [],
         languages: data.languages || ['Română'],
-        documents_uploaded: data.documents_uploaded || { diploma: false, certificate: false }
+        documents_uploaded: data.documents_uploaded || { cdr_certificate: false, course_certificate: false, practice_notice: false }
       }
 
       return { data: transformedData, error: null }
@@ -163,7 +163,7 @@ export class NutritionistService {
         consultation_types: item.consultation_types || [],
         work_days: item.work_days || [],
         languages: item.languages || ['Română'],
-        documents_uploaded: item.documents_uploaded || { diploma: false, certificate: false }
+        documents_uploaded: item.documents_uploaded || { cdr_certificate: false, course_certificate: false, practice_notice: false }
       }))
 
       return { data: transformedData, error: null }

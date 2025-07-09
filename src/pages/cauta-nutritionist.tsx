@@ -37,7 +37,7 @@ export default function FindNutritionist() {
     name: ''
   })
 
-  const totalSteps = 7
+  const totalSteps = 6
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -468,7 +468,7 @@ export default function FindNutritionist() {
           )}
 
           {/* Step 6: Additional Info */}
-          {currentStep === 6 && (
+          {/* {currentStep === 6 && (
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
                 Câteva detalii despre tine 📝
@@ -555,10 +555,10 @@ export default function FindNutritionist() {
                 Sari peste acest pas →
               </button>
             </div>
-          )}
+          )} */}
 
-          {/* Step 7: Contact */}
-          {currentStep === 7 && (
+          {/* Step 6: Contact */}
+          {currentStep === 6 && (
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
                 Aproape gata! 🎉
