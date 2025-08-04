@@ -131,7 +131,7 @@ export default function PrivacyPolicyPage() {
                 <li><strong>Pe baza consimțământului dumneavoastră (Art. 6(1)(a) și Art. 9(2)(a) GDPR):</strong>
                     <ul>
                         <li>Prelucrarea datelor sensibile privind sănătatea pentru a vă oferi recomandări de nutriționiști și pentru a permite acestora să vă ofere servicii personalizate.</li>
-                        <li>Trimiterea de newslettere și comunicări de marketing prin e-mail (via SendGrid), de la care vă puteți dezabona oricând.</li>
+                        <li>Trimiterea de newslettere și comunicări de marketing prin e-mail (via SelfMailKit), de la care vă puteți dezabona oricând.</li>
                         <li>Utilizarea cookie-urilor de analiză și marketing.</li>
                     </ul>
                 </li>
@@ -150,7 +150,7 @@ export default function PrivacyPolicyPage() {
                 <li><strong>Supabase (Irlanda):</strong> Furnizorul nostru pentru infrastructura de backend, inclusiv baza de date (PostgreSQL), autentificare și stocarea securizată a fișierelor (ex: diplome).</li>
                 <li><strong>Vercel (SUA):</strong> Serviciul de hosting pentru site-ul nostru web. Transferul de date este protejat prin Clauze Contractuale Standard.</li>
                 <li><strong>Cloudflare (SUA):</strong> Serviciul pe care îl folosim pentru securitate (firewall, protecție DDoS) și performanță (CDN). Transferul de date este protejat prin Clauze Contractuale Standard.</li>
-                <li><strong>SendGrid (SUA):</strong> Serviciul folosit pentru a trimite e-mailuri tranzacționale (ex: resetarea parolei) și de marketing. Transferul de date este protejat prin Clauze Contractuale Standard.</li>
+                <li><strong>SelfMailKit:</strong> Serviciul folosit pentru a trimite e-mailuri tranzacționale (ex: resetarea parolei) și de marketing. Datele sunt procesate în conformitate cu reglementările de protecție a datelor.</li>
                 <li><strong>Nutriționiștii de pe platformă:</strong> Atunci când un Utilizator contactează un Nutriționist, datele relevante (nume, conținutul mesajelor) sunt partajate cu acel Nutriționist pentru a putea presta serviciul solicitat.</li>
             </ul>
             <p>De asemenea, putem dezvălui datele către autoritățile publice, dacă legea ne impune acest lucru.</p>

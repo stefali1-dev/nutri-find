@@ -1,7 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import sgMail from '@sendgrid/mail';
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 interface SendEmailRequestBody {
   toEmail: string;
@@ -25,29 +22,44 @@ export default async function handler(
     return res.status(400).json({ message: 'Lipsesc câmpuri esențiale pentru trimiterea emailului (toEmail, subject, htmlContent).' });
   }
 
-  const fromEmail = 'support@nutrifind.ro';
+  const fromEmail = 'NutriFind <support@nutrifind.ro>';
+  const apiKey = process.env.SELFMAILKIT_API_KEY;
+  
+  if (!apiKey) {
+    return res.status(500).json({ message: 'Cheia API SelfMailKit nu este configurată.' });
+  }
 
-  const msg = {
-    to: toEmail,
+  const emailData = {
+    to: [toEmail],
     from: fromEmail,
     subject: subject,
     html: htmlContent,
   };
 
   try {
-    await sgMail.send(msg);
-    console.log(`[SendGrid] Email trimis cu succes către: ${toEmail}`);
-    return res.status(200).json({ message: 'Email trimis cu succes!' });
-  } catch (error: any) {
-    console.error(`[SendGrid] Eroare la trimiterea emailului către ${toEmail}:`, error);
+    const response = await fetch('https://api.selfmailkit.com/v1/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailData),
+    });
 
-    if (error.response) {
-      console.error(error.response.body);
-      return res.status(error.code || 500).json({
-        message: 'Eroare la trimiterea emailului prin SendGrid.',
-        details: error.response.body || error.message,
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error(`[SelfMailKit] Eroare la trimiterea emailului către ${toEmail}:`, errorData);
+      return res.status(response.status).json({
+        message: 'Eroare la trimiterea emailului prin SelfMailKit.',
+        details: errorData.message || `HTTP ${response.status}`,
       });
     }
+
+    const result = await response.json();
+    console.log(`[SelfMailKit] Email trimis cu succes către: ${toEmail}`);
+    return res.status(200).json({ message: 'Email trimis cu succes!' });
+  } catch (error: any) {
+    console.error(`[SelfMailKit] Eroare la trimiterea emailului către ${toEmail}:`, error);
 
     return res.status(500).json({
       message: 'A apărut o eroare necunoscută la trimiterea emailului.',
