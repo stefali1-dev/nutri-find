@@ -29,11 +29,12 @@ export default function LocationSearch({
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Parse the initial value to extract location and county
+  // Parse the initial value to extract location name
   useEffect(() => {
     if (value && value.includes(',')) {
-      const [name, county] = value.split(',').map(s => s.trim())
-      setSelectedLocation({ name, county })
+      // Handle legacy format "Town, County" - extract just the town
+      const [name] = value.split(',').map(s => s.trim())
+      setSelectedLocation({ name, county: '' })
       setSearchQuery(name)
     } else if (value) {
       setSearchQuery(value)
@@ -89,7 +90,7 @@ export default function LocationSearch({
   const handleSelectLocation = (location: Location) => {
     setSelectedLocation(location)
     setSearchQuery(location.name)
-    onChange(`${location.name}, ${location.county}`)
+    onChange(location.name)
     setIsOpen(false)
   }
 
