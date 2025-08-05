@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { NutritionistService } from '@/lib/services/nutritionistService'
 import type { NutritionistData } from '@/lib/types/nutritionist'
+import BookingModal, { BookingData } from '@/components/BookingModal'
 import Footer from '@/components/Footer'
 
 interface Review {
@@ -16,50 +17,8 @@ interface Review {
   verified: boolean
 }
 
-interface AvailableSlot {
-  date: string
-  time: string
-  type: 'online' | 'in-person'
-}
-
 // Mock data pentru reviews și available slots
 const mockReviews: Review[] = [
-  {
-    id: '1',
-    author: 'Ioana M.',
-    rating: 5,
-    date: '15 ianuarie 2024',
-    comment: 'Profesionist desăvârșit! Mi-a schimbat complet relația cu mâncarea. Am slăbit 12 kg în 3 luni, fără să mă înfometez. Planul personalizat a fost exact ce aveam nevoie.',
-    helpful: 23,
-    verified: true
-  },
-  {
-    id: '2',
-    author: 'Andrei P.',
-    rating: 5,
-    date: '3 februarie 2024',
-    comment: 'Foarte atent la detalii și empatic. Mi-a explicat tot ce trebuia să știu despre nutriție sportivă. Performanțele mele au crescut semnificativ.',
-    helpful: 15,
-    verified: true
-  },
-  {
-    id: '3',
-    author: 'Elena R.',
-    rating: 4,
-    date: '20 februarie 2024',
-    comment: 'Foarte mulțumită de rezultate. Singura problemă a fost că uneori răspunde mai greu la mesaje, dar consultațiile sunt excelente.',
-    helpful: 8,
-    verified: true
-  }
-]
-
-const mockAvailableSlots: AvailableSlot[] = [
-  { date: 'Mâine', time: '10:00', type: 'online' },
-  { date: 'Mâine', time: '14:00', type: 'in-person' },
-  { date: 'Mâine', time: '16:00', type: 'online' },
-  { date: 'Joi', time: '09:00', type: 'online' },
-  { date: 'Joi', time: '11:00', type: 'in-person' },
-  { date: 'Vineri', time: '15:00', type: 'online' }
 ]
 
 export default function NutritionistProfile() {
@@ -70,7 +29,6 @@ export default function NutritionistProfile() {
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'about' | 'services' | 'reviews' | 'certificates'>('about')
   const [showAllReviews, setShowAllReviews] = useState(false)
-  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
 
@@ -99,10 +57,14 @@ export default function NutritionistProfile() {
     }
   }
 
-  const handleBooking = () => {
-    if (selectedSlot) {
-      setShowBookingModal(true)
-    }
+  const handleBookingConfirmed = (data: BookingData) => {
+    // Handle booking confirmation
+    console.log('Booking confirmed:', data)
+    
+    // Close modal and reset state
+    setShowBookingModal(false)
+    
+    // Optionally redirect or show confirmation
   }
 
   const handleContactSubmit = (e: React.FormEvent) => {
@@ -140,6 +102,13 @@ export default function NutritionistProfile() {
     if (days.length === 7) return 'Toată săptămâna'
     if (days.length === 5 && !days.includes('Sâmbătă') && !days.includes('Duminică')) return 'Luni - Vineri'
     return days.join(', ')
+  }
+
+  const formatExperienceYears = (years: string | number) => {
+    const yearNum = typeof years === 'string' ? parseInt(years) : years
+    if (yearNum === 1) return '1 an experiență'
+    if (yearNum === 0) return 'Sub 1 an experiență'
+    return `${yearNum} ani experiență`
   }
 
   if (loading) {
@@ -217,7 +186,7 @@ export default function NutritionistProfile() {
                       <div>
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">{nutritionist.full_name}</h1>
                         <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                          {nutritionist.average_rating && (
+                          {/* {nutritionist.average_rating && (
                             <span className="flex items-center gap-1">
                               <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -225,12 +194,12 @@ export default function NutritionistProfile() {
                               <span className="font-medium text-lg">{nutritionist.average_rating}</span>
                               <span>({nutritionist.total_reviews || 3} recenzii)</span>
                             </span>
-                          )}
+                          )} */}
                           <span className="flex items-center gap-1">
                             <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {nutritionist.years_experience} ani experiență
+                            {formatExperienceYears(nutritionist.years_experience)}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
@@ -246,26 +215,6 @@ export default function NutritionistProfile() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                       </button>
-                    </div>
-                    
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.total_consultations || 0}</div>
-                        <div className="text-sm text-gray-600">Consultații</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.years_experience}</div>
-                        <div className="text-sm text-gray-600">Ani experiență</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.certifications.length}</div>
-                        <div className="text-sm text-gray-600">Certificări</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{nutritionist.languages.length}</div>
-                        <div className="text-sm text-gray-600">Limbi vorbite</div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -291,18 +240,6 @@ export default function NutritionistProfile() {
                       </svg>
                       {nutritionist.verification_status === 'verified' ? 'Nutriționist verificat' : 'În proces de verificare'}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Disponibil {nutritionist.next_available || 'în curând'}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      Suport între consultații
-                    </div>
                   </div>
 
                   <button
@@ -312,16 +249,12 @@ export default function NutritionistProfile() {
                     Programează consultație
                   </button>
                   
-                  <button
+                  {/* <button
                     onClick={() => setShowContactModal(true)}
                     className="w-full bg-white text-green-600 border-2 border-green-600 py-3 rounded-full font-medium hover:bg-green-50 transition-all"
                   >
                     Trimite mesaj
-                  </button>
-                  
-                  <p className="text-xs text-gray-500 text-center mt-4">
-                    Anulare gratuită cu 24h înainte
-                  </p>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -335,7 +268,7 @@ export default function NutritionistProfile() {
               {[
                 { id: 'about', label: 'Despre mine' },
                 { id: 'services', label: 'Servicii și prețuri' },
-                { id: 'reviews', label: 'Recenzii' },
+                // { id: 'reviews', label: 'Recenzii' },
                 { id: 'certificates', label: 'Educație și certificări' }
               ].map((tab) => (
                 <button
@@ -394,7 +327,7 @@ export default function NutritionistProfile() {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="md:col-span-2">
                       <h3 className="font-semibold text-gray-800 mb-3">Locație cabinet</h3>
                       <p className="text-gray-600 flex items-center gap-2">
                         <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -402,14 +335,6 @@ export default function NutritionistProfile() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         {nutritionist.location}
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-3">Program de lucru</h3>
-                      <p className="text-gray-600 mb-1">{formatWorkDays(nutritionist.work_days)}</p>
-                      <p className="text-sm text-gray-500">
-                        {nutritionist.work_hours.start} - {nutritionist.work_hours.end}
                       </p>
                     </div>
                   </div>
@@ -463,7 +388,7 @@ export default function NutritionistProfile() {
                           ))}
                         </div>
                         <span className="font-semibold">{nutritionist.average_rating}</span>
-                        <span className="text-gray-600">({nutritionist.total_reviews || 3} recenzii)</span>
+                        <span className="text-gray-600">({nutritionist.total_reviews} recenzii)</span>
                       </div>
                     )}
                   </div>
@@ -585,172 +510,88 @@ export default function NutritionistProfile() {
 
             {/* Sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Available Slots */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Disponibilitate următoarele zile</h3>
-                <div className="space-y-2">
-                  {mockAvailableSlots.map((slot, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedSlot(slot)}
-                      className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
-                        selectedSlot === slot
-                          ? 'border-green-600 bg-green-50'
-                          : 'border-gray-200 hover:border-green-400'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-medium text-gray-800">{slot.date}</span>
-                          <span className="text-gray-600 mx-2">•</span>
-                          <span className="text-gray-600">{slot.time}</span>
-                        </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          slot.type === 'online' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-purple-100 text-purple-800'
-                        }`}>
-                          {slot.type === 'online' ? 'Online' : 'Cabinet'}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={handleBooking}
-                  disabled={!selectedSlot}
-                  className={`w-full mt-4 py-3 rounded-full font-medium transition-all ${
-                    selectedSlot
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  Rezervă ora selectată
-                </button>
-              </div>
 
-              {/* Contact Info */}
+              {/* Contact & Availability Info */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Informații de contact</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact și disponibilitate</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span className="text-gray-600">{nutritionist.location}</span>
+                    <div>
+                      <div className="font-medium text-gray-800">Locație</div>
+                      <div className="text-gray-600">{nutritionist.location}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-gray-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span className="text-gray-600">Contact prin platformă</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-gray-600">{formatWorkDays(nutritionist.work_days)}</span>
+                    <div>
+                      <div className="font-medium text-gray-800">Contact</div>
+                      <div className="text-gray-600">Prin platformă</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Quick Info */}
+              {/* Verification Status */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Informații rapide</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Durată consultație:</span>
-                    <span className="font-medium">{nutritionist.consultation_duration} min</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Status verificare</h3>
+                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tipuri consultații:</span>
-                    <span className="font-medium">{nutritionist.consultation_types.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Specializări:</span>
-                    <span className="font-medium">{nutritionist.specializations.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Limbi vorbite:</span>
-                    <span className="font-medium">{nutritionist.languages.length}</span>
+                  <div>
+                    <div className="font-medium text-gray-800">
+                      {nutritionist.verification_status === 'verified' ? 'Verificat' : 'În proces de verificare'}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {nutritionist.verification_status === 'verified' 
+                        ? 'Nutriționist verificat de echipa NutriFind'
+                        : 'Verificarea documentelor în desfășurare'
+                      }
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Languages */}
+              {nutritionist.languages.length > 1 && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Limbi vorbite</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {nutritionist.languages.map((lang) => (
+                      <span key={lang} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium flex items-center gap-2">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                        </svg>
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Booking Modal */}
-        {showBookingModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">Confirmă programarea</h3>
-              
-              {selectedSlot && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                  <p className="text-gray-600 mb-2">Ai selectat:</p>
-                  <p className="font-semibold text-gray-800">
-                    {selectedSlot.date} • {selectedSlot.time} • {selectedSlot.type === 'online' ? 'Online' : 'La cabinet'}
-                  </p>
-                </div>
-              )}
-
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
-                  <input
-                    type="text"
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="ex: Maria Popescu"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="email@exemplu.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                  <input
-                    type="tel"
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="07XX XXX XXX"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mesaj (opțional)</label>
-                  <textarea
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    rows={3}
-                    placeholder="Spune-i nutriționistului despre ce ai vrea să discutați..."
-                  />
-                </div>
-              </form>
-
-              <div className="flex gap-4 mt-8">
-                <button
-                  onClick={() => setShowBookingModal(false)}
-                  className="flex-1 py-3 border-2 border-gray-200 rounded-full font-medium hover:bg-gray-50 transition-all"
-                >
-                  Anulează
-                </button>
-                <button
-                  onClick={() => {
-                    // Handle booking confirmation
-                    setShowBookingModal(false)
-                    alert('Programare confirmată! Vei primi un email de confirmare.')
-                  }}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-full font-medium hover:bg-green-700 transition-all"
-                >
-                  Confirmă programarea
-                </button>
-              </div>
-            </div>
-          </div>
+        {nutritionist && (
+          <BookingModal
+            isOpen={showBookingModal}
+            onClose={() => {
+              setShowBookingModal(false)
+            }}
+            onConfirm={handleBookingConfirmed}
+            nutritionistId={nutritionist.id!}
+            nutritionistName={nutritionist.full_name}
+          />
         )}
 
         {/* Contact Modal */}

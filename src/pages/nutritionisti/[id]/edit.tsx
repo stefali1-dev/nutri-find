@@ -9,6 +9,7 @@ import type { User } from '@supabase/supabase-js'
 import type { NutritionistData } from '@/lib/types/nutritionist'
 import Footer from '@/components/Footer'
 import LocationSearch from '@/components/LocationSearch'
+import ToastContainer, { useToast } from '@/components/Toast'
 import { consultationTypes, specializations } from '@/lib/utils'
 
 export default function EditNutritionistProfile() {
@@ -23,6 +24,8 @@ export default function EditNutritionistProfile() {
     setError: setHookError
   } = useNutritionist()
 
+  const { toasts, addToast, removeToast } = useToast()
+  
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
@@ -31,7 +34,6 @@ export default function EditNutritionistProfile() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
   const [errorFields, setErrorFields] = useState<Record<string, string>>({})
-  const [toasts, setToasts] = useState<{ id: number; message: string; type: 'error' | 'success' }[]>([])
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [nutritionistData, setNutritionistData] = useState<NutritionistData>({
@@ -57,21 +59,6 @@ export default function EditNutritionistProfile() {
     documents_uploaded: { cdr_certificate: false, course_certificate: false, practice_notice: false },
     verification_status: 'pending'
   })
-
-  // Toast management
-  const addToast = useCallback((message: string, type: 'error' | 'success') => {
-    const id = Date.now()
-    setToasts((prev) => [...prev, { id, message, type }])
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id))
-    }, 5000)
-  }, [])
-
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id))
-  }
 
   // Field to tab mapping for error navigation
   const fieldToTabMap: Record<string, 'personal' | 'professional' | 'services' | 'availability' | 'documents'> = {
@@ -439,27 +426,12 @@ export default function EditNutritionistProfile() {
       `}</style>
 
       {/* Toast Notifications */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 space-y-2 sm:bottom-4 sm:right-4 sm:left-auto sm:p-0 sm:max-w-sm">
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className={`w-full p-4 rounded-lg shadow-lg text-white transition-all duration-300 transform ${toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'
-              }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="flex-1 pr-2">{toast.message}</span>
-              <button
-                onClick={() => removeToast(toast.id)}
-                className="flex-shrink-0 ml-2"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ToastContainer 
+        toasts={toasts} 
+        onRemove={removeToast} 
+        position="bottom-right"
+        zIndex={50}
+      />
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 pb-12">
         {/* Header */}

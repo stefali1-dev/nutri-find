@@ -1,433 +1,375 @@
-import { useState, useEffect } from 'react'
-import { NutritionistData } from '@/lib/types/nutritionist'
-
-interface BookingModalProps {
-    nutritionist: NutritionistData
-    onBook: (bookingData: BookingData) => void
-}
+import { useState } from 'react'
+import { BookingService } from '@/lib/services/bookingService'
+import type { CreateBookingRequestData } from '@/lib/types/booking'
 
 export interface BookingData {
-    nutritionistId: string
-    date: Date
-    time: string
-    phone: string
-    message: string
+  nutritionistId: string
+  fullName: string
+  email: string
+  phone: string
+  message?: string
 }
 
-const BookingModal = ({ nutritionist, onBook }: BookingModalProps) => {
-    const [isOpen, setIsOpen] = useState(false)
-    const [step, setStep] = useState(1) // 1: calendar, 2: contact details
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-    const [selectedTime, setSelectedTime] = useState<string | null>(null)
-    const [phone, setPhone] = useState('')
-    const [message, setMessage] = useState('')
-    const [loading, setLoading] = useState(false)
+interface BookingModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: (data: BookingData) => void
+  nutritionistId: string
+  nutritionistName: string
+}
 
-    // Get current date
-    const today = new Date()
-    const [currentMonth, setCurrentMonth] = useState(today.getMonth())
-    const [currentYear, setCurrentYear] = useState(today.getFullYear())
+export default function BookingModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  nutritionistId,
+  nutritionistName,
+}: BookingModalProps) {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-    // Generate calendar days
-    const getDaysInMonth = (month: number, year: number): number => {
-        return new Date(year, month + 1, 0).getDate()
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
     }
 
-    const getFirstDayOfMonth = (month: number, year: number): number => {
-        return new Date(year, month, 1).getDay()
+    // Clear submit error when user starts typing
+    if (submitError) {
+      setSubmitError(null)
+    }
+  }
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+    const errors: Record<string, string> = {}
+
+    // Validate required fields
+    if (!formData.fullName.trim()) {
+      errors.fullName = 'Numele este obligatoriu'
+    }
+    if (!formData.email.trim()) {
+      errors.email = 'Email-ul este obligatoriu'
+    }
+    if (!formData.phone.trim()) {
+      errors.phone = 'Telefonul este obligatoriu'
     }
 
-    const generateCalendarDays = (): (number | null)[] => {
-        const daysInMonth = getDaysInMonth(currentMonth, currentYear)
-        const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
-        const days: (number | null)[] = []
-
-        // Add empty cells for days before month starts
-        for (let i = 0; i < firstDay; i++) {
-            days.push(null)
-        }
-
-        // Add days of the month
-        for (let i = 1; i <= daysInMonth; i++) {
-            days.push(i)
-        }
-
-        return days
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (formData.email && !emailRegex.test(formData.email)) {
+      errors.email = 'Format email invalid'
     }
 
-    const monthNames = [
-        'Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie',
-        'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'
-    ]
-
-    const dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
-
-    const timeSlots = [
-        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-        '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-        '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-        '18:00', '18:30', '19:00', '19:30'
-    ]
-
-    const isDateAvailable = (day: number | null): boolean => {
-        if (!day) return false
-        const date = new Date(currentYear, currentMonth, day)
-        const dayOfWeek = date.getDay()
-
-        // Check if it's a weekend (simplified - you can use nutritionist.work_days)
-        if (dayOfWeek === 0 || dayOfWeek === 6) return false
-
-        // Check if date is in the past
-        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-        if (date < todayStart) return false
-
-        return true
+    // Validate phone format (basic Romanian phone validation)
+    const phoneRegex = /^(\+4|4|0)(\d{8,9})$/
+    if (formData.phone && !phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      errors.phone = 'Format telefon invalid'
     }
 
-    const handleDateSelect = (day: number | null) => {
-        if (!day || !isDateAvailable(day)) return
-        setSelectedDate(new Date(currentYear, currentMonth, day))
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setIsSubmitting(false)
+      return
     }
 
-    const handleTimeSelect = (time: string) => {
-        setSelectedTime(time)
+    try {
+      // Create booking request data
+      const requestData: CreateBookingRequestData = {
+        nutritionist_id: nutritionistId,
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message || undefined,
+      }
+
+      // Save to Supabase
+      const { data, error } = await BookingService.createBookingRequest(requestData)
+
+      if (error) {
+        console.error('Error saving booking request:', error)
+        setSubmitError('A apărut o eroare la salvarea cererii. Te rugăm să încerci din nou.')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!data) {
+        setSubmitError('A apărut o eroare neașteptată. Te rugăm să încerci din nou.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Show success state
+      setIsSuccess(true)
+      setIsSubmitting(false)
+      
+    } catch (error) {
+      console.error('Unexpected error:', error)
+      setSubmitError('A apărut o eroare de conexiune. Te rugăm să verifici conexiunea la internet și să încerci din nou.')
+      setIsSubmitting(false)
     }
+  }
 
-    const handleNext = () => {
-        if (selectedDate && selectedTime) {
-            setStep(2)
-        }
+  const handleClose = () => {
+    if (isSuccess) {
+      // If we're closing from success state, send the booking data to parent
+      const bookingData: BookingData = {
+        nutritionistId,
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+      }
+      onConfirm(bookingData)
     }
+    
+    // Reset all state when closing
+    setFormData({
+      fullName: '',
+      email: '',
+      phone: '',
+      message: ''
+    })
+    setFieldErrors({})
+    setSubmitError(null)
+    setIsSuccess(false)
+    setIsSubmitting(false)
+    onClose()
+  }
 
-    const handleSubmit = async () => {
-        if (!phone || phone.length < 10) {
-            alert('Te rog introdu un număr de telefon valid')
-            return
-        }
+  if (!isOpen) return null
 
-        if (!selectedDate || !selectedTime || !nutritionist.id) {
-            alert('Eroare: Lipsesc date necesare')
-            return
-        }
-
-        setLoading(true)
-
-        // Simulate API call
-        setTimeout(() => {
-            onBook({
-                nutritionistId: nutritionist.id!,
-                date: selectedDate,
-                time: selectedTime,
-                phone,
-                message
-            })
-            setLoading(false)
-            setIsOpen(false)
-            // Reset form
-            setStep(1)
-            setSelectedDate(null)
-            setSelectedTime(null)
-            setPhone('')
-            setMessage('')
-
-            alert('Programare trimisă cu succes! Vei fi contactat în curând.')
-        }, 1500)
-    }
-
-    const handleClose = () => {
-        setIsOpen(false)
-        setTimeout(() => {
-            setStep(1)
-            setSelectedDate(null)
-            setSelectedTime(null)
-            setPhone('')
-            setMessage('')
-        }, 300)
-    }
-
+  // Success state
+  if (isSuccess) {
     return (
-        <>
-            {/* Button */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="w-full bg-green-600 text-white px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-2 text-sm lg:text-base"
-            >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
+      <>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-8">
+            <div className="text-center">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="hidden sm:inline">Programează</span>
-                <span className="sm:hidden">Program</span>
-            </button>
-
-            {/* Modal */}
-            {isOpen && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                        {/* Background overlay */}
-                        <div
-                            className="fixed inset-0 bg-black/50 z-40"
-                            onClick={handleClose}
-                        />
-
-                        {/* Modal panel */}
-                        <div className="inline-block w-full max-w-lg my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                            {/* Header */}
-                            <div className="px-6 py-4 border-b border-gray-100">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-gray-800">
-                                        {step === 1 ? '📅 Alege data și ora' : '📞 Detalii contact'}
-                                    </h3>
-                                    <button
-                                        onClick={handleClose}
-                                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <p className="mt-1 text-sm text-gray-600">
-                                    Programare consultație cu {nutritionist.full_name}
-                                </p>
-                            </div>
-
-                            {/* Content */}
-                            <div className="px-6 py-4">
-                                {step === 1 ? (
-                                    <>
-                                        {/* Calendar */}
-                                        <div className="mb-6">
-                                            {/* Month navigation */}
-                                            <div className="flex items-center justify-between mb-4">
-                                                <button
-                                                    onClick={() => {
-                                                        if (currentMonth === 0) {
-                                                            setCurrentMonth(11)
-                                                            setCurrentYear(currentYear - 1)
-                                                        } else {
-                                                            setCurrentMonth(currentMonth - 1)
-                                                        }
-                                                    }}
-                                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                                    </svg>
-                                                </button>
-                                                <h4 className="text-lg font-semibold text-gray-800">
-                                                    {monthNames[currentMonth]} {currentYear}
-                                                </h4>
-                                                <button
-                                                    onClick={() => {
-                                                        if (currentMonth === 11) {
-                                                            setCurrentMonth(0)
-                                                            setCurrentYear(currentYear + 1)
-                                                        } else {
-                                                            setCurrentMonth(currentMonth + 1)
-                                                        }
-                                                    }}
-                                                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            {/* Day names */}
-                                            <div className="grid grid-cols-7 gap-1 mb-2">
-                                                {dayNames.map((day, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="text-center text-xs font-medium text-gray-500 py-2"
-                                                    >
-                                                        {day}
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {/* Calendar days */}
-                                            <div className="grid grid-cols-7 gap-1">
-                                                {generateCalendarDays().map((day, index) => (
-                                                    <button
-                                                        key={`${currentMonth}-${currentYear}-${index}`} // Unique key
-                                                        onClick={() => handleDateSelect(day)}
-                                                        disabled={!isDateAvailable(day)}
-                                                        className={`
-        h-10 rounded-lg font-medium text-sm transition-all duration-200
-        ${!day ? 'invisible' : ''}
-        ${isDateAvailable(day)
-                                                                ? selectedDate?.getDate() === day &&
-                                                                    selectedDate?.getMonth() === currentMonth &&
-                                                                    selectedDate?.getFullYear() === currentYear
-                                                                    ? 'bg-green-600 text-white hover:bg-green-700'
-                                                                    : 'hover:bg-green-50 text-gray-700'
-                                                                : 'text-gray-300 cursor-not-allowed'
-                                                            }
-      `}
-                                                    >
-                                                        {day}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Time slots */}
-                                        {selectedDate && (
-                                            <div className="animate-fadeIn">
-                                                <h4 className="text-sm font-semibold text-gray-700 mb-3">Alege ora:</h4>
-                                                <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                                                    {timeSlots.map((time) => (
-                                                        <button
-                                                            key={time}
-                                                            onClick={() => handleTimeSelect(time)}
-                                                            className={`
-                                py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200
-                                ${selectedTime === time
-                                                                    ? 'bg-green-600 text-white'
-                                                                    : 'bg-gray-100 text-gray-700 hover:bg-green-50'
-                                                                }
-                              `}
-                                                        >
-                                                            {time}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                ) : (
-                                    /* Step 2: Contact details */
-                                    <div className="space-y-4 animate-fadeIn">
-                                        {/* Selected date/time summary */}
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                                            <p className="text-sm text-green-800">
-                                                <span className="font-semibold">📅 Data selectată:</span>{' '}
-                                                {selectedDate?.toLocaleDateString('ro-RO', {
-                                                    weekday: 'long',
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}, ora {selectedTime}
-                                            </p>
-                                        </div>
-
-                                        {/* Phone input */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Număr de telefon *
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                value={phone}
-                                                onChange={(e) => setPhone(e.target.value)}
-                                                placeholder="07XX XXX XXX"
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                                            />
-                                        </div>
-
-                                        {/* Message textarea */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Mesaj (opțional)
-                                            </label>
-                                            <textarea
-                                                value={message}
-                                                onChange={(e) => setMessage(e.target.value)}
-                                                placeholder="Spune-i nutriționistului despre ce ai vrea să discutați..."
-                                                rows={4}
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
-                                            />
-                                        </div>
-
-                                        {/* Info message */}
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                            <p className="text-sm text-blue-800">
-                                                💡 Nutriționistul te va contacta pentru a confirma programarea și pentru a discuta detaliile consultației.
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                                <div className="flex gap-3">
-                                    {step === 2 && (
-                                        <button
-                                            onClick={() => setStep(1)}
-                                            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all duration-200 font-medium"
-                                        >
-                                            Înapoi
-                                        </button>
-                                    )}
-
-                                    {step === 1 ? (
-                                        <button
-                                            onClick={handleNext}
-                                            disabled={!selectedDate || !selectedTime}
-                                            className={`
-                        flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200
-                        ${selectedDate && selectedTime
-                                                    ? 'bg-green-600 text-white hover:bg-green-700'
-                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                }
-                      `}
-                                        >
-                                            Continuă
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={handleSubmit}
-                                            disabled={loading || !phone}
-                                            className={`
-                        flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2
-                        ${loading || !phone
-                                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-green-600 text-white hover:bg-green-700'
-                                                }
-                      `}
-                                        >
-                                            {loading ? (
-                                                <>
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                                    Se trimite...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    Trimite programarea
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              
+              {/* Success Message */}
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Cererea a fost trimisă!</h3>
+              <p className="text-gray-600 mb-2">
+                Mulțumim pentru cererea de programare cu <span className="font-semibold">{nutritionistName}</span>.
+              </p>
+              <p className="text-gray-600 mb-6">
+                Vei fi contactat în cel mai scurt timp pentru confirmarea programării și stabilirea detaliilor consultației.
+              </p>
+              
+              {/* Additional Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-blue-800 mb-1">Ce urmează?</p>
+                    <p className="text-sm text-blue-700">Nutriționistul va analiza cererea ta și te va contacta pentru a stabili data și ora consultației.</p>
+                  </div>
                 </div>
-            )}
-
-            <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
-        </>
+              </div>
+              
+              {/* Close Button */}
+              <button
+                onClick={handleClose}
+                className="w-full bg-green-600 text-white py-3 rounded-full font-medium hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Închide
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
     )
-}
+  }
 
-export default BookingModal;
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-gray-800">Trimite cererea</h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+            <p className="text-gray-600 mb-2">Programare cu:</p>
+            <p className="font-semibold text-gray-800 mb-2">{nutritionistName}</p>
+          </div>
+
+          <form className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nume complet <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={`w-full p-3 border-2 ${
+                  fieldErrors.fullName 
+                    ? 'border-red-500 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-green-500'
+                } rounded-lg focus:outline-none focus:ring-2 ${
+                  fieldErrors.fullName 
+                    ? 'focus:ring-red-500/20' 
+                    : 'focus:ring-green-500/20'
+                } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                placeholder="ex: Maria Popescu"
+                required
+              />
+              {fieldErrors.fullName && (
+                <p className="text-red-500 text-sm mt-1">{fieldErrors.fullName}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={`w-full p-3 border-2 ${
+                  fieldErrors.email 
+                    ? 'border-red-500 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-green-500'
+                } rounded-lg focus:outline-none focus:ring-2 ${
+                  fieldErrors.email 
+                    ? 'focus:ring-red-500/20' 
+                    : 'focus:ring-green-500/20'
+                } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                placeholder="email@exemplu.com"
+                required
+              />
+              {fieldErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Telefon <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={`w-full p-3 border-2 ${
+                  fieldErrors.phone 
+                    ? 'border-red-500 focus:border-red-500' 
+                    : 'border-gray-200 focus:border-green-500'
+                } rounded-lg focus:outline-none focus:ring-2 ${
+                  fieldErrors.phone 
+                    ? 'focus:ring-red-500/20' 
+                    : 'focus:ring-green-500/20'
+                } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                placeholder="07XX XXX XXX"
+                required
+              />
+              {fieldErrors.phone && (
+                <p className="text-red-500 text-sm mt-1">{fieldErrors.phone}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mesaj (opțional)
+              </label>
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                rows={3}
+                placeholder="Spune-i nutriționistului despre ce ai vrea să discutați..."
+              />
+            </div>
+          </form>
+
+          {/* Submit Error Message */}
+          {submitError && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-red-800 mb-1">Eroare la salvarea cererii</p>
+                  <p className="text-sm text-red-700">{submitError}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="flex-1 py-3 border-2 border-gray-200 rounded-full font-medium hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anulează
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex-1 bg-green-600 text-white py-3 rounded-full font-medium hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  Se salvează...
+                </>
+              ) : (
+                'Trimite cererea'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
