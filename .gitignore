@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 flatten_files_for_gpt.py
 /gpt-prompt
+supabase

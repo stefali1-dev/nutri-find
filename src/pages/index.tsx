@@ -1,154 +1,8 @@
 import { useState } from 'react'
-import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabaseClient'
-
-// Componenta pentru formularul de waiting list
-type WaitlistFormProps = {
-  placement: string
-  className?: string
-}
-
-function WaitlistForm({ placement, className = "" }: WaitlistFormProps) {
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      // Validare email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(email)) {
-        throw new Error('Te rog să introduci o adresă de email validă')
-      }
-
-      // Insert new subscriber
-      const { error: insertError } = await supabase
-        .from('waitlist')
-        .insert([
-          {
-            email: email,
-            feature_interested: 'client_platform',
-            source_page: router.pathname,
-            user_type: 'client',
-            placement: placement // pentru a vedea unde s-au înscris
-          }
-        ])
-
-      if (insertError) {
-        if (insertError.code === '23505') { // Duplicate email
-          throw new Error('Această adresă de email este deja înregistrată!')
-        }
-        throw insertError
-      }
-
-      setIsSubmitted(true)
-      setEmail('')
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError('A apărut o eroare neașteptată')
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  if (isSubmitted) {
-    return (
-      <div className={`bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6 text-center ${className}`}>
-        <div className="flex items-center justify-center mb-3">
-          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h3 className="text-base sm:text-lg font-semibold text-green-800 mb-2">Mulțumim!</h3>
-        <p className="text-sm sm:text-base text-green-700">
-          Te-ai înscris cu succes! Vei primi în curând un cod de 15% reducere la prima consultație când lansăm platforma.
-        </p>
-      </div>
-    )
-  }
-
-  return (
-    <div className={`bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl ${className}`}>
-      <div className="text-center mb-4 sm:mb-5">
-        <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 animate-pulse">
-          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-          </svg>
-        </div>
-
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-2 px-2">
-          Rezervă-ți locul acum și primești <span className="text-green-600">15% reducere</span>!
-        </h3>
-        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-2">
-          Înscrie-te gratuit pe lista de așteptare.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-        <div className="relative">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Adresa ta de email"
-            required
-            disabled={isLoading}
-            className="w-full px-4 py-3 sm:px-5 sm:py-4 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-400 focus:border-transparent outline-none transition-all shadow-sm hover:shadow-md pr-10 sm:pr-12"
-            autoComplete="email"
-            inputMode="email"
-          />
-          <svg className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
-
-        {error && (
-          <div className="text-red-600 text-xs sm:text-sm bg-red-50 p-2.5 sm:p-3 rounded-lg animate-shake flex items-start">
-            <svg className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="break-words">{error}</span>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg className="animate-spin -ml-1 mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Se înscrie...
-            </span>
-          ) : (
-            "Vreau reducerea de 15%!"
-          )}
-        </button>
-
-        <p className="text-[11px] sm:text-xs text-gray-500 text-center px-2">
-          * Reducerea se aplică exclusiv la prima consultație după lansarea platformei
-        </p>
-      </form>
-    </div>
-  )
-}
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -224,7 +78,7 @@ export default function Home() {
                 <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors">Cum funcționează</a>
                 <a href="#benefits" className="text-gray-700 hover:text-green-600 transition-colors">Beneficii</a>
                 <a href="#insights" className="text-gray-700 hover:text-green-600 transition-colors">Interviuri</a>
-                <Link href="/#find-nutritionist">
+                <Link href="/cauta-nutritionist">
                   <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
                     Începe acum
                   </button>
@@ -274,7 +128,7 @@ export default function Home() {
                 >
                   Interviuri
                 </a>
-                <Link href="/#find-nutritionist">
+                <Link href="/cauta-nutritionist">
                   <button
                     className="w-full mt-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
@@ -304,7 +158,7 @@ export default function Home() {
                     Consultații personalizate, prețuri transparente, rezultate garantate.
                   </p>
                   <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
-                    <Link href="#find-nutritionist">
+                    <Link href="/cauta-nutritionist">
                       <button className="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
                         Găsește un nutriționist
                       </button>
@@ -316,48 +170,6 @@ export default function Home() {
                     </Link>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Secțiune de reducere - clarificată */}
-        <section id="find-nutritionist" className="py-12 sm:py-16 bg-gradient-to-r from-green-500 to-emerald-600">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-10">
-              <div className="text-white lg:w-1/2">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
-                  Fii printre primii care au acces la platformă!
-                </h2>
-                <p className="text-base sm:text-lg text-green-100 mb-4 sm:mb-6">
-                  Înscrie-te acum pe lista noastră de așteptare și primești 15% reducere la prima consultație, imediat ce lansăm platforma.
-                </p>
-                <ul className="text-green-100 space-y-2 text-sm sm:text-base">
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Acces prioritar la lansare
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Reducere de lansare: -15% la prima consultație
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Fără obligații – te poți retrage oricând
-                  </li>
-                </ul>
-              </div>
-              <div className="w-full lg:w-1/2 max-w-md">
-                <WaitlistForm
-                  placement="before_how_it_works"
-                  className="transform hover:-translate-y-1 transition-transform duration-300"
-                />
               </div>
             </div>
           </div>
@@ -655,39 +467,41 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Secțiunea finală de reducere */}
-        <section id="final-waitlist" className="pb-16 pt-8 sm:py-20 bg-gradient-to-br from-green-600 to-emerald-700">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 px-2">
-                Gata să îți transformi viața?
-              </h2>
-              <p className="text-lg sm:text-xl text-green-100 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-                Alătură-te primilor utilizatori și beneficiază de reducerea exclusivă de 15% la prima consultație
-              </p>
-
-              <div className="inline-flex items-center justify-center bg-yellow-50 text-yellow-800 px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-6 sm:mb-8 animate-bounce text-sm sm:text-base">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
+        {/* Final CTA Section */}
+        <section className="pb-16 pt-8 sm:py-20 bg-gradient-to-br from-green-600 to-emerald-700">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6 px-2">
+              Gata să îți transformi viața?
+            </h2>
+            <p className="text-lg sm:text-xl text-green-100 mb-8 sm:mb-10 max-w-2xl mx-auto px-2">
+              Începe acum căutarea nutriționistului perfect pentru tine. Procesul durează doar câteva minute!
+            </p>
+            
+            <Link href="/cauta-nutritionist">
+              <button className="bg-white text-green-600 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-lg sm:text-xl font-bold hover:bg-green-50 transition-all transform hover:scale-105 shadow-2xl">
+                Găsește-ți nutriționistul acum
+              </button>
+            </Link>
+            
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 text-green-100">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-bold">Ofertă limitată la primele 30 de înscrieri</span>
+                <span className="text-sm sm:text-base">Fără cont necesar</span>
               </div>
-            </div>
-
-            <div className="max-w-2xl mx-auto bg-white/20 backdrop-blur-sm p-0.5 sm:p-1 rounded-xl sm:rounded-2xl">
-              <WaitlistForm
-                placement="final_cta"
-                className="bg-white rounded-xl sm:rounded-2xl shadow-xl"
-              />
-            </div>
-
-            <div className="text-center mt-8 sm:mt-10 px-4">
-              <p className="text-green-100 text-sm sm:text-base flex items-center justify-center">
-                <svg className="inline w-4 h-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm sm:text-base">Doar 5 minute</span>
+              </div>
+              <div className="flex items-center">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span>Datele tale sunt sigure. Nu vom partaja niciodată informațiile tale.</span>
-              </p>
+                <span className="text-sm sm:text-base">100% gratuit</span>
+              </div>
             </div>
           </div>
         </section>

@@ -110,7 +110,7 @@ export default function FindNutritionist() {
       // Save in sessionStorage (serialize to JSON)
       // Will be used later to fetch nutritionists
       sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
-      router.push('/nutritionisti/results')
+      router.push('/nutritionisti/rezultate')
 
     } catch (error) {
       console.error('Unexpected error:', error)
@@ -145,6 +145,23 @@ export default function FindNutritionist() {
           -webkit-user-select: none;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 500px;
+          }
+        }
+        
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out forwards;
         }
       `}</style>
 
@@ -189,7 +206,7 @@ export default function FindNutritionist() {
 
       {/* Form Content */}
       <div className="max-w-2xl mx-auto px-4 pt-6 sm:pt-12 pb-24 sm:pb-12">
-        <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'}`}>
+        <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100'}`}>
 
           {/* Step 1: Main Goal */}
           {currentStep === 1 && (
@@ -614,7 +631,7 @@ export default function FindNutritionist() {
         </div>
 
         {/* Navigation Buttons - Fixed on mobile */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 sm:relative sm:bg-transparent sm:border-0 sm:p-0 sm:mt-8">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 sm:relative sm:bg-transparent sm:border-0 sm:p-0 sm:mt-8 z-10">
           <div className="flex justify-between items-center max-w-2xl mx-auto">
             {currentStep > 1 && (
               <button

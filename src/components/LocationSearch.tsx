@@ -164,7 +164,7 @@ export default function LocationSearch({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-[9999] w-full mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-auto">
           {loading ? (
             <div className="p-4 text-center">
               <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
