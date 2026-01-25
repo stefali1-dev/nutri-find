@@ -1,0 +1,8 @@
+read @AGENT.md.
+
+and understand the context.
+now, we're in the process of adding more nutritionists to the site. 
+but I talked to them and they agreed that we can do the registering for them, with data from their site. as they are busy and can't complete the registration themselfs.
+so i will give you their sites, and I want you to scrape all the needed data you can find four our nutiritonist profile.
+feel free to browse their site until you find the needed data or until you are certain that it is not present. in that case, you can ask me directly.
+

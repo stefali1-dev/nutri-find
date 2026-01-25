@@ -59,7 +59,6 @@ export default function NutritionistProfile() {
 
   const handleBookingConfirmed = (data: BookingData) => {
     // Handle booking confirmation
-    console.log('Booking confirmed:', data)
     
     // Close modal and reset state
     setShowBookingModal(false)
@@ -128,7 +127,7 @@ export default function NutritionistProfile() {
         <div className="text-center">
           <p className="text-xl font-medium text-red-600 mb-4">{error || 'Nutriționistul nu a fost găsit'}</p>
           <Link href="/">
-            <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors">
+            <button className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors cursor-pointer">
               Înapoi la căutare
             </button>
           </Link>
@@ -153,7 +152,7 @@ export default function NutritionistProfile() {
                 <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
               </Link>
               <span className="text-gray-400">/</span>
-              <Link href="/nutritionisti/results">
+              <Link href="/nutritionisti/rezultate">
                 <span className="text-gray-600 hover:text-green-600 cursor-pointer">Nutriționiști</span>
               </Link>
               <span className="text-gray-400">/</span>
@@ -210,11 +209,6 @@ export default function NutritionistProfile() {
                           ))}
                         </div>
                       </div>
-                      <button className="hidden md:block p-2 text-gray-400 hover:text-red-500 transition-colors">
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -274,7 +268,7 @@ export default function NutritionistProfile() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap ${
+                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
                     activeTab === tab.id
                       ? 'border-green-600 text-green-600'
                       : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -424,7 +418,7 @@ export default function NutritionistProfile() {
                         </div>
                         <p className="text-gray-600 mt-3">{review.comment}</p>
                         <div className="flex items-center gap-4 mt-4">
-                          <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                          <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 cursor-pointer">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                             </svg>

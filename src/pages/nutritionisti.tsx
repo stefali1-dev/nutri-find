@@ -4,6 +4,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
+import PublicNavbar from '@/components/PublicNavbar'
 
 // Calculator de venit - Mobile optimized
 function IncomeCalculator() {
@@ -103,7 +104,7 @@ function IncomeCalculator() {
                     *Calculele sunt orientative și bazate pe date din piață
                 </p>
                 <Link href="/nutritionisti/onboarding">
-                    <button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
+                    <button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 cursor-pointer">
                         Vreau să încep să câștig!
                     </button>
                 </Link>
@@ -137,7 +138,6 @@ function LiveStats() {
 }
 
 export default function NutritionistsPage() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [openFaq, setOpenFaq] = useState<number | null>(null)
 
     const toggleFaq = (index: number) => {
@@ -222,111 +222,23 @@ export default function NutritionistsPage() {
 
             <div className="min-h-screen bg-white">
                 {/* Navbar */}
-                <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center h-16">
-                            <div className="flex items-center">
-                                <Image
-                                    src="/images/logo.png"
-                                    alt="NutriFind Logo"
-                                    width={40}
-                                    height={40}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 mr-2"
-                                    priority
-                                />
-                                <Link href="/">
-                                    <span className="text-xl sm:text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
-                                </Link>
-                            </div>
-
-                            {/* Desktop Navigation */}
-                            <div className="hidden md:flex items-center space-x-8">
-                                <a href="#benefits" className="text-gray-700 hover:text-green-600 transition-colors">Beneficii</a>
-                                <a href="#income-potential" className="text-gray-700 hover:text-green-600 transition-colors">Calculator Venit</a>
-                                <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors">Cum funcționează</a>
-                                <a href="#faq" className="text-gray-700 hover:text-green-600 transition-colors">FAQ</a>
-                                <Link href="/nutritionisti/onboarding">
-                                    <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105 pulse-border">
-                                        Începe acum
-                                    </button>
-                                </Link>
-                                <Link href="/nutritionisti/login">
-                                    <button className="cursor-pointer bg-transparent text-green-600 border border-green-600 px-6 py-2 rounded-full hover:bg-green-600 hover:text-white transition-all transform hover:scale-105">
-                                        Login
-                                    </button>
-                                </Link>
-                            </div>
-
-                            {/* Mobile menu button */}
-                            <div className="md:hidden">
-                                <button
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="text-gray-700 hover:text-green-600 focus:outline-none p-2"
-                                >
-                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        {isMenuOpen ? (
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        ) : (
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                        )}
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile Navigation */}
-                    {isMenuOpen && (
-                        <div className="md:hidden bg-white border-t border-gray-100">
-                            <div className="px-2 pt-2 pb-3 space-y-1">
-                                <a
-                                    href="#benefits"
-                                    className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Beneficii
-                                </a>
-                                <a
-                                    href="#income-potential"
-                                    className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Calculator Venit
-                                </a>
-                                <a
-                                    href="#how-it-works"
-                                    className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Cum funcționează
-                                </a>
-                                <a
-                                    href="#faq"
-                                    className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    FAQ
-                                </a>
-                                <Link href="/nutritionisti/onboarding">
-                                    <button
-                                        className="w-full mt-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors"
-                                        onClick={() => setIsMenuOpen(false)}
-                                    >
-                                        Începe acum
-                                    </button>
-                                </Link>
-                                <Link href="/nutritionisti/login">
-                                    <button
-                                        className="w-full mt-2 bg-transparent text-green-600 border border-green-600 px-6 py-3 rounded-full hover:bg-green-600 hover:text-white transition-colors"
-                                        onClick={() => setIsMenuOpen(false)}
-                                    >
-                                        Login
-                                    </button>
-                                </Link>
-                            </div>
-                        </div>
-                    )}
-                </nav>
+                <PublicNavbar 
+                    activePage="nutritionisti"
+                    navLinks={[
+                        { href: '#benefits', label: 'Beneficii' },
+                        { href: '#income-potential', label: 'Calculator Venit' },
+                        { href: '#how-it-works', label: 'Cum funcționează' },
+                        { href: '#faq', label: 'FAQ' }
+                    ]}
+                    ctaButton={{
+                        label: 'Începe acum',
+                        href: '/nutritionisti/onboarding'
+                    }}
+                    secondaryButton={{
+                        label: 'Login',
+                        href: '/nutritionisti/login'
+                    }}
+                />
 
                 {/* Live Stats Bar */}
                 {/* <LiveStats /> */}
@@ -380,7 +292,7 @@ export default function NutritionistsPage() {
 
                                     <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
                                         <Link href="/nutritionisti/onboarding">
-                                            <button className="w-full sm:w-auto bg-green-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg pulse-border">
+                                            <button className="w-full sm:w-auto bg-green-600 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg pulse-border cursor-pointer">
                                                 Înscrie-te gratuit acum
                                             </button>
                                         </Link>
@@ -657,7 +569,7 @@ export default function NutritionistsPage() {
                             {faqs.map((faq, index) => (
                                 <div key={index} className="bg-gray-50 rounded-lg overflow-hidden">
                                     <button
-                                        className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex justify-between items-center hover:bg-gray-100 transition-colors touch-manipulation"
+                                        className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex justify-between items-center hover:bg-gray-100 transition-colors touch-manipulation cursor-pointer"
                                         onClick={() => toggleFaq(index)}
                                     >
                                         <span className="font-semibold text-gray-800 text-sm sm:text-base pr-2">{faq.question}</span>
@@ -710,7 +622,7 @@ export default function NutritionistsPage() {
                         </div>
 
                         <Link href="/nutritionisti/onboarding">
-                            <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
+                            <button className="bg-white text-green-600 px-10 py-4 rounded-full text-lg font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl cursor-pointer">
                                 Începe acum - Gratuit!
                             </button>
                         </Link>

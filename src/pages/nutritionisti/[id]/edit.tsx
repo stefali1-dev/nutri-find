@@ -604,7 +604,7 @@ export default function EditNutritionistProfile() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 cursor-pointer ${activeTab === tab.id
                     ? 'border-green-600 text-green-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
                     }`}
@@ -906,7 +906,7 @@ export default function EditNutritionistProfile() {
                   </div>
                   <button
                     onClick={addEducation}
-                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4"
+                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4 cursor-pointer"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -950,7 +950,7 @@ export default function EditNutritionistProfile() {
                         </div>
                         <button
                           onClick={() => removeEducation(index)}
-                          className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2"
+                          className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2 cursor-pointer"
                         >
                           <svg
                             className="w-4 h-4"
@@ -981,7 +981,7 @@ export default function EditNutritionistProfile() {
                   </div>
                   <button
                     onClick={addCertification}
-                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4"
+                    className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4 cursor-pointer"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
@@ -1027,7 +1027,7 @@ export default function EditNutritionistProfile() {
                         </div>
                         <button
                           onClick={() => removeCertification(index)}
-                          className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2"
+                          className="text-red-600 hover:text-red-700 text-sm flex items-center gap-2 cursor-pointer"
                         >
                           <svg
                             className="w-4 h-4"
@@ -1512,7 +1512,7 @@ export default function EditNutritionistProfile() {
                                   </div>
                                   <button
                                     onClick={() => handleFileUpload('cdr_certificate', null)}
-                                    className="text-red-600 hover:text-red-700 p-2"
+                                    className="text-red-600 hover:text-red-700 p-2 cursor-pointer"
                                     title="Șterge document"
                                   >
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

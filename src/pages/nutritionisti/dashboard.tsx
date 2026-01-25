@@ -149,7 +149,7 @@ export default function NutritionistDashboard() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <button className="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition-all transform hover:scale-105 flex items-center justify-center gap-3">
+            <button className="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700 transition-all transform hover:scale-105 flex items-center justify-center gap-3 cursor-pointer">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
@@ -381,7 +381,7 @@ export default function NutritionistDashboard() {
                     <span className="font-bold">Top 5%</span>
                   </div>
                 </div>
-                <button className="mt-4 w-full bg-white/20 hover:bg-white/30 backdrop-blur py-2 rounded-lg transition-colors text-sm font-medium">
+                <button className="mt-4 w-full bg-white/20 hover:bg-white/30 backdrop-blur py-2 rounded-lg transition-colors text-sm font-medium cursor-pointer">
                   Vezi clasament complet →
                 </button>
               </div>

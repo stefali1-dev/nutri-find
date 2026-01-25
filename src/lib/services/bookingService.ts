@@ -31,7 +31,6 @@ export class BookingService {
         return { data: null, error }
       }
 
-      console.log('✅ SUCCESS - Booking request created:', data)
       return { data, error: null }
     } catch (error) {
       console.error('Unexpected error creating booking request:', error)

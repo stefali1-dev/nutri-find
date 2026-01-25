@@ -45,23 +45,23 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center">
                         <Link href="/">
-                            <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
+                            <span className="text-2xl font-bold text-green-600 cursor-pointer hover:text-green-700 transition-colors">NutriFind</span>
                         </Link>
                         <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">PRO</span>
                     </div>
 
                     <nav className="hidden md:flex items-center space-x-8">
                         <Link href="/nutritionisti/dashboard">
-                            <span className="text-gray-900 font-medium cursor-pointer">Dashboard</span>
+                            <span className="text-gray-900 font-medium cursor-pointer hover:text-green-600 transition-colors">Dashboard</span>
                         </Link>
-                        <Link href="/nutritionist/appointments">
-                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Programări</span>
+                        <Link href="/nutritionisti/dashboard">
+                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">Programări</span>
                         </Link>
-                        <Link href="/nutritionist/clients">
-                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Clienți</span>
+                        <Link href="/nutritionisti/dashboard">
+                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">Clienți</span>
                         </Link>
                         <Link href={`/nutritionisti/${nutritionist.id}/edit`}>
-                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Profil</span>
+                            <span className="text-gray-600 hover:text-gray-900 cursor-pointer transition-colors">Profil</span>
                         </Link>
                     </nav>
 

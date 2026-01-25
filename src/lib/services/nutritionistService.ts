@@ -94,13 +94,12 @@ export class NutritionistService {
         });
 
         if (emailResult.success) {
-          console.log(`Email de confirmare trimis cu succes către ${data.email}.`);
+          // Email sent successfully
         } else {
-          console.warn(`Cont nutriționist creat, dar emailul de confirmare nu a putut fi trimis către ${data.email}:`, emailResult.message);
+          // Email could not be sent but account was created
 
         }
       } else {
-        console.warn('Nu s-au putut trimite emailul de confirmare: datele nutriționistului lipsesc sau sunt incomplete.');
       }
 
       return { data, error: null }
@@ -117,8 +116,6 @@ export class NutritionistService {
         consultation_duration: parseInt(nutritionistData.consultation_duration?.toString() || '60'),
         updated_at: new Date().toISOString()
       }
-
-      console.log('Updating nutritionist data:', dataToUpdate)
 
       const { data, error } = await supabase
         .from('nutritionists')
@@ -137,16 +134,13 @@ export class NutritionistService {
     }
   }
 
-  // Încarcă toți nutriționiștii verificați (pentru listări publice)
+  // Încarcă toți nutriționiștii activi (pentru listări publice)
   static async getVerifiedNutritionists(): Promise<{ data: NutritionistData[], error: any }> {
     try {
       const { data, error } = await supabase
         .from('nutritionists')
         .select('*')
-        .eq('verification_status', 'verified')
         .eq('account_status', 'active');
-
-      console.log('Fetched verified nutritionists:', data)
 
       if (error) {
         return { data: [], error }

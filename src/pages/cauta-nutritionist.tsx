@@ -105,8 +105,6 @@ export default function FindNutritionist() {
         gender: formData.gender || null
       }
 
-      console.log(dataToSave);
-
       // Save in sessionStorage (serialize to JSON)
       // Will be used later to fetch nutritionists
       sessionStorage.setItem('nutriPreferences', JSON.stringify(dataToSave))
@@ -168,18 +166,23 @@ export default function FindNutritionist() {
       {/* Header */}
 
       <div className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4 relative flex items-center justify-between">
           <button
             onClick={() => router.push('/')}
-            className="text-gray-600 hover:text-gray-800 flex items-center gap-1 sm:gap-2 p-2 -m-2 touch-manipulation"
+            className="text-gray-600 hover:text-gray-800 flex items-center gap-1 sm:gap-2 p-2 -m-2 touch-manipulation cursor-pointer transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span className="hidden sm:inline">Înapoi</span>
           </button>
-          <span className="text-xl sm:text-2xl font-bold text-green-600">NutriFind</span>
-          <button className="text-gray-500 text-xs sm:text-sm p-2 -m-2 touch-manipulation">
+          <button
+            onClick={() => router.push('/')}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl sm:text-2xl font-bold text-green-600 cursor-pointer hover:text-green-700 transition-colors"
+          >
+            NutriFind
+          </button>
+          <button className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm p-2 -m-2 touch-manipulation cursor-pointer transition-colors">
             <span className="hidden sm:inline">Salvează și continuă mai târziu</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -230,7 +233,7 @@ export default function FindNutritionist() {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('goal', option.value)}
-                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation ${formData.goal === option.value
+                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation cursor-pointer ${formData.goal === option.value
                         ? 'border-green-600 bg-green-50'
                         : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
                       }`}
@@ -344,7 +347,7 @@ export default function FindNutritionist() {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('dietType', option.value)}
-                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation ${formData.dietType === option.value
+                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation cursor-pointer ${formData.dietType === option.value
                         ? 'border-green-600 bg-green-50'
                         : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
                       }`}
@@ -392,7 +395,7 @@ export default function FindNutritionist() {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('budget', option.value)}
-                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation ${formData.budget === option.value
+                    className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all duration-200 flex items-center justify-between group touch-manipulation cursor-pointer ${formData.budget === option.value
                         ? 'border-green-600 bg-green-50'
                         : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
                       }`}
@@ -452,7 +455,7 @@ export default function FindNutritionist() {
                   <button
                     key={option.value}
                     onClick={() => updateFormData('consultationType', option.value)}
-                    className={`w-full p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-left touch-manipulation ${formData.consultationType === option.value
+                    className={`w-full p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-left touch-manipulation cursor-pointer ${formData.consultationType === option.value
                         ? 'border-green-600 bg-green-50'
                         : 'border-gray-200 hover:border-green-400 hover:bg-gray-50'
                       }`}
@@ -518,7 +521,7 @@ export default function FindNutritionist() {
                       <button
                         key={gender}
                         onClick={() => updateFormData('gender', gender)}
-                        className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-sm sm:text-base touch-manipulation ${formData.gender === gender
+                        className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-sm sm:text-base touch-manipulation cursor-pointer ${formData.gender === gender
                             ? 'border-green-600 bg-green-50'
                             : 'border-gray-200 hover:border-green-400'
                           }`}
@@ -552,7 +555,7 @@ export default function FindNutritionist() {
                       <button
                         key={level.value}
                         onClick={() => updateFormData('experience', level.value)}
-                        className={`w-full p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-left touch-manipulation ${formData.experience === level.value
+                        className={`w-full p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-200 text-left touch-manipulation cursor-pointer ${formData.experience === level.value
                             ? 'border-green-600 bg-green-50'
                             : 'border-gray-200 hover:border-green-400'
                           }`}
@@ -636,7 +639,7 @@ export default function FindNutritionist() {
             {currentStep > 1 && (
               <button
                 onClick={handleBack}
-                className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation"
+                className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation cursor-pointer"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -650,7 +653,7 @@ export default function FindNutritionist() {
                 onClick={handleNext}
                 disabled={!validateStep()}
                 className={`ml-auto flex items-center gap-1 sm:gap-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-medium transition-all text-sm sm:text-base touch-manipulation ${validateStep()
-                    ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                    ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 cursor-pointer'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
@@ -664,7 +667,7 @@ export default function FindNutritionist() {
                 onClick={handleSubmit}
                 disabled={!validateStep()}
                 className={`ml-auto flex items-center gap-1 sm:gap-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full font-medium transition-all text-sm sm:text-base touch-manipulation ${validateStep()
-                    ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                    ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 cursor-pointer'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >

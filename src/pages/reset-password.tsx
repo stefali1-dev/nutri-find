@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import SimpleNavbar from '@/components/SimpleNavbar';
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -135,23 +136,13 @@ export default function ResetPassword() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col">
         {/* Header */}
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Link href="/">
-                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
-              </Link>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Înapoi la login?</span>
-                <Link href="/nutritionisti/login" legacyBehavior>
-                  <button className="text-green-600 hover:text-green-700 font-medium transition-colors py-2 px-3 rounded-md">
-                    Login
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <SimpleNavbar 
+          rightText="Înapoi la login?"
+          rightLink={{
+            label: 'Login',
+            href: '/nutritionisti/login'
+          }}
+        />
 
         {/* Reset Password Form Section */}
         <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -233,7 +224,7 @@ export default function ResetPassword() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
                           aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
                           disabled={isLoadingSetPassword}
                         >
@@ -270,7 +261,7 @@ export default function ResetPassword() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
                           aria-label={showConfirmPassword ? "Ascunde parola" : "Arată parola"}
                           disabled={isLoadingSetPassword}
                         >

@@ -111,7 +111,6 @@ export async function sendAccountConfirmationEmail({ toEmail }: SendWelcomeEmail
             return { success: false, message: result.message || 'Eroare la trimiterea emailului.' };
         }
 
-        console.log(`[EmailService] Email de confirmare trimis cu succes către ${toEmail}.`);
         return { success: true, message: 'Email de confirmare trimis cu succes!' };
 
     } catch (error: any) {

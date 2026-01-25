@@ -3,9 +3,9 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import Footer from '@/components/Footer'
+import PublicNavbar from '@/components/PublicNavbar'
 
 export default function Home() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <>
@@ -58,88 +58,7 @@ export default function Home() {
 
       <div className="min-h-screen bg-white">
         {/* Navbar */}
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <Image
-                  src="/images/logo.png"
-                  alt="NutriFind Logo"
-                  width={40}
-                  height={40}
-                  className="w-8 h-8 sm:w-10 sm:h-10 mr-2"
-                  priority
-                />
-                <span className="text-xl sm:text-2xl font-bold text-green-600">NutriFind</span>
-              </div>
-
-              {/* Desktop Navigation */}
-              <div className="hidden md:flex items-center space-x-8">
-                <a href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors">Cum funcționează</a>
-                <a href="#benefits" className="text-gray-700 hover:text-green-600 transition-colors">Beneficii</a>
-                <a href="#insights" className="text-gray-700 hover:text-green-600 transition-colors">Interviuri</a>
-                <Link href="/cauta-nutritionist">
-                  <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105">
-                    Începe acum
-                  </button>
-                </Link>
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="md:hidden">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="text-gray-700 hover:text-green-600 focus:outline-none p-2"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {isMenuOpen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden bg-white border-t border-gray-100">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                <a
-                  href="#how-it-works"
-                  className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Cum funcționează
-                </a>
-                <a
-                  href="#benefits"
-                  className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Beneficii
-                </a>
-                <a
-                  href="#insights"
-                  className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-gray-50 rounded-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Interviuri
-                </a>
-                <Link href="/cauta-nutritionist">
-                  <button
-                    className="w-full mt-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Începe acum
-                  </button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </nav>
+        <PublicNavbar activePage="home" />
 
         {/* Hero Section */}
         <section className="relative pt-12 sm:pt-16 pb-20 sm:pb-32 flex content-center items-center justify-center min-h-[70vh] sm:min-h-[80vh]">
@@ -159,7 +78,7 @@ export default function Home() {
                   </p>
                   <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
                     <Link href="/cauta-nutritionist">
-                      <button className="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
+                      <button className="w-full sm:w-auto bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer">
                         Găsește un nutriționist
                       </button>
                     </Link>
@@ -478,7 +397,7 @@ export default function Home() {
             </p>
             
             <Link href="/cauta-nutritionist">
-              <button className="bg-white text-green-600 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-lg sm:text-xl font-bold hover:bg-green-50 transition-all transform hover:scale-105 shadow-2xl">
+              <button className="bg-white text-green-600 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-lg sm:text-xl font-bold hover:bg-green-50 transition-all transform hover:scale-105 shadow-2xl cursor-pointer">
                 Găsește-ți nutriționistul acum
               </button>
             </Link>

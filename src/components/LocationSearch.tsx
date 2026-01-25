@@ -153,7 +153,7 @@ export default function LocationSearch({
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -177,7 +177,7 @@ export default function LocationSearch({
                   <button
                     type="button"
                     onClick={() => handleSelectLocation(location)}
-                    className="w-full px-4 py-3 text-left hover:bg-green-50 transition-colors flex items-center justify-between group"
+                    className="w-full px-4 py-3 text-left hover:bg-green-50 transition-colors flex items-center justify-between group cursor-pointer"
                   >
                     <div className="flex items-center">
                       <svg 

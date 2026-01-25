@@ -1,3 +1,10 @@
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 // Nutritionist specialization utilities
 type Specialization =
   | 'weight-loss'
@@ -10,10 +17,12 @@ type Specialization =
   | 'clinical-nutrition'
   | 'geriatrics'
   | 'weight-gain'
-  | 'eating-disorders';
+  | 'eating-disorders'
+  | 'pediatric'
+  | 'elderly';
 
 export const getSpecializationEmoji = (spec: Specialization | string): string => {
-  const emojiMap: Record<Specialization, string> = {
+  const emojiMap: Record<string, string> = {
     'weight-loss': '⚖️',
     'muscle-gain': '💪',
     'health-condition': '🏥',
@@ -24,14 +33,16 @@ export const getSpecializationEmoji = (spec: Specialization | string): string =>
     'clinical-nutrition': '📋',
     'geriatrics': '👵',
     'weight-gain': '📈',
-    'eating-disorders': '💔'
+    'eating-disorders': '💔',
+    'pediatric': '👶',
+    'elderly': '👴'
   };
 
-  return emojiMap[spec as Specialization] || '✨';
+  return emojiMap[spec as string] || '✨';
 };
 
 export const getSpecializationLabel = (spec: Specialization | string): string => {
-  const labelMap: Record<Specialization, string> = {
+  const labelMap: Record<string, string> = {
     'weight-loss': 'Slăbire',
     'muscle-gain': 'Masa musculară',
     'health-condition': 'Condiții medicale',
@@ -42,10 +53,12 @@ export const getSpecializationLabel = (spec: Specialization | string): string =>
     'clinical-nutrition': 'Nutriție clinică',
     'geriatrics': 'Nutriție geriatrică',
     'weight-gain': 'Creștere în greutate',
-    'eating-disorders': 'Tulburări de alimentație'
+    'eating-disorders': 'Tulburări de alimentație',
+    'pediatric': 'Nutriție pediatrică',
+    'elderly': 'Nutriție vârstnici'
   };
 
-  return labelMap[spec as Specialization] || spec;
+  return labelMap[spec as string] || spec;
 };
 
 // Optional: Combined helper for both emoji and label

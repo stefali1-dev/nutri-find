@@ -3,6 +3,11 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import SimpleNavbar from '@/components/SimpleNavbar'
 
 export default function NutritionistLogin() {
   const router = useRouter()
@@ -70,23 +75,14 @@ export default function NutritionistLogin() {
 
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col">
         {/* Header */}
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Link href="/">
-                <span className="text-2xl font-bold text-green-600 cursor-pointer">NutriFind</span>
-              </Link>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Nu ai cont?</span>
-                <Link href="/nutritionisti">
-                  <button className="text-green-600 hover:text-green-700 font-medium transition-colors">
-                    Înregistrează-te
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <SimpleNavbar 
+          rightText="Nu ai cont?"
+          rightLink={{
+            label: 'Înregistrează-te',
+            href: '/nutritionisti',
+            isButton: true
+          }}
+        />
 
         {/* Login Form Section */}
         <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -120,12 +116,12 @@ export default function NutritionistLogin() {
                   </div>
                 )}
 
-                <div className="rounded-md shadow-sm -space-y-px">
-                  <div>
-                    <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="rounded-md -space-y-px">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-address">
                       Adresă de email
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="email-address"
                       name="email"
                       type="email"
@@ -133,16 +129,15 @@ export default function NutritionistLogin() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition-colors"
                       placeholder="exemplu@domeniu.ro"
                     />
                   </div>
-                  <div className="pt-4">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="pt-4 space-y-2">
+                    <Label htmlFor="password">
                       Parolă
-                    </label>
+                    </Label>
                     <div className="relative">
-                      <input
+                      <Input
                         id="password"
                         name="password"
                         type={showPassword ? 'text' : 'password'}
@@ -150,13 +145,12 @@ export default function NutritionistLogin() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition-colors"
                         placeholder="Parola ta"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 cursor-pointer"
                         aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
                       >
                         {showPassword ? (
@@ -197,25 +191,29 @@ export default function NutritionistLogin() {
                 </div>
 
                 <div>
-                  <button
+                  <Button
                     type="submit"
                     disabled={isLoading}
-                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-150 ease-in-out disabled:opacity-75 disabled:cursor-not-allowed"
+                    size="lg"
+                    className="w-full bg-green-600 hover:bg-green-700"
                   >
                     {isLoading ? (
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Se conectează...
+                      </>
                     ) : (
-                      <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg className="h-5 w-5 text-green-500 group-hover:text-green-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <>
+                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                           <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
                         </svg>
-                      </span>
+                        Conectare
+                      </>
                     )}
-                    {isLoading ? 'Se conectează...' : 'Conectare'}
-                  </button>
+                  </Button>
                 </div>
               </form>
 

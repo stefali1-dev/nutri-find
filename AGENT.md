@@ -4,9 +4,11 @@ This file provides guidance to AI Agents(Claude Code, Github Copilot, etc.) when
 
 ## Project Overview
 
-NutriFind is a two-sided marketplace connecting clients with verified nutritionists in Romania. Built with Next.js 15 (Pages Router), TypeScript, Supabase (PostgreSQL + Auth + Storage), and Tailwind CSS 4.1.
+NutriFind is a two-sided marketplace connecting clients with verified nutritionists in Romania. Built with Next.js 15 (Pages Router), TypeScript, Supabase (PostgreSQL + Auth + Storage), Tailwind CSS 4.1, and shadcn/ui component library.
 
 **Key distinction**: Clients browse and book without authentication. Only nutritionists have user accounts.
+
+**UI/UX Standards**: The project follows a consistent design system using shadcn/ui components with green (#16a34a) as the primary brand color. All forms use standardized Input, Button, Label, and Textarea components for consistency.
 
 ## Development Commands
 
@@ -137,6 +139,12 @@ const {
 
 ### Key Components
 
+**NutritionistCard** (`src/components/ui/nutritionist-card.tsx`) - Reusable card for displaying nutritionist profiles
+- Responsive layout with proper overflow handling
+- Truncation for long text (location, bio, name)
+- Mobile-optimized spacing and touch targets
+- Integrated with shadcn/ui Button and Badge components
+
 **LocationSearch** - Romanian cities autocomplete
 - Queries `romanian_locations` table
 - Debounced search
@@ -144,13 +152,27 @@ const {
 
 **BookingModal** - Client booking form
 - No authentication required
+- Uses shadcn/ui form components (Input, Label, Textarea, Button)
 - Creates `booking_requests` record
-- Validates email/phone format
+- Validates email/phone format with inline error display
 
 **Toast** - Notification system
 - Types: success, error, info
 - Auto-dismiss with timer
 - Use via `useToast()` hook
+
+### Reusable UI Components (shadcn/ui)
+
+Located in `src/components/ui/`:
+- **Button** - Primary action buttons with variants (default, outline, destructive, ghost)
+- **Card** - Content containers with CardHeader, CardContent, CardFooter
+- **Badge** - Status indicators and tags with variants
+- **Input** - Form text inputs with consistent styling
+- **Textarea** - Multi-line text inputs
+- **Select** - Dropdown selects
+- **Label** - Form labels with accessibility support
+
+All components use the `cn()` utility from `@/lib/utils` for class name merging.
 
 ### Path Aliases
 
@@ -217,7 +239,10 @@ const transformed = {
   education: data.education || [],
   specializations: data.specializations || [],
   birth_date: data.birth_date?.split('T')[0] || ''
-}
+}Class name utility** (`src/lib/utils.ts`):
+- `cn()` - Combines clsx and tailwind-merge for conditional class names
+
+**
 ```
 
 ### Protected Page Pattern
@@ -252,6 +277,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 2. **Minimal API routes**: Only `/api/send-email` - most operations use Supabase client-side with RLS
 3. **Single-role auth**: Only nutritionists have accounts; clients are anonymous
 4. **Service layer**: All database operations abstracted into service classes
+8. **shadcn/ui for consistency**: All new UI components use shadcn/ui for consistent styling and behavior
+9. **Green brand color**: Primary brand color is green-600 (#16a34a) used throughout the app
 5. **No client-side persistence**: Beyond sessionStorage for temporary data
 6. **JSONB for arrays**: Education, certifications, services, specializations stored as JSONB in PostgreSQL
 7. **Verification workflow**: Nutritionists upload documents → admin verifies → `verification_status` updated
