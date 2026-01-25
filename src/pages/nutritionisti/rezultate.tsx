@@ -46,28 +46,39 @@ export default function ResultsVertical() {
   })
 
   /** ─────────────────────────────────────────────────────────────
-   *  Fetch only VERIFIED + ACTIVE nutritionists once on mount
-   *  (MVP → nu ne uităm la preferințele user-ului încă)
+   *  Fetch nutritionists from our smart ordering API
+   *  Uses semi-random algorithm that prioritizes those with photos
    *  ─────────────────────────────────────────────────────────── */
   useEffect(() => {
     const fetchNutritionists = async () => {
-
+      // Load user preferences from session storage
       const preferences = sessionStorage.getItem('nutriPreferences')
       if (preferences) {
         setUserPreferences(JSON.parse(preferences))
       }
 
-      const { data, error } = await NutritionistService.getVerifiedNutritionists()
+      try {
+        // Fetch from our smart ordering API endpoint
+        const response = await fetch('/api/nutritionists/get-ordered')
+        const result = await response.json()
 
-      if (error) {
-        // TODO: poți adăuga un toast / mesaj de eroare
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to fetch nutritionists')
+        }
+
+        setNutritionists(result.data)
+        setFilteredNutritionists(result.data)
+      } catch (error) {
         console.error('Failed to load nutritionists:', error)
-      } else {
-        setNutritionists(data)
-        setFilteredNutritionists(data) // momentan fără filtre
+        // Graceful fallback: try direct service call
+        const { data, error: serviceError } = await NutritionistService.getVerifiedNutritionists()
+        if (!serviceError) {
+          setNutritionists(data)
+          setFilteredNutritionists(data)
+        }
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
     fetchNutritionists()

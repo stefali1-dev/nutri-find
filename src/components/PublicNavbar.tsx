@@ -92,10 +92,6 @@ export default function PublicNavbar({
                 {link.label}
               </a>
             ))}
-            <Link href={cta.href}>
-              <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105 cursor-pointer">
-                {cta.label}
-              </button>
             {secondaryButton && (
               <Link href={secondaryButton.href}>
                 <button className="cursor-pointer bg-transparent text-green-600 border border-green-600 px-6 py-2 rounded-full hover:bg-green-600 hover:text-white transition-all transform hover:scale-105">
@@ -103,6 +99,10 @@ export default function PublicNavbar({
                 </button>
               </Link>
             )}
+            <Link href={cta.href}>
+              <button className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-all transform hover:scale-105 cursor-pointer">
+                {cta.label}
+              </button>
             </Link>
           </div>
 

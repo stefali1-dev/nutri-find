@@ -214,6 +214,28 @@ export default function NutritionistOnboarding() {
                 return;
             }
 
+            // Ensure the session is set on the client before proceeding
+            if (authData.session) {
+                await supabase.auth.setSession({
+                    access_token: authData.session.access_token,
+                    refresh_token: authData.session.refresh_token,
+                });
+            } else {
+                console.error('No session returned after signup');
+                setErrors(prev => ({ ...prev, general: 'Sesiunea nu a putut fi inițializată. Te rugăm să încerci să te autentifici.' }));
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Verify the session is active before proceeding
+            const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+            if (!verifiedUser || verifiedUser.id !== authData.user.id) {
+                console.error('Session verification failed');
+                setErrors(prev => ({ ...prev, general: 'Autentificarea nu a putut fi verificată. Te rugăm să încerci din nou.' }));
+                setIsSubmitting(false);
+                return;
+            }
+
             // Pasul 2: Convertește FormData în CreateNutritionistData
             const nutritionistData: CreateNutritionistData = {
                 user_id: authData.user.id,
@@ -240,11 +262,25 @@ export default function NutritionistOnboarding() {
 
             if (createError) {
                 console.error('Error creating nutritionist profile:', createError);
-                // Dacă crearea profilului eșuează, ar trebui să ștergem și user-ul din Auth
-                // Dar aceasta necesită o funcție de server cu privilegii admin
+                
+                let errorMessage = 'Profilul nu a putut fi creat. ';
+                
+                // Check for RLS policy errors
+                if (createError.message && createError.message.includes('policy')) {
+                    errorMessage += 'Eroare de permisiuni (RLS). Verifică că ești autentificat corect. ';
+                } else if (createError.code === '42501') {
+                    errorMessage += 'Nu ai permisiunea să creezi acest profil. ';
+                } else if (createError.code === '23505') {
+                    errorMessage += 'Există deja un profil asociat cu acest cont. ';
+                } else {
+                    errorMessage += `(${createError.message || createError.code || 'Eroare necunoscută'})`;
+                }
+                
+                errorMessage += ' Te rugăm să contactezi suportul dacă problema persistă.';
+                
                 setErrors(prev => ({
                     ...prev,
-                    general: `Profilul nu a putut fi creat. Te rugăm să contactezi suportul. (${createError.message || 'Eroare necunoscută'})`
+                    general: errorMessage
                 }));
                 setIsSubmitting(false);
                 return;
