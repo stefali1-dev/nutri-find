@@ -20,12 +20,41 @@ interface OrderedNutritionistResponse {
 }
 
 /**
- * Fisher-Yates shuffle algorithm for randomizing arrays
+ * Simple seeded random number generator (Mulberry32)
+ * Returns consistent pseudo-random numbers for the same seed
+ */
+function seededRandom(seed: number) {
+  return function() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+/**
+ * Get daily seed based on current date (UTC)
+ * Same seed for entire day, changes at midnight UTC
+ */
+function getDailySeed(): number {
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth() + 1
+  const day = now.getUTCDate()
+  // Combine date components into a seed
+  return year * 10000 + month * 100 + day
+}
+
+/**
+ * Fisher-Yates shuffle algorithm with seeded random
+ * Uses daily seed to maintain consistent order throughout the day
  */
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
+  const rng = seededRandom(getDailySeed())
+  
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled

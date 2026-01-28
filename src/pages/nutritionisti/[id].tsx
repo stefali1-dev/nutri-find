@@ -3,29 +3,19 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { NutritionistService } from '@/lib/services/nutritionistService'
+import { ReviewService } from '@/lib/services/reviewService'
 import type { NutritionistData } from '@/lib/types/nutritionist'
+import type { ReviewData } from '@/lib/types/review'
 import BookingModal, { BookingData } from '@/components/BookingModal'
 import Footer from '@/components/Footer'
-
-interface Review {
-  id: string
-  author: string
-  rating: number
-  date: string
-  comment: string
-  helpful: number
-  verified: boolean
-}
-
-// Mock data pentru reviews și available slots
-const mockReviews: Review[] = [
-]
 
 export default function NutritionistProfile() {
   const router = useRouter()
   const { id } = router.query
   const [nutritionist, setNutritionist] = useState<NutritionistData | null>(null)
+  const [reviews, setReviews] = useState<ReviewData[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingReviews, setLoadingReviews] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'about' | 'services' | 'reviews' | 'certificates'>('about')
   const [showAllReviews, setShowAllReviews] = useState(false)
@@ -35,6 +25,7 @@ export default function NutritionistProfile() {
   useEffect(() => {
     if (id && typeof id === 'string') {
       loadNutritionistData(id)
+      loadReviews(id)
     }
   }, [id])
 
@@ -54,6 +45,24 @@ export default function NutritionistProfile() {
       setError('A apărut o eroare la încărcarea datelor')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadReviews = async (nutritionistId: string) => {
+    try {
+      setLoadingReviews(true)
+      const { data, error } = await ReviewService.getReviewsByNutritionist(nutritionistId)
+      
+      if (error) {
+        console.error('Error loading reviews:', error)
+        return
+      }
+
+      setReviews(data || [])
+    } catch (err) {
+      console.error('Error loading reviews:', err)
+    } finally {
+      setLoadingReviews(false)
     }
   }
 
@@ -185,15 +194,15 @@ export default function NutritionistProfile() {
                       <div>
                         <h1 className="text-3xl font-bold text-gray-800 mb-2">{nutritionist.full_name}</h1>
                         <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                          {/* {nutritionist.average_rating && (
+                          {nutritionist.average_rating > 0 && (
                             <span className="flex items-center gap-1">
                               <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                               <span className="font-medium text-lg">{nutritionist.average_rating}</span>
-                              <span>({nutritionist.total_reviews || 3} recenzii)</span>
+                              <span>({nutritionist.total_reviews || 0} recenzii)</span>
                             </span>
-                          )} */}
+                          )}
                           <span className="flex items-center gap-1">
                             <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -262,7 +271,7 @@ export default function NutritionistProfile() {
               {[
                 { id: 'about', label: 'Despre mine' },
                 { id: 'services', label: 'Servicii și prețuri' },
-                // { id: 'reviews', label: 'Recenzii' },
+                { id: 'reviews', label: 'Recenzii' },
                 { id: 'certificates', label: 'Educație și certificări' }
               ].map((tab) => (
                 <button
@@ -372,11 +381,11 @@ export default function NutritionistProfile() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Recenzii clienți</h2>
-                    {nutritionist.average_rating && (
+                    {nutritionist.average_rating > 0 && (
                       <div className="flex items-center gap-2">
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
-                            <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <svg key={i} className={`w-5 h-5 ${i < Math.round(nutritionist.average_rating) ? 'text-yellow-400' : 'text-gray-200'} fill-current`} viewBox="0 0 20 20">
                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
                           ))}
@@ -387,58 +396,59 @@ export default function NutritionistProfile() {
                     )}
                   </div>
 
-                  <div className="space-y-6">
-                    {mockReviews.slice(0, showAllReviews ? undefined : 3).map((review) => (
-                      <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-semibold text-gray-800">{review.author}</span>
-                              {review.verified && (
-                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                  ✓ Client verificat
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <svg
-                                    key={i}
-                                    className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-200'} fill-current`}
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                ))}
+                  {loadingReviews ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                      <p className="text-gray-500">Se încarcă recenziile...</p>
+                    </div>
+                  ) : reviews.length > 0 ? (
+                    <>
+                      <div className="space-y-6">
+                        {reviews.slice(0, showAllReviews ? undefined : 3).map((review) => (
+                          <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <div className="flex items-center gap-3">
+                                  <span className="font-semibold text-gray-800">{review.author_name}</span>
+                                  {review.is_verified && (
+                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                      ✓ Client verificat
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <svg
+                                        key={i}
+                                        className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-200'} fill-current`}
+                                        viewBox="0 0 20 20"
+                                      >
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                      </svg>
+                                    ))}
+                                  </div>
+                                  <span className="text-sm text-gray-500">
+                                    {new Date(review.created_at || '').toLocaleDateString('ro-RO', { year: 'numeric', month: 'long' })}
+                                  </span>
+                                </div>
                               </div>
-                              <span className="text-sm text-gray-500">{review.date}</span>
                             </div>
+                            <p className="text-gray-600 mt-3">{review.comment}</p>
                           </div>
-                        </div>
-                        <p className="text-gray-600 mt-3">{review.comment}</p>
-                        <div className="flex items-center gap-4 mt-4">
-                          <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 cursor-pointer">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                            </svg>
-                            Util ({review.helpful})
-                          </button>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
 
-                  {!showAllReviews && mockReviews.length > 3 && (
-                    <button
-                      onClick={() => setShowAllReviews(true)}
-                      className="w-full mt-6 text-green-600 hover:text-green-700 font-medium"
-                    >
-                      Vezi toate recenziile ({mockReviews.length})
-                    </button>
-                  )}
-
-                  {(nutritionist.total_reviews === 0 || !nutritionist.total_reviews) && (
+                      {!showAllReviews && reviews.length > 3 && (
+                        <button
+                          onClick={() => setShowAllReviews(true)}
+                          className="w-full mt-6 text-green-600 hover:text-green-700 font-medium"
+                        >
+                          Vezi toate recenziile ({reviews.length})
+                        </button>
+                      )}
+                    </>
+                  ) : (
                     <div className="text-center py-8">
                       <p className="text-gray-500">Nu există recenzii încă</p>
                     </div>

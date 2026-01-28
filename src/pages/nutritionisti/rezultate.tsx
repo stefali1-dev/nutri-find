@@ -47,7 +47,8 @@ export default function ResultsVertical() {
 
   /** ─────────────────────────────────────────────────────────────
    *  Fetch nutritionists from our smart ordering API
-   *  Uses semi-random algorithm that prioritizes those with photos
+   *  Uses daily-seeded algorithm + sessionStorage caching
+   *  This ensures consistent order during session (fixes back button)
    *  ─────────────────────────────────────────────────────────── */
   useEffect(() => {
     const fetchNutritionists = async () => {
@@ -57,14 +58,42 @@ export default function ResultsVertical() {
         setUserPreferences(JSON.parse(preferences))
       }
 
+      // Check for cached ordered results in sessionStorage
+      const cachedResults = sessionStorage.getItem('orderedNutritionists')
+      const cacheTimestamp = sessionStorage.getItem('orderedNutritionistsTimestamp')
+      
+      // If cache exists and is from today, use it
+      if (cachedResults && cacheTimestamp) {
+        const cacheDate = new Date(parseInt(cacheTimestamp))
+        const now = new Date()
+        const isSameDay = cacheDate.toDateString() === now.toDateString()
+        
+        if (isSameDay) {
+          try {
+            const parsed = JSON.parse(cachedResults)
+            setNutritionists(parsed)
+            setFilteredNutritionists(parsed)
+            setLoading(false)
+            return
+          } catch (e) {
+            // Invalid cache, continue to fetch
+            console.warn('Invalid cache, fetching fresh data')
+          }
+        }
+      }
+
+      // No valid cache, fetch from API
       try {
-        // Fetch from our smart ordering API endpoint
         const response = await fetch('/api/nutritionists/get-ordered')
         const result = await response.json()
 
         if (!response.ok || !result.success) {
           throw new Error(result.error || 'Failed to fetch nutritionists')
         }
+
+        // Cache the ordered results in sessionStorage
+        sessionStorage.setItem('orderedNutritionists', JSON.stringify(result.data))
+        sessionStorage.setItem('orderedNutritionistsTimestamp', Date.now().toString())
 
         setNutritionists(result.data)
         setFilteredNutritionists(result.data)
